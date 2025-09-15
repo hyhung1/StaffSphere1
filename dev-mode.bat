@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    HR Employee Management System
+echo    Employee Management Dashboard
 echo        Development Mode
 echo ========================================
 echo Starting both frontend and backend servers...

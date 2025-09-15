@@ -38,8 +38,8 @@ function App() {
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position="static">
             <Toolbar>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                HR Employee Management System
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
+                Employee Management Dashboard
               </Typography>
             </Toolbar>
           </AppBar>

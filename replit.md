@@ -1,4 +1,4 @@
-# HR Employee Management System
+# Employee Management Dashboard
 
 ## Overview
 A comprehensive web application for HR departments to monitor and manage employee information built with React frontend and FastAPI backend.

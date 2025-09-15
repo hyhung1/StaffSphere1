@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    HR Employee Management System
+echo    Employee Management Dashboard
 echo ========================================
 echo Starting the application...
 echo.
