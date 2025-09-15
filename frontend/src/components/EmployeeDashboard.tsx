@@ -212,7 +212,7 @@ const EmployeeDashboard: React.FC = () => {
               </Box>
 
               <Typography variant="body2"><strong>Position:</strong> {employee.position}</Typography>
-              <Typography variant="body2"><strong>Age:</strong> {employee.age} years</Typography>
+              <Typography variant="body2"><strong>Age:</strong> {Math.ceil(employee.age)} years</Typography>
               <Typography variant="body2"><strong>Phone:</strong> {employee.phone}</Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 <strong>Salary:</strong> {formatCurrency(employee.salary)}
@@ -259,7 +259,7 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.full_name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {employee.age} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                      {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -518,7 +518,7 @@ const EmployeeDashboard: React.FC = () => {
                       </Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>{Math.floor(employee.age)}</TableCell>
+                  <TableCell>{Math.ceil(employee.age)}</TableCell>
                   <TableCell>
                     <Chip
                       label={employee.gender}
