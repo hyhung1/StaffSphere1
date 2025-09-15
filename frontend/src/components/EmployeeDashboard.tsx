@@ -363,10 +363,6 @@ const EmployeeDashboard: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Employee Management Dashboard
-      </Typography>
-
       {/* Search and Filter Section */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
