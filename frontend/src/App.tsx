@@ -45,7 +45,7 @@ const theme = createTheme({
     },
     background: {
       default: '#F0F4FF',  // Very light blue background
-      paper: '#FFFFFF',
+      paper: '#F8FAFF',    // Very light blue-tinted paper
     },
     text: {
       primary: '#2D3748',   // Dark gray for main text
@@ -167,7 +167,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#F8FAFF',
           border: '1px solid #DBEAFE',
           borderRadius: '12px',
         },
@@ -200,11 +200,12 @@ const theme = createTheme({
           borderRadius: 12,
           boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
           border: '1px solid #DBEAFE',
-          background: 'linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%)',
+          background: 'linear-gradient(145deg, #F8FAFF 0%, #EEF2FF 100%)',
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'translateY(-2px)',
             boxShadow: '0px 8px 20px 0px rgba(59, 130, 246, 0.2)',
+            background: 'linear-gradient(145deg, #F0F4FF 0%, #E0E7FF 100%)',
           },
         },
       },
