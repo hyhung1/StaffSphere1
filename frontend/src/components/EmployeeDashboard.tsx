@@ -257,11 +257,16 @@ const EmployeeDashboard: React.FC = () => {
                     <Button 
                       size="small" 
                       onClick={() => handleExpandEmployee(employee.Id_number)}
-                      sx={{ minWidth: 'auto', p: 0.5 }}
+                      sx={{ 
+                        minWidth: 'auto', 
+                        p: 0.5,
+                        mr: 0.5,
+                        order: -1  // Ensures it's always first/leftmost
+                      }}
                     >
                       {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
                     </Button>
-                    <Box>
+                    <Box sx={{ flex: 1 }}>
                       <Typography variant="body1" fontWeight="bold">
                         {employee.full_name}
                       </Typography>
