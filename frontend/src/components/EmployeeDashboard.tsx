@@ -204,7 +204,7 @@ const EmployeeDashboard: React.FC = () => {
                   sx={{ mr: 1, mb: 1 }}
                 />
                 <Chip 
-                  label={employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'} 
+                  label={employee.gender} 
                   color={employee.gender === 'Nam' ? 'info' : 'secondary'} 
                   size="small" 
                   sx={{ mb: 1 }}
@@ -224,11 +224,6 @@ const EmployeeDashboard: React.FC = () => {
                 size="small" 
               />
             </CardContent>
-            <CardActions>
-              <Button size="small">👁️ View</Button>
-              <Button size="small">✏️ Edit</Button>
-              <Button size="small" color="error">🗑️ Delete</Button>
-            </CardActions>
           </Card>
         </Grid>
       ))}
