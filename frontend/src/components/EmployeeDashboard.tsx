@@ -266,7 +266,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                    {employee.gender}
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -286,9 +286,6 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">{employee.phone}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    ID: {employee.Id_number}
-                  </Typography>
                 </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
@@ -318,6 +315,8 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
                             {formatCurrency(employee.salary)}
                           </Typography>
+                          <Typography variant="body2"><strong>Contract ID:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
                           <Typography variant="body2"><strong>Contract Type:</strong></Typography>
                           <Chip 
                             label={employee.contract_type} 
@@ -328,11 +327,11 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_sign_date}</Typography>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.last_salary_adjustment}</Typography>
-                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
-                          <Typography variant="body2">{employee.bank_account}</Typography>
+                          <Typography variant="body2">{employee.last_salary_adjustment}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>ID Number:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.Id_number}</Typography>
                           <Typography variant="body2"><strong>Education:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
@@ -341,8 +340,8 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.social_insurance_number}</Typography>
                           <Typography variant="body2"><strong>PVI Care:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
-                          <Typography variant="body2"><strong>Contract ID:</strong></Typography>
-                          <Typography variant="body2">{employee.contract_id}</Typography>
+                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
+                          <Typography variant="body2">{employee.bank_account}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>Address:</strong></Typography>
