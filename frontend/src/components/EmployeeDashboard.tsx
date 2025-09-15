@@ -460,41 +460,6 @@ const EmployeeDashboard: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Employees</Typography>
-              <Typography variant="h4" color="primary">
-                {employees.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Average Salary</Typography>
-              <Typography variant="h4" color="primary">
-                {employees.length > 0
-                  ? formatCurrency(employees.reduce((sum, emp) => sum + emp.salary, 0) / employees.length)
-                  : '₫0'}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Departments</Typography>
-              <Typography variant="h4" color="primary">
-{Array.from(new Set(employees.map(emp => emp.department))).length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
 
       {/* Actions */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
