@@ -322,17 +322,23 @@ const EmployeeDashboard: React.FC = () => {
       </Box>
 
       {/* Employee Table */}
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: 1200 }}>
           <TableHead>
             <TableRow>
               <TableCell>Full Name</TableCell>
               <TableCell>Age</TableCell>
+              <TableCell>Gender</TableCell>
               <TableCell>Department</TableCell>
               <TableCell>Position</TableCell>
               <TableCell>Phone</TableCell>
+              <TableCell>Education</TableCell>
               <TableCell>Salary</TableCell>
               <TableCell>Contract Type</TableCell>
+              <TableCell>Contract ID</TableCell>
+              <TableCell>Address</TableCell>
+              <TableCell>Insurance</TableCell>
+              <TableCell>Training Skills</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -354,14 +360,31 @@ const EmployeeDashboard: React.FC = () => {
                   <TableCell>{Math.floor(employee.age)}</TableCell>
                   <TableCell>
                     <Chip
+                      label={employee.gender}
+                      size="small"
+                      color={employee.gender === 'Nam' ? 'info' : 'secondary'}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
                       label={employee.department}
                       size="small"
                       color="primary"
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{employee.position}</TableCell>
+                  <TableCell sx={{ maxWidth: 200 }}>
+                    <Typography variant="body2" noWrap>
+                      {employee.position}
+                    </Typography>
+                  </TableCell>
                   <TableCell>{employee.phone}</TableCell>
+                  <TableCell sx={{ maxWidth: 150 }}>
+                    <Typography variant="body2" noWrap>
+                      {employee.education_level}
+                    </Typography>
+                  </TableCell>
                   <TableCell>{formatCurrency(employee.salary)}</TableCell>
                   <TableCell>
                     <Chip
@@ -369,6 +392,26 @@ const EmployeeDashboard: React.FC = () => {
                       size="small"
                       color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
                     />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="text.secondary">
+                      {employee.contract_id}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 200 }}>
+                    <Typography variant="body2" noWrap title={employee.address}>
+                      {employee.address}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 150 }}>
+                    <Typography variant="caption" noWrap title={employee.medical_insurance_hospital}>
+                      {employee.medical_insurance_hospital}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 150 }}>
+                    <Typography variant="caption" noWrap title={employee.training_skills}>
+                      {employee.training_skills}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
