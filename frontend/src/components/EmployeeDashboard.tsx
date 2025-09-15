@@ -509,90 +509,143 @@ const EmployeeDashboard: React.FC = () => {
       {viewMode === 'compact' && renderCompactView()}
       {viewMode === 'table' && (
         <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 1600, tableLayout: 'auto' }}>
+          <Table sx={{ minWidth: 2400, tableLayout: 'auto' }}>
             <TableHead>
               <TableRow>
-                <TableCell>Full Name</TableCell>
-                <TableCell>Age</TableCell>
-                <TableCell>Gender</TableCell>
-                <TableCell>Department</TableCell>
-                <TableCell>Position</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Education</TableCell>
-                <TableCell>Salary</TableCell>
-                <TableCell>Contract Type</TableCell>
-                <TableCell>Contract ID</TableCell>
-                <TableCell>Address</TableCell>
-                <TableCell>Insurance</TableCell>
-                <TableCell>Training Skills</TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Full Name</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Age</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Phone</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Education Level</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract ID</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Type</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Sign Date</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Salary</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Last Salary Adjustment</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Social Insurance Number</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Medical Insurance Hospital</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Bank Account</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">PVI Care</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Training Skills</Typography></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedEmployees.map((employee: Employee) => (
                 <TableRow key={employee.Id_number} hover>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="subtitle2">
-                        {employee.full_name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        ID: {employee.Id_number}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{Math.ceil(employee.age)}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={employee.gender}
-                      size="small"
-                      color={employee.gender === 'Nam' ? 'info' : 'secondary'}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={employee.department}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                    />
-                  </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2">
-                      {employee.position}
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.full_name}
                     </Typography>
                   </TableCell>
-                  <TableCell>{employee.phone}</TableCell>
-                  <TableCell sx={{ minWidth: 180 }}>
+                  <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {employee.education_level}
+                      {new Date(employee.dob).toLocaleDateString('en-GB')}
                     </Typography>
                   </TableCell>
-                  <TableCell>{formatCurrency(employee.salary)}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={employee.contract_type}
-                      size="small"
-                      color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                    />
+                  <TableCell sx={{ minWidth: 80 }}>
+                    <Typography variant="body2">
+                      {Math.ceil(employee.age)}
+                    </Typography>
                   </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {employee.contract_id}
+                  <TableCell sx={{ minWidth: 80 }}>
+                    <Typography variant="body2">
+                      {employee.gender}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 130 }}>
+                    <Typography variant="body2">
+                      {employee.Id_number}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 250 }}>
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                       {employee.address}
                     </Typography>
                   </TableCell>
+                  <TableCell sx={{ minWidth: 250 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.current_address}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {employee.phone}
+                    </Typography>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="caption">
-                      {employee.medical_insurance_hospital}
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.education_level}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.department}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.position}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 180 }}>
-                    <Typography variant="caption">
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.contract_id}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.contract_type}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 140 }}>
+                    <Typography variant="body2">
+                      {new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {formatCurrency(employee.salary)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 140 }}>
+                    <Typography variant="body2">
+                      {new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {employee.tax_code}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2">
+                      {employee.social_insurance_number}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.medical_insurance_hospital}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2">
+                      {employee.bank_account}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>
+                    <Typography variant="body2">
+                      {employee.pvi_care}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                       {employee.training_skills}
                     </Typography>
                   </TableCell>
