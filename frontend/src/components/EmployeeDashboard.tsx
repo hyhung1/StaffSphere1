@@ -242,6 +242,7 @@ const EmployeeDashboard: React.FC = () => {
         <TableHead>
           <TableRow>
             <TableCell>Employee</TableCell>
+            <TableCell>DOB</TableCell>
             <TableCell>Position</TableCell>
             <TableCell>Department</TableCell>
             <TableCell>Contact</TableCell>
@@ -270,6 +271,11 @@ const EmployeeDashboard: React.FC = () => {
                     </Box>
                   </Box>
                 </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {new Date(employee.dob).toLocaleDateString('vi-VN')}
+                  </Typography>
+                </TableCell>
                 <TableCell sx={{ maxWidth: 200 }}>
                   <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
                     {employee.position}
@@ -288,7 +294,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
@@ -325,8 +331,12 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
+                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_account}</Typography>
                           <Typography variant="body2"><strong>Address:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.address}</Typography>
+                          <Typography variant="body2"><strong>Current Address:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.current_address}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
                           <Typography variant="body2">{employee.medical_insurance_hospital}</Typography>
                         </Grid>
