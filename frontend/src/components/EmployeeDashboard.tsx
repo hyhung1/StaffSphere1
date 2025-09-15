@@ -242,11 +242,10 @@ const EmployeeDashboard: React.FC = () => {
         <TableHead>
           <TableRow>
             <TableCell>Employee</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Salary</TableCell>
-            <TableCell>Contact</TableCell>
-            <TableCell align="center">Details</TableCell>
             <TableCell>Position</TableCell>
+            <TableCell>Department</TableCell>
+            <TableCell>Contact</TableCell>
+            <TableCell>Salary</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -254,19 +253,36 @@ const EmployeeDashboard: React.FC = () => {
             <React.Fragment key={employee.Id_number}>
               <TableRow>
                 <TableCell>
-                  <Box>
-                    <Typography variant="body1" fontWeight="bold">
-                      {employee.full_name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button 
+                      size="small" 
+                      onClick={() => handleExpandEmployee(employee.Id_number)}
+                      sx={{ minWidth: 'auto', p: 0.5 }}
+                    >
+                      {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
+                    </Button>
+                    <Box>
+                      <Typography variant="body1" fontWeight="bold">
+                        {employee.full_name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                      </Typography>
+                    </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Chip label={employee.department} color="primary" size="small" />
-                  <Typography variant="caption" display="block">
+                  <Typography variant="body2">
                     {employee.position}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  {/* Department column with no value as requested */}
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">{employee.phone}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ID: {employee.Id_number}
                   </Typography>
                 </TableCell>
                 <TableCell>
@@ -279,28 +295,9 @@ const EmployeeDashboard: React.FC = () => {
                     color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
                   />
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2">{employee.phone}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    ID: {employee.Id_number}
-                  </Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Button 
-                    size="small" 
-                    onClick={() => handleExpandEmployee(employee.Id_number)}
-                  >
-                    {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">
-                    {employee.position}
-                  </Typography>
-                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
