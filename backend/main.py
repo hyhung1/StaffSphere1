@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 import json
@@ -19,6 +20,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API routes will be defined below, then mount static files last
 
 class Employee(BaseModel):
     full_name: str
@@ -354,6 +357,9 @@ def export_csv(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=employees.csv"}
     )
+
+# Mount the React build as static files (this must be last to not override API routes)
+app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
