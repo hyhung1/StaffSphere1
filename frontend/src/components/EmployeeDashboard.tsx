@@ -323,7 +323,7 @@ const EmployeeDashboard: React.FC = () => {
 
       {/* Employee Table */}
       <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 1200 }}>
+        <Table sx={{ minWidth: 1600, tableLayout: 'auto' }}>
           <TableHead>
             <TableRow>
               <TableCell>Full Name</TableCell>
@@ -374,14 +374,14 @@ const EmployeeDashboard: React.FC = () => {
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 200 }}>
-                    <Typography variant="body2" noWrap>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="body2">
                       {employee.position}
                     </Typography>
                   </TableCell>
                   <TableCell>{employee.phone}</TableCell>
-                  <TableCell sx={{ maxWidth: 150 }}>
-                    <Typography variant="body2" noWrap>
+                  <TableCell sx={{ minWidth: 180 }}>
+                    <Typography variant="body2">
                       {employee.education_level}
                     </Typography>
                   </TableCell>
@@ -393,23 +393,23 @@ const EmployeeDashboard: React.FC = () => {
                       color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
                     <Typography variant="caption" color="text.secondary">
                       {employee.contract_id}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 200 }}>
-                    <Typography variant="body2" noWrap title={employee.address}>
+                  <TableCell sx={{ minWidth: 250 }}>
+                    <Typography variant="body2">
                       {employee.address}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 150 }}>
-                    <Typography variant="caption" noWrap title={employee.medical_insurance_hospital}>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="caption">
                       {employee.medical_insurance_hospital}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ maxWidth: 150 }}>
-                    <Typography variant="caption" noWrap title={employee.training_skills}>
+                  <TableCell sx={{ minWidth: 180 }}>
+                    <Typography variant="caption">
                       {employee.training_skills}
                     </Typography>
                   </TableCell>
