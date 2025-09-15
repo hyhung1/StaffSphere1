@@ -101,7 +101,7 @@ def calculate_age(dob_str):
     except:
         return 0.0
 
-@app.get("/")
+@app.get("/api/")
 def read_root():
     return {"message": "HR Employee Management API", "version": "1.0.0"}
 
