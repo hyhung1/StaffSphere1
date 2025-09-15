@@ -246,6 +246,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
+            <TableCell></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -253,26 +254,13 @@ const EmployeeDashboard: React.FC = () => {
             <React.Fragment key={employee.Id_number}>
               <TableRow>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" fontWeight="bold">
-                        {employee.full_name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
-                      </Typography>
-                    </Box>
-                    <Button 
-                      size="small" 
-                      onClick={() => handleExpandEmployee(employee.Id_number)}
-                      sx={{ 
-                        minWidth: 'auto', 
-                        p: 0.5,
-                        ml: 0.5
-                      }}
-                    >
-                      {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
-                    </Button>
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold">
+                      {employee.full_name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                    </Typography>
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -296,9 +284,21 @@ const EmployeeDashboard: React.FC = () => {
                     ID: {employee.Id_number}
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Button 
+                    size="small" 
+                    onClick={() => handleExpandEmployee(employee.Id_number)}
+                    sx={{ 
+                      minWidth: 'auto', 
+                      p: 0.5
+                    }}
+                  >
+                    {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
+                  </Button>
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
