@@ -189,7 +189,7 @@ const EmployeeDashboard: React.FC = () => {
         <Grid item xs={12} sm={6} md={4} key={employee.Id_number}>
           <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
+              <Typography variant="h6" component="h2" gutterBottom sx={{ fontSize: '16px' }}>
                 {employee.full_name}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
