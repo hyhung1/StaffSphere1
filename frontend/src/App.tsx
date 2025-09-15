@@ -152,8 +152,14 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C5282',
-          boxShadow: '0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)',
+          backgroundColor: '#1A365D',
+          boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.15)',
+          '& .MuiTypography-root': {
+            color: '#FFFFFF',
+            fontWeight: 700,
+            fontSize: '1.5rem',
+            textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
+          },
         },
       },
     },
@@ -205,7 +211,19 @@ function App() {
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position="static">
             <Toolbar>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
+              <Typography 
+                variant="h5" 
+                component="div" 
+                sx={{ 
+                  flexGrow: 1, 
+                  textAlign: 'center',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '1.5rem',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
+                  letterSpacing: '0.5px'
+                }}
+              >
                 Employee Management Dashboard
               </Typography>
             </Toolbar>
