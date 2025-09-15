@@ -301,7 +301,7 @@ const EmployeeDashboard: React.FC = () => {
                         Complete Details
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>Salary:</strong></Typography>
                           <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
                             {formatCurrency(employee.salary)}
@@ -316,31 +316,29 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_sign_date}</Typography>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
-                          <Typography variant="body2">{employee.last_salary_adjustment}</Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.last_salary_adjustment}</Typography>
+                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
+                          <Typography variant="body2">{employee.bank_account}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={3}>
+                        <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>Education:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
                           <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.social_insurance_number}</Typography>
                           <Typography variant="body2"><strong>PVI Care:</strong></Typography>
-                          <Typography variant="body2">{employee.pvi_care}</Typography>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
-                          <Typography variant="body2"><strong>Education:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
-                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_account}</Typography>
+                          <Typography variant="body2">{employee.contract_id}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>Address:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.address}</Typography>
                           <Typography variant="body2"><strong>Current Address:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.current_address}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
-                          <Typography variant="body2">{employee.medical_insurance_hospital}</Typography>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.medical_insurance_hospital}</Typography>
                           <Typography variant="body2"><strong>Training Skills:</strong></Typography>
                           <Typography variant="body2">{employee.training_skills}</Typography>
                         </Grid>
