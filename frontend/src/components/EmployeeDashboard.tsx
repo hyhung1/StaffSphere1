@@ -242,11 +242,12 @@ const EmployeeDashboard: React.FC = () => {
         <TableHead>
           <TableRow>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Employee</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
-            <TableCell></TableCell>
+            <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -259,9 +260,14 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.full_name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                      {Math.ceil(employee.age)} years
                     </Typography>
                   </Box>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
@@ -284,13 +290,15 @@ const EmployeeDashboard: React.FC = () => {
                     ID: {employee.Id_number}
                   </Typography>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
                     size="small" 
                     onClick={() => handleExpandEmployee(employee.Id_number)}
                     sx={{ 
                       minWidth: 'auto', 
-                      p: 0.5
+                      p: 0.25,
+                      width: 30,
+                      height: 30
                     }}
                   >
                     {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
@@ -298,7 +306,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
