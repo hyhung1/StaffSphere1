@@ -305,15 +305,26 @@ const EmployeeDashboard: React.FC = () => {
                             label={employee.contract_type} 
                             size="small" 
                             color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                            sx={{ mb: 1 }}
                           />
+                          <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_sign_date}</Typography>
+                          <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
+                          <Typography variant="body2">{employee.last_salary_adjustment}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2"><strong>Tax Code:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
+                          <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.social_insurance_number}</Typography>
+                          <Typography variant="body2"><strong>PVI Care:</strong></Typography>
+                          <Typography variant="body2">{employee.pvi_care}</Typography>
                         </Grid>
                         <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Education:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
-                          <Typography variant="body2">{employee.contract_id}</Typography>
-                        </Grid>
-                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
                           <Typography variant="body2"><strong>Address:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.address}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
