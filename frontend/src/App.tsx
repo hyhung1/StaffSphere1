@@ -44,8 +44,8 @@ const theme = createTheme({
       dark: '#2F855A',
     },
     background: {
-      default: '#F0F4FF',  // Very light blue background
-      paper: '#F8FAFF',    // Very light blue-tinted paper
+      default: '#FAFAFA',  // Very soft neutral gray
+      paper: '#FCFCFC',    // Almost white with hint of warmth
     },
     text: {
       primary: '#2D3748',   // Dark gray for main text
@@ -170,9 +170,9 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
-          backgroundColor: '#F8FAFF',
-          border: '1px solid #DBEAFE',
+          boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.08)',
+          backgroundColor: '#FCFCFC',
+          border: '1px solid #F0F0F0',
           borderRadius: '12px',
         },
       },
@@ -203,14 +203,14 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
-          border: '1px solid #DBEAFE',
-          background: 'linear-gradient(145deg, #F8FAFF 0%, #EEF2FF 100%)',
+          boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #F0F0F0',
+          background: '#FCFCFC',
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: '0px 8px 20px 0px rgba(59, 130, 246, 0.2)',
-            background: 'linear-gradient(145deg, #F0F4FF 0%, #E0E7FF 100%)',
+            boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.12)',
+            background: '#FEFEFE',
           },
         },
       },
@@ -255,7 +255,7 @@ function App() {
             </Toolbar>
           </AppBar>
           <Box sx={{ 
-            background: 'linear-gradient(135deg, #E8F4FD 0%, #F0F9FF 25%, #F0F4FF 50%, #E6FFFA 75%, #F0FDF4 100%)',
+            background: 'linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)',
             minHeight: 'calc(100vh - 64px)',
             pt: 4,
             pb: 4
