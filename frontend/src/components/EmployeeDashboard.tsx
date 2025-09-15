@@ -207,6 +207,12 @@ const EmployeeDashboard: React.FC = () => {
                   label={employee.gender} 
                   color={employee.gender === 'Nam' ? 'info' : 'secondary'} 
                   size="small" 
+                  sx={{ mr: 1, mb: 1 }}
+                />
+                <Chip 
+                  label={employee.contract_type} 
+                  color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'} 
+                  size="small" 
                   sx={{ mb: 1 }}
                 />
               </Box>
@@ -218,11 +224,6 @@ const EmployeeDashboard: React.FC = () => {
                 <strong>Current Address:</strong> {employee.current_address}
               </Typography>
               
-              <Chip 
-                label={employee.contract_type} 
-                color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'} 
-                size="small" 
-              />
             </CardContent>
           </Card>
         </Grid>
