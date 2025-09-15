@@ -20,6 +20,11 @@ import {
   TableRow,
   TablePagination,
   IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Collapse,
+  CardActions,
+  Divider,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 // Temporarily removed @mui/icons-material to reduce memory usage
@@ -56,6 +61,8 @@ const EmployeeDashboard: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('compact');
+  const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState({
     department: '',
     position: '',
@@ -147,6 +154,22 @@ const EmployeeDashboard: React.FC = () => {
     }).format(amount);
   };
 
+  const handleExpandEmployee = (employeeId: string) => {
+    const newExpanded = new Set(expandedEmployees);
+    if (newExpanded.has(employeeId)) {
+      newExpanded.delete(employeeId);
+    } else {
+      newExpanded.add(employeeId);
+    }
+    setExpandedEmployees(newExpanded);
+  };
+
+  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newView: 'table' | 'cards' | 'compact') => {
+    if (newView !== null) {
+      setViewMode(newView);
+    }
+  };
+
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -156,6 +179,164 @@ const EmployeeDashboard: React.FC = () => {
     setPage(0);
   };
 
+  // Calculate paginated employees
+  const paginatedEmployees = employees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  // Card View Component
+  const renderCardView = () => (
+    <Grid container spacing={3}>
+      {paginatedEmployees.map((employee: Employee) => (
+        <Grid item xs={12} sm={6} md={4} key={employee.Id_number}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1 }}>
+              <Typography variant="h6" component="h2" gutterBottom>
+                {employee.full_name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                ID: {employee.Id_number}
+              </Typography>
+              
+              <Box sx={{ mb: 2 }}>
+                <Chip 
+                  label={employee.department} 
+                  color="primary" 
+                  size="small" 
+                  sx={{ mr: 1, mb: 1 }}
+                />
+                <Chip 
+                  label={employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'} 
+                  color={employee.gender === 'Nam' ? 'info' : 'secondary'} 
+                  size="small" 
+                  sx={{ mb: 1 }}
+                />
+              </Box>
+
+              <Typography variant="body2"><strong>Position:</strong> {employee.position}</Typography>
+              <Typography variant="body2"><strong>Age:</strong> {employee.age} years</Typography>
+              <Typography variant="body2"><strong>Phone:</strong> {employee.phone}</Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Salary:</strong> {formatCurrency(employee.salary)}
+              </Typography>
+              
+              <Chip 
+                label={employee.contract_type} 
+                color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'} 
+                size="small" 
+              />
+            </CardContent>
+            <CardActions>
+              <Button size="small">👁️ View</Button>
+              <Button size="small">✏️ Edit</Button>
+              <Button size="small" color="error">🗑️ Delete</Button>
+            </CardActions>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  // Compact Table View Component
+  const renderCompactView = () => (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Employee</TableCell>
+            <TableCell>Department</TableCell>
+            <TableCell>Salary</TableCell>
+            <TableCell>Contact</TableCell>
+            <TableCell align="center">Details</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {paginatedEmployees.map((employee: Employee) => (
+            <React.Fragment key={employee.Id_number}>
+              <TableRow>
+                <TableCell>
+                  <Box>
+                    <Typography variant="body1" fontWeight="bold">
+                      {employee.full_name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {employee.age} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Chip label={employee.department} color="primary" size="small" />
+                  <Typography variant="caption" display="block">
+                    {employee.position}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight="bold">
+                    {formatCurrency(employee.salary)}
+                  </Typography>
+                  <Chip 
+                    label={employee.contract_type} 
+                    size="small" 
+                    color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">{employee.phone}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ID: {employee.Id_number}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Button 
+                    size="small" 
+                    onClick={() => handleExpandEmployee(employee.Id_number)}
+                  >
+                    {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton size="small" color="primary">👁️</IconButton>
+                    <IconButton size="small" color="primary">✏️</IconButton>
+                    <IconButton size="small" color="error">🗑️</IconButton>
+                  </Box>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                  <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
+                    <Box sx={{ margin: 1 }}>
+                      <Typography variant="h6" gutterBottom component="div">
+                        Complete Details
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>Education:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
+                          <Typography variant="body2"><strong>Contract ID:</strong></Typography>
+                          <Typography variant="body2">{employee.contract_id}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>Address:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.address}</Typography>
+                          <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
+                          <Typography variant="body2">{employee.medical_insurance_hospital}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>Training Skills:</strong></Typography>
+                          <Typography variant="body2">{employee.training_skills}</Typography>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Collapse>
+                </TableCell>
+              </TableRow>
+            </React.Fragment>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -164,10 +345,24 @@ const EmployeeDashboard: React.FC = () => {
 
       {/* Search and Filter Section */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          🔍
-          Search & Filter
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6">
+            🔍 Search & Filter
+          </Typography>
+          <Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>View Mode:</Typography>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewChange}
+              size="small"
+            >
+              <ToggleButton value="compact">📋 Compact</ToggleButton>
+              <ToggleButton value="cards">🎴 Cards</ToggleButton>
+              <ToggleButton value="table">📊 Full Table</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        </Box>
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
@@ -321,31 +516,32 @@ const EmployeeDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Employee Table */}
-      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 1600, tableLayout: 'auto' }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Age</TableCell>
-              <TableCell>Gender</TableCell>
-              <TableCell>Department</TableCell>
-              <TableCell>Position</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Education</TableCell>
-              <TableCell>Salary</TableCell>
-              <TableCell>Contract Type</TableCell>
-              <TableCell>Contract ID</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>Insurance</TableCell>
-              <TableCell>Training Skills</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {employees
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((employee) => (
+      {/* Employee Display */}
+      {viewMode === 'cards' && renderCardView()}
+      {viewMode === 'compact' && renderCompactView()}
+      {viewMode === 'table' && (
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 1600, tableLayout: 'auto' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Full Name</TableCell>
+                <TableCell>Age</TableCell>
+                <TableCell>Gender</TableCell>
+                <TableCell>Department</TableCell>
+                <TableCell>Position</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Education</TableCell>
+                <TableCell>Salary</TableCell>
+                <TableCell>Contract Type</TableCell>
+                <TableCell>Contract ID</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell>Insurance</TableCell>
+                <TableCell>Training Skills</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedEmployees.map((employee: Employee) => (
                 <TableRow key={employee.Id_number} hover>
                   <TableCell>
                     <Box>
@@ -428,8 +624,13 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                 </TableRow>
               ))}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Pagination */}
+      <Paper sx={{ mt: 2 }}>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
@@ -439,7 +640,7 @@ const EmployeeDashboard: React.FC = () => {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </TableContainer>
+      </Paper>
     </Box>
   );
 };
