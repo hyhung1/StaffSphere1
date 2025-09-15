@@ -44,8 +44,8 @@ const theme = createTheme({
       dark: '#2F855A',
     },
     background: {
-      default: '#FAFAFA',  // Very soft neutral gray
-      paper: '#FCFCFC',    // Almost white with hint of warmth
+      default: '#D9D9D9',  // Medium gray background
+      paper: '#F5F5F5',    // Light gray paper
     },
     text: {
       primary: '#2D3748',   // Dark gray for main text
@@ -170,9 +170,9 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.08)',
-          backgroundColor: '#FCFCFC',
-          border: '1px solid #F0F0F0',
+          boxShadow: '0px 3px 10px 0px rgba(0, 0, 0, 0.15)',
+          backgroundColor: '#F5F5F5',
+          border: '1px solid #D0D0D0',
           borderRadius: '12px',
         },
       },
@@ -203,14 +203,14 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0px 2px 8px 0px rgba(0, 0, 0, 0.08)',
-          border: '1px solid #F0F0F0',
-          background: '#FCFCFC',
+          boxShadow: '0px 3px 10px 0px rgba(0, 0, 0, 0.15)',
+          border: '1px solid #D0D0D0',
+          background: '#F5F5F5',
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: '0px 4px 12px 0px rgba(0, 0, 0, 0.12)',
-            background: '#FEFEFE',
+            boxShadow: '0px 5px 15px 0px rgba(0, 0, 0, 0.2)',
+            background: '#F8F8F8',
           },
         },
       },
@@ -255,7 +255,7 @@ function App() {
             </Toolbar>
           </AppBar>
           <Box sx={{ 
-            background: 'linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)',
+            background: 'linear-gradient(180deg, #E8E8E8 0%, #D4D4D4 100%)',
             minHeight: 'calc(100vh - 64px)',
             pt: 4,
             pb: 4
