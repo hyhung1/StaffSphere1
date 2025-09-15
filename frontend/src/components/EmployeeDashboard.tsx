@@ -201,19 +201,20 @@ const EmployeeDashboard: React.FC = () => {
                   label={employee.department} 
                   color="primary" 
                   size="small" 
-                  sx={{ mr: 1, mb: 1 }}
+                  sx={{ mr: 1, mb: 1, fontWeight: 600 }}
                 />
                 <Chip 
                   label={employee.gender} 
                   color={employee.gender === 'Nam' ? 'info' : 'secondary'} 
                   size="small" 
-                  sx={{ mr: 1, mb: 1 }}
+                  sx={{ mr: 1, mb: 1, fontWeight: 600 }}
                 />
                 <Chip 
                   label={employee.contract_type} 
-                  color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'} 
+                  color={employee.contract_type === 'Không thời hạn' ? 'success' : 'secondary'} 
                   size="small" 
-                  sx={{ mb: 1 }}
+                  variant={employee.contract_type === 'Không thời hạn' ? 'filled' : 'outlined'}
+                  sx={{ mb: 1, fontWeight: 600 }}
                 />
               </Box>
 
@@ -364,22 +365,22 @@ const EmployeeDashboard: React.FC = () => {
   return (
     <Box>
       {/* Search and Filter Section */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
             🔍 Search & Filter
           </Typography>
           <Box>
-            <Typography variant="body2" sx={{ mb: 1 }}>View Mode:</Typography>
+            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>View Mode:</Typography>
             <ToggleButtonGroup
               value={viewMode}
               exclusive
               onChange={handleViewChange}
               size="small"
             >
-              <ToggleButton value="compact">📋 Compact</ToggleButton>
-              <ToggleButton value="cards">🎴 Cards</ToggleButton>
-              <ToggleButton value="table">📊 Full Table</ToggleButton>
+              <ToggleButton value="compact" sx={{ fontWeight: 600 }}>📋 Compact</ToggleButton>
+              <ToggleButton value="cards" sx={{ fontWeight: 600 }}>🎴 Cards</ToggleButton>
+              <ToggleButton value="table" sx={{ fontWeight: 600 }}>📊 Full Table</ToggleButton>
             </ToggleButtonGroup>
           </Box>
         </Box>
@@ -483,18 +484,42 @@ const EmployeeDashboard: React.FC = () => {
 
       {/* Actions */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">
+        <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
           Employee List ({employees.length} records)
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
-            variant="outlined"
+            variant="contained"
+            color="secondary"
             onClick={exportData}
+            sx={{ 
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 3,
+              py: 1.2,
+              boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-1px)'
+              }
+            }}
           >
             📥 Export CSV
           </Button>
           <Button
             variant="contained"
+            color="primary"
+            sx={{ 
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 3,
+              py: 1.2,
+              boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-1px)'
+              }
+            }}
           >
             ➕ Add Employee
           </Button>
