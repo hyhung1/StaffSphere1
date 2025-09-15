@@ -256,7 +256,7 @@ const EmployeeDashboard: React.FC = () => {
               <TableRow>
                 <TableCell>
                   <Box>
-                    <Typography variant="body1" fontWeight="bold">
+                    <Typography variant="body2" fontWeight="bold">
                       {employee.full_name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -325,9 +325,9 @@ const EmployeeDashboard: React.FC = () => {
                             sx={{ mb: 1 }}
                           />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_sign_date}</Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
-                          <Typography variant="body2">{employee.last_salary_adjustment}</Typography>
+                          <Typography variant="body2">{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>ID Number:</strong></Typography>
