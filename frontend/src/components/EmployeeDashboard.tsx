@@ -245,7 +245,6 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell>Position</TableCell>
             <TableCell>Department</TableCell>
             <TableCell>Contact</TableCell>
-            <TableCell>Salary</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -271,13 +270,13 @@ const EmployeeDashboard: React.FC = () => {
                     </Box>
                   </Box>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2">
+                <TableCell sx={{ maxWidth: 200 }}>
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
                     {employee.position}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2">
+                <TableCell sx={{ maxWidth: 150 }}>
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word' }}>
                     {employee.department}
                   </Typography>
                 </TableCell>
@@ -287,38 +286,40 @@ const EmployeeDashboard: React.FC = () => {
                     ID: {employee.Id_number}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight="bold">
-                    {formatCurrency(employee.salary)}
-                  </Typography>
-                  <Chip 
-                    label={employee.contract_type} 
-                    size="small" 
-                    color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                  />
-                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
                         Complete Details
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2"><strong>Salary:</strong></Typography>
+                          <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
+                            {formatCurrency(employee.salary)}
+                          </Typography>
+                          <Typography variant="body2"><strong>Contract Type:</strong></Typography>
+                          <Chip 
+                            label={employee.contract_type} 
+                            size="small" 
+                            color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Education:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2">{employee.contract_id}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Address:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.address}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
                           <Typography variant="body2">{employee.medical_insurance_hospital}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Training Skills:</strong></Typography>
                           <Typography variant="body2">{employee.training_skills}</Typography>
                         </Grid>
