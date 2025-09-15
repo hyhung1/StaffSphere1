@@ -211,6 +211,17 @@ function App() {
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position="static">
             <Toolbar>
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
+                <img 
+                  src="/logo.png" 
+                  alt="Company Logo" 
+                  style={{ 
+                    height: '40px', 
+                    width: 'auto',
+                    marginRight: '12px'
+                  }} 
+                />
+              </Box>
               <Typography 
                 variant="h5" 
                 component="div" 
