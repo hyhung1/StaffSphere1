@@ -65,7 +65,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Poppins", "Segoe UI", "Roboto", "Open Sans", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
       letterSpacing: '-0.025em',
@@ -101,10 +101,14 @@ const theme = createTheme({
       letterSpacing: '-0.01em',
     },
     body1: {
-      letterSpacing: '-0.01em',
+      letterSpacing: '0.02em',
+      fontWeight: 400,
+      lineHeight: 1.6,
     },
     body2: {
-      letterSpacing: '-0.01em',
+      letterSpacing: '0.02em',
+      fontWeight: 400,
+      lineHeight: 1.5,
     },
     button: {
       fontWeight: 600,
@@ -176,6 +180,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
+          fontFamily: '"Poppins", "Segoe UI", "Roboto", sans-serif',
           fontWeight: 500,
           letterSpacing: '0.025em',
         },
