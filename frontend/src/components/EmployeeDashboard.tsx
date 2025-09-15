@@ -254,18 +254,6 @@ const EmployeeDashboard: React.FC = () => {
               <TableRow>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Button 
-                      size="small" 
-                      onClick={() => handleExpandEmployee(employee.Id_number)}
-                      sx={{ 
-                        minWidth: 'auto', 
-                        p: 0.5,
-                        mr: 0.5,
-                        order: -1  // Ensures it's always first/leftmost
-                      }}
-                    >
-                      {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
-                    </Button>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body1" fontWeight="bold">
                         {employee.full_name}
@@ -274,6 +262,17 @@ const EmployeeDashboard: React.FC = () => {
                         {Math.ceil(employee.age)} years • {employee.gender === 'Nam' ? '👨 Nam' : '👩 Nữ'}
                       </Typography>
                     </Box>
+                    <Button 
+                      size="small" 
+                      onClick={() => handleExpandEmployee(employee.Id_number)}
+                      sx={{ 
+                        minWidth: 'auto', 
+                        p: 0.5,
+                        ml: 0.5
+                      }}
+                    >
+                      {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
+                    </Button>
                   </Box>
                 </TableCell>
                 <TableCell>
