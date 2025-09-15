@@ -259,6 +259,14 @@ const EmployeeDashboard: React.FC = () => {
                     <Typography variant="caption" color="text.secondary">
                       {Math.ceil(employee.age)} years
                     </Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Chip 
+                        label={employee.contract_type} 
+                        size="small" 
+                        color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                        sx={{ fontSize: '0.7rem' }}
+                      />
+                    </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -314,13 +322,6 @@ const EmployeeDashboard: React.FC = () => {
                           </Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
-                          <Typography variant="body2"><strong>Contract Type:</strong></Typography>
-                          <Chip 
-                            label={employee.contract_type} 
-                            size="small" 
-                            color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                            sx={{ mb: 1 }}
-                          />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
