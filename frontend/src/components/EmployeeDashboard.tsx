@@ -241,11 +241,11 @@ const EmployeeDashboard: React.FC = () => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Employee</TableCell>
-            <TableCell>DOB</TableCell>
-            <TableCell>Position</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Contact</TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Employee</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
