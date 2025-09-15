@@ -216,9 +216,9 @@ function App() {
                   src="/logo.png" 
                   alt="Company Logo" 
                   style={{ 
-                    height: '40px', 
+                    height: '56px', 
                     width: 'auto',
-                    marginRight: '12px'
+                    marginRight: '16px'
                   }} 
                 />
               </Box>
