@@ -44,7 +44,7 @@ const theme = createTheme({
       dark: '#2F855A',
     },
     background: {
-      default: '#F7FAFC',  // Very light gray
+      default: '#EDF2F7',  // Soft light gray background
       paper: '#FFFFFF',
     },
     text: {
@@ -167,6 +167,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow: '0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E2E8F0',
         },
       },
     },
@@ -239,13 +241,20 @@ function App() {
               </Typography>
             </Toolbar>
           </AppBar>
-          <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Routes>
-              <Route path="/" element={<EmployeeDashboard />} />
-              <Route path="/employee/:id" element={<EmployeeDetail />} />
-              <Route path="/statistics" element={<Statistics />} />
-            </Routes>
-          </Container>
+          <Box sx={{ 
+            background: 'linear-gradient(135deg, #EDF2F7 0%, #E2E8F0 100%)',
+            minHeight: 'calc(100vh - 64px)',
+            pt: 4,
+            pb: 4
+          }}>
+            <Container maxWidth="xl">
+              <Routes>
+                <Route path="/" element={<EmployeeDashboard />} />
+                <Route path="/employee/:id" element={<EmployeeDetail />} />
+                <Route path="/statistics" element={<Statistics />} />
+              </Routes>
+            </Container>
+          </Box>
         </Box>
       </Router>
     </ThemeProvider>
