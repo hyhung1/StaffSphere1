@@ -44,7 +44,7 @@ const theme = createTheme({
       dark: '#2F855A',
     },
     background: {
-      default: '#EDF2F7',  // Soft light gray background
+      default: '#F0F4FF',  // Very light blue background
       paper: '#FFFFFF',
     },
     text: {
@@ -166,9 +166,10 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)',
+          boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
           backgroundColor: '#FFFFFF',
-          border: '1px solid #E2E8F0',
+          border: '1px solid #DBEAFE',
+          borderRadius: '12px',
         },
       },
     },
@@ -196,9 +197,15 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          boxShadow: '0px 1px 3px 0px rgba(0, 0, 0, 0.1), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)',
-          border: '1px solid #E2E8F0',
+          borderRadius: 12,
+          boxShadow: '0px 4px 12px 0px rgba(59, 130, 246, 0.15)',
+          border: '1px solid #DBEAFE',
+          background: 'linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%)',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0px 8px 20px 0px rgba(59, 130, 246, 0.2)',
+          },
         },
       },
     },
@@ -242,7 +249,7 @@ function App() {
             </Toolbar>
           </AppBar>
           <Box sx={{ 
-            background: 'linear-gradient(135deg, #EDF2F7 0%, #E2E8F0 100%)',
+            background: 'linear-gradient(135deg, #E8F4FD 0%, #F0F9FF 25%, #F0F4FF 50%, #E6FFFA 75%, #F0FDF4 100%)',
             minHeight: 'calc(100vh - 64px)',
             pt: 4,
             pb: 4
