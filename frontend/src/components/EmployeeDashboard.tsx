@@ -246,7 +246,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell>Salary</TableCell>
             <TableCell>Contact</TableCell>
             <TableCell align="center">Details</TableCell>
-            <TableCell>Actions</TableCell>
+            <TableCell>Position</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -294,11 +294,9 @@ const EmployeeDashboard: React.FC = () => {
                   </Button>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <IconButton size="small" color="primary">👁️</IconButton>
-                    <IconButton size="small" color="primary">✏️</IconButton>
-                    <IconButton size="small" color="error">🗑️</IconButton>
-                  </Box>
+                  <Typography variant="body2">
+                    {employee.position}
+                  </Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -502,7 +500,6 @@ const EmployeeDashboard: React.FC = () => {
                 <TableCell>Address</TableCell>
                 <TableCell>Insurance</TableCell>
                 <TableCell>Training Skills</TableCell>
-                <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -573,19 +570,6 @@ const EmployeeDashboard: React.FC = () => {
                     <Typography variant="caption">
                       {employee.training_skills}
                     </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <IconButton size="small" color="primary">
-                        👁️
-                      </IconButton>
-                      <IconButton size="small" color="secondary">
-                        ✏️
-                      </IconButton>
-                      <IconButton size="small" color="error">
-                        🗑️
-                      </IconButton>
-                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
