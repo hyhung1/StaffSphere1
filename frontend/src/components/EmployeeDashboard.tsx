@@ -277,7 +277,9 @@ const EmployeeDashboard: React.FC = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {/* Department column with no value as requested */}
+                  <Typography variant="body2">
+                    {employee.department}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">{employee.phone}</Typography>
