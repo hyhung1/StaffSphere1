@@ -215,7 +215,7 @@ const EmployeeDashboard: React.FC = () => {
               <Typography variant="body2"><strong>Age:</strong> {Math.ceil(employee.age)} years</Typography>
               <Typography variant="body2"><strong>Phone:</strong> {employee.phone}</Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Salary:</strong> {formatCurrency(employee.salary)}
+                <strong>Current Address:</strong> {employee.current_address}
               </Typography>
               
               <Chip 
