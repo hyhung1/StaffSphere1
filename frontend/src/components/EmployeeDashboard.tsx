@@ -726,12 +726,13 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
           <Grid item xs={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Position</InputLabel>
+              {!filters.position && <InputLabel>Position</InputLabel>}
               <Select
                 value={filters.position}
                 onChange={(e) => setFilters({ ...filters, position: e.target.value })}
+                displayEmpty
               >
-                <MenuItem value="">All</MenuItem>
+                <MenuItem value="">All Positions</MenuItem>
                 <MenuItem value="Manager">Manager</MenuItem>
                 <MenuItem value="Developer">Developer</MenuItem>
                 <MenuItem value="Designer">Designer</MenuItem>
@@ -745,12 +746,13 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
           <Grid item xs={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Department</InputLabel>
+              {!filters.department && <InputLabel>Department</InputLabel>}
               <Select
                 value={filters.department}
                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
+                displayEmpty
               >
-                <MenuItem value="">All</MenuItem>
+                <MenuItem value="">All Departments</MenuItem>
                 <MenuItem value="Sales">Sales</MenuItem>
                 <MenuItem value="Engineering">Engineering</MenuItem>
                 <MenuItem value="HR">HR</MenuItem>
@@ -761,12 +763,13 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
           <Grid item xs={6} md={1}>
             <FormControl fullWidth size="small">
-              <InputLabel>Gender</InputLabel>
+              {!filters.gender && <InputLabel>Gender</InputLabel>}
               <Select
                 value={filters.gender}
                 onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
+                displayEmpty
               >
-                <MenuItem value="">All</MenuItem>
+                <MenuItem value="">All Genders</MenuItem>
                 <MenuItem value="Nam">Nam</MenuItem>
                 <MenuItem value="Nữ">Nữ</MenuItem>
               </Select>
