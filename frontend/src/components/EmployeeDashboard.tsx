@@ -244,6 +244,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Type</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
@@ -259,14 +260,6 @@ const EmployeeDashboard: React.FC = () => {
                     <Typography variant="caption" color="text.secondary">
                       {Math.ceil(employee.age)} years
                     </Typography>
-                    <Box sx={{ mt: 0.5 }}>
-                      <Chip 
-                        label={employee.contract_type} 
-                        size="small" 
-                        color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                        sx={{ fontSize: '0.7rem' }}
-                      />
-                    </Box>
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -292,6 +285,13 @@ const EmployeeDashboard: React.FC = () => {
                 <TableCell>
                   <Typography variant="body2">{employee.phone}</Typography>
                 </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={employee.contract_type} 
+                    size="small" 
+                    color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                  />
+                </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
                     size="small" 
@@ -308,7 +308,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
