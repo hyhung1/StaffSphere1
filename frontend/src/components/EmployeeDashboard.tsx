@@ -255,14 +255,13 @@ const EmployeeDashboard: React.FC = () => {
       'Sales': [],
       'Engineering': [],
       'Back office': [],
-      'Contract': [],
-      'Drafter': []
+      'Contract': []
     };
 
     employees.forEach(emp => {
       const mappedDept = departmentMapping[emp.department] || emp.department;
-      // Map Commissioning to Drafter for separate display
-      const finalDept = mappedDept === 'Commissioning' ? 'Drafter' : mappedDept;
+      // Map Commissioning to Engineering for consolidated display
+      const finalDept = mappedDept === 'Commissioning' ? 'Engineering' : mappedDept;
       if (groups[finalDept]) {
         groups[finalDept].push(emp);
       }
@@ -289,7 +288,6 @@ const EmployeeDashboard: React.FC = () => {
             {/* Draw lines from center to departments */}
             <line x1="400" y1="300" x2="400" y2="100" stroke="#cccccc" strokeWidth="2" />
             <line x1="400" y1="300" x2="600" y2="200" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="650" y2="180" stroke="#cccccc" strokeWidth="2" />
             <line x1="400" y1="300" x2="600" y2="400" stroke="#cccccc" strokeWidth="2" />
             <line x1="400" y1="300" x2="200" y2="400" stroke="#cccccc" strokeWidth="2" />
             <line x1="400" y1="300" x2="200" y2="200" stroke="#cccccc" strokeWidth="2" />
@@ -335,24 +333,6 @@ const EmployeeDashboard: React.FC = () => {
               </text>
               <text x="600" y="210" textAnchor="middle" fill="white" fontSize="12">
                 ({departmentGroups['Engineering']?.length || 0})
-              </text>
-            </g>
-
-            {/* Drafter - Top Right (offset) */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Drafter');
-                setSelectedEmployees(departmentGroups['Drafter'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="650" cy="180" r="35" fill="#00bcd4" />
-              <text x="650" y="175" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
-                Drafter
-              </text>
-              <text x="650" y="190" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Drafter']?.length || 0})
               </text>
             </g>
 
