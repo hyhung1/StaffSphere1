@@ -793,21 +793,29 @@ const EmployeeDashboard: React.FC = () => {
           <Grid item xs={6} md={1.5}>
             <TextField
               fullWidth
-              label="Min Age"
+              label={filters.min_age ? "" : "Min Age"}
+              placeholder="Min Age"
               type="number"
               size="small"
               value={filters.min_age}
               onChange={(e) => setFilters({ ...filters, min_age: e.target.value })}
+              InputLabelProps={{
+                shrink: false,
+              }}
             />
           </Grid>
           <Grid item xs={6} md={1.5}>
             <TextField
               fullWidth
-              label="Max Age"
+              label={filters.max_age ? "" : "Max Age"}
+              placeholder="Max Age"
               type="number"
               size="small"
               value={filters.max_age}
               onChange={(e) => setFilters({ ...filters, max_age: e.target.value })}
+              InputLabelProps={{
+                shrink: false,
+              }}
             />
           </Grid>
           <Grid item xs={12} md={1.5}>
