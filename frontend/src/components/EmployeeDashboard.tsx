@@ -424,7 +424,16 @@ const EmployeeDashboard: React.FC = () => {
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>PVI Care:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.pvi_care || '-'}</Typography>
+                            {employee.pvi_care ? (
+                              <Chip 
+                                label="Yes" 
+                                size="small" 
+                                color="info"
+                                sx={{ height: 20, fontSize: '0.75rem' }}
+                              />
+                            ) : (
+                              <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>-</Typography>
+                            )}
                           </Box>
                         </Box>
                         
