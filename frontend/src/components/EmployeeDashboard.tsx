@@ -164,7 +164,7 @@ const EmployeeDashboard: React.FC = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string | undefined | null) => {
+  const formatDate = (dateString: string | undefined | null, reverse: boolean = false) => {
     if (!dateString) return '-';
     if (dateString === 'Không thời hạn') return 'Không thời hạn';
     
@@ -173,6 +173,9 @@ const EmployeeDashboard: React.FC = () => {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     
+    if (reverse) {
+      return `${day}/${month}/${year}`;
+    }
     return `${month}/${day}/${year}`;
   };
 
@@ -304,7 +307,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {formatDate(employee.dob)}
+                    {formatDate(employee.dob, true)}
                   </Typography>
                 </TableCell>
                 <TableCell sx={{ maxWidth: 200 }}>
@@ -705,7 +708,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {formatDate(employee.dob)}
+                      {formatDate(employee.dob, true)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 80 }}>
