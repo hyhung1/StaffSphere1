@@ -859,7 +859,7 @@ const EmployeeDashboard: React.FC = () => {
                 }
               }}
             >
-              📤 Import Excel
+              📤 Upload Excel
               <input
                 type="file"
                 hidden
