@@ -164,6 +164,18 @@ const EmployeeDashboard: React.FC = () => {
     }).format(amount);
   };
 
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return '-';
+    if (dateString === 'Không thời hạn') return 'Không thời hạn';
+    
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+  };
+
   const handleExpandEmployee = (employeeId: string) => {
     const newExpanded = new Set(expandedEmployees);
     if (newExpanded.has(employeeId)) {
@@ -292,7 +304,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {new Date(employee.dob).toLocaleDateString('en-GB')}
+                    {formatDate(employee.dob)}
                   </Typography>
                 </TableCell>
                 <TableCell sx={{ maxWidth: 200 }}>
@@ -371,11 +383,11 @@ const EmployeeDashboard: React.FC = () => {
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>ID Issue Date:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('en-GB') : '-'}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.Issue_date)}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Join Date:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('en-GB') : '-'}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.join_date)}</Typography>
                           </Box>
                         </Box>
                         
@@ -417,7 +429,7 @@ const EmployeeDashboard: React.FC = () => {
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Contract Sign Date:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.contract_sign_date)}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Emergency Contact:</Typography>
@@ -456,7 +468,7 @@ const EmployeeDashboard: React.FC = () => {
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Last Salary Adjustment:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.last_salary_adjustment)}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Allowance:</Typography>
@@ -693,7 +705,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {new Date(employee.dob).toLocaleDateString('en-GB')}
+                      {formatDate(employee.dob)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 80 }}>
@@ -713,7 +725,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('en-GB') : '-'}
+                      {formatDate(employee.Issue_date)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 250 }}>
@@ -748,7 +760,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {employee.join_date ? new Date(employee.join_date).toLocaleDateString('en-GB') : '-'}
+                      {formatDate(employee.join_date)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
@@ -768,16 +780,12 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
                     <Typography variant="body2">
-                      {new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}
+                      {formatDate(employee.contract_sign_date)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
                     <Typography variant="body2">
-                      {employee.contract_end_date === 'Không thời hạn' 
-                        ? 'Không thời hạn' 
-                        : employee.contract_end_date 
-                          ? new Date(employee.contract_end_date).toLocaleDateString('en-GB')
-                          : '-'}
+                      {formatDate(employee.contract_end_date)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
@@ -792,7 +800,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
                     <Typography variant="body2">
-                      {new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}
+                      {formatDate(employee.last_salary_adjustment)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
