@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ExpandMore, ExpandLess, Close } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -24,12 +24,14 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Collapse,
-  CardActions,
-  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-// Temporarily removed @mui/icons-material to reduce memory usage
 import axios from 'axios';
+import ForceGraph2D from 'react-force-graph-2d';
 
 interface Employee {
   full_name: string;
@@ -73,6 +75,9 @@ const EmployeeDashboard: React.FC = () => {
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('compact');
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [visibleSalaries, setVisibleSalaries] = useState<Set<string>>(new Set());
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
+  const graphRef = useRef<any>(null);
   const [filters, setFilters] = useState({
     department: '',
     position: '',
@@ -236,59 +241,217 @@ const EmployeeDashboard: React.FC = () => {
   // Calculate paginated employees
   const paginatedEmployees = employees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
-  // Card View Component
-  const renderCardView = () => (
-    <Grid container spacing={3}>
-      {paginatedEmployees.map((employee: Employee) => (
-        <Grid item xs={12} sm={6} md={4} key={employee.Id_number}>
-          <Card sx={{ height: 'auto', minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flexGrow: 1, p: 2 }}>
-              {/* Row 1: Name - Department */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                <Typography variant="h6" component="h2" sx={{ fontSize: '16px', fontWeight: 600, flex: 1, mr: 1 }}>
-                  {employee.full_name}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'primary.main', fontWeight: 500 }}>
-                  {employee.department}
-                </Typography>
-              </Box>
+  // Group employees by department
+  const groupEmployeesByDepartment = () => {
+    // Map department names to the required 5 departments
+    const departmentMapping: Record<string, string> = {
+      'Sales': 'Sales',
+      'Engineering': 'Engineering',
+      'HR': 'Back office',
+      'Marketing': 'Back office',
+      'Finance': 'Back office',
+      // Add default mappings for any other departments
+    };
 
-              {/* Row 2: ID - Gender */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                  ID: {employee.Id_number}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                  {employee.gender}
-                </Typography>
-              </Box>
+    const groups: Record<string, Employee[]> = {
+      'Sales': [],
+      'Engineering': [],
+      'Back office': [],
+      'Contract': [],
+      'Drafter': []
+    };
 
-              {/* Row 3: Age - Contact */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                  Age: {Math.ceil(employee.age)}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                  Contact: {employee.phone}
-                </Typography>
-              </Box>
+    employees.forEach(emp => {
+      const mappedDept = departmentMapping[emp.department] || emp.department;
+      if (groups[mappedDept]) {
+        groups[mappedDept].push(emp);
+      } else {
+        // If department doesn't match any of the 5, add to Back office
+        groups['Back office'].push(emp);
+      }
+    });
 
-              {/* Row 4: Position - Contract Type */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                  Position: {employee.position}
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
-                  {employee.contract_type}
-                </Typography>
-              </Box>
+    return groups;
+  };
+
+  // Create graph data for network diagram
+  const createGraphData = () => {
+    const departmentGroups = groupEmployeesByDepartment();
+    const departments = ['Sales', 'Engineering', 'Back office', 'Contract', 'Drafter'];
+    
+    const nodes = [
+      { 
+        id: 'VIVN', 
+        name: 'VIVN', 
+        val: 20, 
+        color: '#1976d2',
+        isCenter: true
+      },
+      ...departments.map(dept => ({
+        id: dept,
+        name: `${dept}\n(${departmentGroups[dept].length} employees)`,
+        val: 12,
+        color: dept === 'Sales' ? '#4caf50' : 
+               dept === 'Engineering' ? '#ff9800' : 
+               dept === 'Back office' ? '#9c27b0' :
+               dept === 'Contract' ? '#f44336' : '#00bcd4',
+        isDepartment: true,
+        employeeCount: departmentGroups[dept].length
+      }))
+    ];
+
+    const links = departments.map(dept => ({
+      source: 'VIVN',
+      target: dept
+    }));
+
+    return { nodes, links };
+  };
+
+  // Handle node click
+  const handleNodeClick = useCallback((node: any) => {
+    if (node.isDepartment) {
+      setSelectedDepartment(node.id);
+      setDepartmentDialogOpen(true);
+    }
+  }, []);
+
+  // Card View Component with Network Diagram
+  const renderCardView = () => {
+    const graphData = createGraphData();
+    const departmentEmployees = selectedDepartment ? groupEmployeesByDepartment()[selectedDepartment] : [];
+
+    return (
+      <>
+        <Box sx={{ 
+          width: '100%', 
+          height: '600px', 
+          border: '1px solid #e0e0e0', 
+          borderRadius: 2,
+          backgroundColor: '#fafafa',
+          position: 'relative'
+        }}>
+          <ForceGraph2D
+            ref={graphRef}
+            graphData={graphData}
+            nodeLabel="name"
+            nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+              const label = node.name;
+              const fontSize = node.isCenter ? 14/globalScale : 10/globalScale;
+              ctx.font = `${fontSize}px Sans-Serif`;
               
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
-  );
+              // Draw node circle
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
+              ctx.fillStyle = node.color;
+              ctx.fill();
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 2/globalScale;
+              ctx.stroke();
+              
+              // Draw label
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillStyle = '#fff';
+              
+              // Split multi-line labels
+              const lines = label.split('\n');
+              lines.forEach((line: string, i: number) => {
+                ctx.fillText(line, node.x, node.y + (i - (lines.length - 1) / 2) * fontSize * 1.2);
+              });
+            }}
+            nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
+              ctx.fillStyle = color;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, node.val, 0, 2 * Math.PI, false);
+              ctx.fill();
+            }}
+            onNodeClick={handleNodeClick}
+            linkColor={() => '#999'}
+            linkWidth={2}
+            enableNodeDrag={false}
+            enableZoomInteraction={false}
+            enablePanInteraction={false}
+            cooldownTicks={100}
+            d3AlphaDecay={0.02}
+            d3VelocityDecay={0.3}
+          />
+        </Box>
+
+        {/* Department Employees Dialog */}
+        <Dialog
+          open={departmentDialogOpen}
+          onClose={() => setDepartmentDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: { maxHeight: '80vh' }
+          }}
+        >
+          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">{selectedDepartment} Department Employees</Typography>
+            <IconButton onClick={() => setDepartmentDialogOpen(false)}>
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Grid container spacing={2}>
+              {departmentEmployees.map((employee: Employee) => (
+                <Grid item xs={12} sm={6} key={employee.Id_number}>
+                  <Card sx={{ height: 'auto', minHeight: '140px' }}>
+                    <CardContent sx={{ p: 2 }}>
+                      {/* Row 1: Name - Department */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Typography variant="h6" sx={{ fontSize: '16px', fontWeight: 600, flex: 1, mr: 1 }}>
+                          {employee.full_name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'primary.main', fontWeight: 500 }}>
+                          {employee.department}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 2: ID - Gender */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          ID: {employee.Id_number}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          {employee.gender}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 3: Age - Contact */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          Age: {Math.ceil(employee.age)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          Contact: {employee.phone}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 4: Position - Contract Type */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          Position: {employee.position}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
+                          {employee.contract_type}
+                        </Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDepartmentDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      </>
+    );
+  };
 
   // Compact Table View Component
   const renderCompactView = () => (
