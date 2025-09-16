@@ -404,17 +404,31 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2"><strong>Bank Name:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_name || '-'}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={3}>
-                          <Typography variant="body2"><strong>Emergency Contact:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.emergency_contact || '-'}</Typography>
-                          <Typography variant="body2"><strong>PVI Care:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
-                          <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.medical_insurance_hospital}</Typography>
-                          <Typography variant="body2"><strong>Training Courses:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.training_courses || '-'}</Typography>
-                          <Typography variant="body2"><strong>Training Skills:</strong></Typography>
-                          <Typography variant="body2">{employee.training_skills}</Typography>
+                        <Grid item xs={12}>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                            <Box sx={{ flex: '1 1 200px' }}>
+                              <Typography variant="body2"><strong>Emergency Contact:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.emergency_contact || '-'}</Typography>
+                            </Box>
+                            <Box sx={{ flex: '1 1 100px' }}>
+                              <Typography variant="body2"><strong>PVI Care:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
+                            </Box>
+                            <Box sx={{ flex: '1 1 300px' }}>
+                              <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.medical_insurance_hospital}</Typography>
+                            </Box>
+                          </Box>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 1 }}>
+                            <Box sx={{ flex: '1 1 200px' }}>
+                              <Typography variant="body2"><strong>Training Courses:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.training_courses || '-'}</Typography>
+                            </Box>
+                            <Box sx={{ flex: '1 1 300px' }}>
+                              <Typography variant="body2"><strong>Training Skills:</strong></Typography>
+                              <Typography variant="body2">{employee.training_skills}</Typography>
+                            </Box>
+                          </Box>
                         </Grid>
                       </Grid>
                     </Box>
