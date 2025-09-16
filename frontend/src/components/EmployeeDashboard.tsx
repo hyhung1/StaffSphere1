@@ -515,12 +515,16 @@ const EmployeeDashboard: React.FC = () => {
 
   return (
     <Box>
-      {/* Search and Filter Section */}
+      {/* View Mode Selector and Search/Filter Section */}
       <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
-            🔍 Search & Filter
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: viewMode !== 'cards' ? 3 : 0 }}>
+          {viewMode !== 'cards' ? (
+            <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
+              🔍 Search & Filter
+            </Typography>
+          ) : (
+            <Box /> // Empty box for spacing
+          )}
           <Box>
             <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>View Mode:</Typography>
             <ToggleButtonGroup
@@ -536,6 +540,8 @@ const EmployeeDashboard: React.FC = () => {
           </Box>
         </Box>
 
+        {viewMode !== 'cards' && (
+          <>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <TextField
@@ -630,6 +636,8 @@ const EmployeeDashboard: React.FC = () => {
             </Box>
           </Grid>
         </Grid>
+          </>
+        )}
       </Paper>
 
 
