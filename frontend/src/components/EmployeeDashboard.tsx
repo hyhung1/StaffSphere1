@@ -89,6 +89,16 @@ const EmployeeDashboard: React.FC = () => {
     fetchEmployees();
   }, []);
 
+  // Realtime filtering - trigger when search term or filters change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(0);
+      fetchEmployees();
+    }, 300); // 300ms debounce to avoid too many API calls
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, filters]);
+
   const fetchEmployees = async () => {
     try {
       setLoading(true);
@@ -109,10 +119,7 @@ const EmployeeDashboard: React.FC = () => {
     }
   };
 
-  const handleSearch = () => {
-    setPage(0);
-    fetchEmployees();
-  };
+  // Remove handleSearch since we now have realtime filtering
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -124,7 +131,7 @@ const EmployeeDashboard: React.FC = () => {
       birth_year: '',
     });
     setPage(0);
-    fetchEmployees();
+    // fetchEmployees will be called automatically by useEffect
   };
 
   const exportData = async () => {
@@ -783,9 +790,6 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
           <Grid item xs={12} md={1.5}>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Button variant="contained" onClick={handleSearch} size="small">
-                Apply
-              </Button>
               <Button variant="outlined" onClick={clearFilters} size="small">
                 Clear
               </Button>
