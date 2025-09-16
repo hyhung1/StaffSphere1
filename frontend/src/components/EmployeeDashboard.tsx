@@ -708,14 +708,14 @@ const EmployeeDashboard: React.FC = () => {
 
         {viewMode !== 'cards' && (
           <>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={3}>
             <TextField
-              fullWidth
               label="Search employees"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Name, phone, ID, department..."
+              size="small"
               InputProps={{
                 endAdornment: (
                   <Button onClick={handleSearch}>🔍</Button>
@@ -723,14 +723,14 @@ const EmployeeDashboard: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
+          <Grid item xs={6} md={1.5}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Department</InputLabel>
               <Select
                 value={filters.department}
                 onChange={(e) => setFilters({ ...filters, department: e.target.value })}
               >
-                <MenuItem value="">All Departments</MenuItem>
+                <MenuItem value="">All</MenuItem>
                 <MenuItem value="Sales">Sales</MenuItem>
                 <MenuItem value="Engineering">Engineering</MenuItem>
                 <MenuItem value="HR">HR</MenuItem>
@@ -739,8 +739,8 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
+          <Grid item xs={6} md={1.5}>
+            <FormControl size="small" sx={{ minWidth: 100 }}>
               <InputLabel>Gender</InputLabel>
               <Select
                 value={filters.gender}
@@ -752,33 +752,32 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-        </Grid>
-
-        <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={6} md={1.5}>
             <TextField
-              fullWidth
               label="Min Age"
               type="number"
+              size="small"
               value={filters.min_age}
               onChange={(e) => setFilters({ ...filters, min_age: e.target.value })}
+              sx={{ width: 100 }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={6} md={1.5}>
             <TextField
-              fullWidth
               label="Max Age"
               type="number"
+              size="small"
               value={filters.max_age}
               onChange={(e) => setFilters({ ...filters, max_age: e.target.value })}
+              sx={{ width: 100 }}
             />
           </Grid>
           <Grid item xs={12} md={2}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button variant="contained" onClick={handleSearch}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button variant="contained" onClick={handleSearch} size="small">
                 Apply
               </Button>
-              <Button variant="outlined" onClick={clearFilters}>
+              <Button variant="outlined" onClick={clearFilters} size="small">
                 Clear
               </Button>
             </Box>
