@@ -414,45 +414,45 @@ const EmployeeDashboard: React.FC = () => {
           <DialogContent dividers>
             <Grid container spacing={2}>
               {selectedEmployees.map((employee: Employee) => (
-                <Grid item xs={12} sm={3} key={employee.Id_number}>
-                  <Card sx={{ height: 'auto', minHeight: '140px' }}>
-                    <CardContent sx={{ p: 2 }}>
+                <Grid item xs={12} sm={1.5} key={employee.Id_number} sx={{ flexBasis: '12.5%', maxWidth: '12.5%' }}>
+                  <Card sx={{ height: 'auto', minHeight: '140px', fontSize: '0.8rem' }}>
+                    <CardContent sx={{ p: 1 }}>
                       {/* Row 1: Name - Department */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '16px', fontWeight: 600, flex: 1, mr: 1 }}>
+                        <Typography variant="h6" sx={{ fontSize: '12px', fontWeight: 600, flex: 1, mr: 0.5 }}>
                           {employee.full_name}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'primary.main', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'primary.main', fontWeight: 500 }}>
                           {employee.department}
                         </Typography>
                       </Box>
 
                       {/* Row 2: ID - Gender */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.secondary' }}>
                           ID: {employee.Id_number}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.primary' }}>
                           {employee.gender}
                         </Typography>
                       </Box>
 
                       {/* Row 3: Age - Contact */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.primary' }}>
                           Age: {Math.ceil(employee.age)}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.secondary' }}>
                           {employee.phone}
                         </Typography>
                       </Box>
 
                       {/* Row 4: Position - Contract Type */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'text.primary' }}>
                           {employee.position}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ fontSize: '10px', color: 'success.main', fontWeight: 500 }}>
                           {employee.contract_type}
                         </Typography>
                       </Box>
