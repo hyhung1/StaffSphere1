@@ -80,7 +80,6 @@ const EmployeeDashboard: React.FC = () => {
     position: '',
     contract_type: '',
     gender: '',
-    birth_year: '',
   });
   
   const [filterOptions, setFilterOptions] = useState({
@@ -116,7 +115,6 @@ const EmployeeDashboard: React.FC = () => {
       if (filters.position) params.append('position', filters.position);
       if (filters.contract_type) params.append('contract_type', filters.contract_type);
       if (filters.gender) params.append('gender', filters.gender);
-      if (filters.birth_year) params.append('birth_year', filters.birth_year);
 
       const response = await axios.get(`${API_BASE_URL}/employees?${params.toString()}`);
       setEmployees(response.data);
@@ -145,7 +143,6 @@ const EmployeeDashboard: React.FC = () => {
       position: '',
       contract_type: '',
       gender: '',
-      birth_year: '',
     });
     setPage(0);
     // fetchEmployees will be called automatically by useEffect
@@ -501,9 +498,6 @@ const EmployeeDashboard: React.FC = () => {
                     <Typography variant="body2" fontWeight="bold">
                       {employee.full_name}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {Math.ceil(employee.age)} years
-                    </Typography>
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -791,20 +785,6 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} md={1.5}>
-            <TextField
-              fullWidth
-              label={filters.birth_year ? "" : "Year"}
-              placeholder="Birth Year"
-              type="number"
-              size="small"
-              value={filters.birth_year}
-              onChange={(e) => setFilters({ ...filters, birth_year: e.target.value })}
-              InputLabelProps={{
-                shrink: false,
-              }}
-            />
-          </Grid>
           <Grid item xs={12} md={1.5}>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
               <Button variant="outlined" onClick={clearFilters} size="small">
@@ -908,7 +888,6 @@ const EmployeeDashboard: React.FC = () => {
               <TableRow>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Full Name</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Age</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Issue Date</Typography></TableCell>
@@ -949,11 +928,6 @@ const EmployeeDashboard: React.FC = () => {
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
                       {formatDate(employee.dob, true)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>
-                    <Typography variant="body2">
-                      {Math.ceil(employee.age)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 80 }}>

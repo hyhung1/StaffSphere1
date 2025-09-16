@@ -26,7 +26,6 @@ app.add_middleware(
 class Employee(BaseModel):
     full_name: str
     dob: str
-    age: float
     gender: str
     Id_number: str
     Issue_date: str = ""
@@ -81,7 +80,6 @@ class EmployeeFilter(BaseModel):
     position: Optional[str] = None
     contract_type: Optional[str] = None
     gender: Optional[str] = None
-    birth_year: Optional[int] = None
     search: Optional[str] = None
 
 # Load employee data
@@ -97,14 +95,6 @@ def save_employees(employees):
     with open("nhan_vien.json", "w", encoding="utf-8") as f:
         json.dump(employees, f, ensure_ascii=False, indent=2)
 
-def calculate_age(dob_str):
-    try:
-        dob = datetime.fromisoformat(dob_str.replace("T00:00:00", ""))
-        today = datetime.now()
-        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-        return float(age)
-    except:
-        return 0.0
 
 @app.get("/api/")
 def read_root():
@@ -116,7 +106,6 @@ def get_employees(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    birth_year: Optional[int] = None,
     search: Optional[str] = None
 ):
     employees = load_employees()
@@ -140,19 +129,6 @@ def get_employees(
         if gender and emp.get("gender", "").lower() != gender.lower():
             continue
             
-            
-        # Birth year filter
-        if birth_year is not None:
-            emp_dob = emp.get("dob", "")
-            if emp_dob:
-                try:
-                    emp_birth_year = int(emp_dob.split('-')[0])
-                    if emp_birth_year != birth_year:
-                        continue
-                except (ValueError, IndexError):
-                    continue
-            else:
-                continue
             
         # Search filter (searches in employee name only)
         if search:
@@ -185,14 +161,10 @@ def create_employee(employee: EmployeeCreate):
     # Generate contract ID (simple implementation)
     contract_id = f"{len(employees)+1:02d}-{datetime.now().strftime('%m%Y')}/HĐLĐ/KXĐ"
     
-    # Calculate age
-    age = calculate_age(employee.dob)
-    
     # Create new employee
     new_employee = {
         "full_name": employee.full_name,
         "dob": employee.dob,
-        "age": age,
         "gender": employee.gender,
         "Id_number": employee.Id_number,
         "address": employee.address,
@@ -225,14 +197,10 @@ def update_employee(employee_id: str, employee: EmployeeCreate):
     
     for i, emp in enumerate(employees):
         if emp.get("Id_number") == employee_id:
-            # Update age
-            age = calculate_age(employee.dob)
-            
             # Update employee data
             employees[i].update({
                 "full_name": employee.full_name,
                 "dob": employee.dob,
-                "age": age,
                 "gender": employee.gender,
                 "address": employee.address,
                 "current_address": employee.current_address,
@@ -320,8 +288,7 @@ def get_statistics():
             "positions": {},
             "contract_types": {},
             "average_salary": 0,
-            "salary_ranges": {},
-            "age_distribution": {}
+            "salary_ranges": {}
         }
     
     df = pd.DataFrame(employees)
@@ -346,22 +313,13 @@ def get_statistics():
         "30M+": len(df[df['salary'] >= 30000000])
     }
     
-    # Age distribution
-    age_ranges = {
-        "20-30": len(df[(df['age'] >= 20) & (df['age'] < 30)]),
-        "30-40": len(df[(df['age'] >= 30) & (df['age'] < 40)]),
-        "40-50": len(df[(df['age'] >= 40) & (df['age'] < 50)]),
-        "50+": len(df[df['age'] >= 50])
-    }
-    
     return {
         "total_employees": len(employees),
         "departments": dept_counts,
         "positions": position_counts,
         "contract_types": contract_counts,
         "average_salary": int(avg_salary),
-        "salary_ranges": salary_ranges,
-        "age_distribution": age_ranges
+        "salary_ranges": salary_ranges
     }
 
 @app.get("/export/csv")
@@ -452,7 +410,6 @@ async def import_excel(file: UploadFile = File(...)):
             'ID': 'id',
             'Họ và tên': 'full_name',
             'Ngày sinh': 'dob',
-            'Số tuổi': 'age',
             'Giới tính': 'gender',
             'CMND/CCCD': 'Id_number',
             'Ngày cấp ': 'Issue_date',
@@ -500,11 +457,9 @@ async def import_excel(file: UploadFile = File(...)):
                     value = value.strftime('%Y-%m-%d')
                 # Handle numeric values
                 elif isinstance(value, (int, float)):
-                    # Keep salary as integer, age as float
+                    # Keep salary as integer
                     if field == 'salary':
                         value = int(value)
-                    elif field == 'age':
-                        value = float(value)
                     # Convert numeric fields to string without decimals if they're whole numbers
                     elif field in ['id', 'tax_code', 'social_insurance_number', 'bank_account', 'Id_number', 'phone']:
                         # Remove .0 from floats that are actually integers
