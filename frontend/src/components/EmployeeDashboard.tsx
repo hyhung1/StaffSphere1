@@ -447,13 +447,13 @@ const EmployeeDashboard: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Row 4: Position - Tax Code */}
+                      {/* Row 4: Tax Code - Position */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          {employee.position}
-                        </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
                           Tax Code: {employee.tax_code}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          {employee.position}
                         </Typography>
                       </Box>
 
