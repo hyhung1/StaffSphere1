@@ -713,11 +713,6 @@ const EmployeeDashboard: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Employee name..."
               size="small"
-              InputProps={{
-                endAdornment: (
-                  <Button onClick={handleSearch}>🔍</Button>
-                ),
-              }}
             />
           </Grid>
           <Grid item xs={6} md={2}>
