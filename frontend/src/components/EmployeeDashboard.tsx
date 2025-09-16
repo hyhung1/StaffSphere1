@@ -679,28 +679,13 @@ const EmployeeDashboard: React.FC = () => {
     <Box>
       {/* View Mode Selector and Search/Filter Section */}
       <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: viewMode !== 'cards' ? 3 : 0 }}>
-          {viewMode !== 'cards' ? (
+        {viewMode !== 'cards' && (
+          <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
               🔍 Search & Filter
             </Typography>
-          ) : (
-            <Box /> // Empty box for spacing
-          )}
-          <Box>
-            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>View Mode:</Typography>
-            <ToggleButtonGroup
-              value={viewMode}
-              exclusive
-              onChange={handleViewChange}
-              size="small"
-            >
-              <ToggleButton value="compact" sx={{ fontWeight: 600 }}>📋 Compact</ToggleButton>
-              <ToggleButton value="cards" sx={{ fontWeight: 600 }}>🎴 Cards</ToggleButton>
-              <ToggleButton value="table" sx={{ fontWeight: 600 }}>📊 Full Table</ToggleButton>
-            </ToggleButtonGroup>
           </Box>
-        </Box>
+        )}
 
         {viewMode !== 'cards' && (
           <>
@@ -812,71 +797,83 @@ const EmployeeDashboard: React.FC = () => {
 
 
       {/* Actions */}
-      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
-          Employee List ({employees.length} records)
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={exportData}
-            sx={{ 
-              fontWeight: 600,
-              borderRadius: 2,
-              px: 3,
-              py: 1.2,
-              boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
-              '&:hover': {
-                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                transform: 'translateY(-1px)'
-              }
-            }}
-          >
-            📥 Export Excel
-          </Button>
-          <Button
-            variant="contained"
-            component="label"
-            color="info"
-            sx={{ 
-              fontWeight: 600,
-              borderRadius: 2,
-              px: 3,
-              py: 1.2,
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                transform: 'translateY(-1px)'
-              }
-            }}
-          >
-            📤 Import Excel
-            <input
-              type="file"
-              hidden
-              accept=".xlsx,.xls"
-              onChange={importData}
-            />
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ 
-              fontWeight: 600,
-              borderRadius: 2,
-              px: 3,
-              py: 1.2,
-              boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
-              '&:hover': {
-                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                transform: 'translateY(-1px)'
-              }
-            }}
-          >
-            ➕ Add Employee
-          </Button>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
+            Employee List ({employees.length} records)
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={exportData}
+              sx={{ 
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 3,
+                py: 1.2,
+                boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              📥 Export Excel
+            </Button>
+            <Button
+              variant="contained"
+              component="label"
+              color="info"
+              sx={{ 
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 3,
+                py: 1.2,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              📤 Import Excel
+              <input
+                type="file"
+                hidden
+                accept=".xlsx,.xls"
+                onChange={importData}
+              />
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ 
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 3,
+                py: 1.2,
+                boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              ➕ Add Employee
+            </Button>
+          </Box>
         </Box>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewChange}
+          size="small"
+        >
+          <ToggleButton value="compact" sx={{ fontWeight: 600 }}>📋 Compact</ToggleButton>
+          <ToggleButton value="cards" sx={{ fontWeight: 600 }}>🎴 Cards</ToggleButton>
+          <ToggleButton value="table" sx={{ fontWeight: 600 }}>📊 Full Table</ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
       {/* Employee Display */}
