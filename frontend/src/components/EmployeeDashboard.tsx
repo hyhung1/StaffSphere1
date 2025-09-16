@@ -63,6 +63,7 @@ const EmployeeDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('compact');
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
+  const [visibleSalaries, setVisibleSalaries] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState({
     department: '',
     position: '',
@@ -162,6 +163,16 @@ const EmployeeDashboard: React.FC = () => {
       newExpanded.add(employeeId);
     }
     setExpandedEmployees(newExpanded);
+  };
+
+  const toggleSalaryVisibility = (employeeId: string) => {
+    const newVisible = new Set(visibleSalaries);
+    if (newVisible.has(employeeId)) {
+      newVisible.delete(employeeId);
+    } else {
+      newVisible.add(employeeId);
+    }
+    setVisibleSalaries(newVisible);
   };
 
   const handleViewChange = (event: React.MouseEvent<HTMLElement>, newView: 'table' | 'cards' | 'compact') => {
@@ -325,9 +336,22 @@ const EmployeeDashboard: React.FC = () => {
                       <Grid container spacing={2}>
                         <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>Salary:</strong></Typography>
-                          <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
-                            {formatCurrency(employee.salary)}
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="body2" fontWeight="bold" sx={{ mr: 1 }}>
+                              {visibleSalaries.has(employee.Id_number) 
+                                ? formatCurrency(employee.salary) 
+                                : '••••••••••'}
+                            </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => toggleSalaryVisibility(employee.Id_number)}
+                              sx={{ p: 0.25 }}
+                            >
+                              <Typography variant="body2" sx={{ fontSize: 12 }}>
+                                {visibleSalaries.has(employee.Id_number) ? '🙈' : '👁️'}
+                              </Typography>
+                            </IconButton>
+                          </Box>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
                           <Typography variant="body2"><strong>Contract Type:</strong></Typography>
