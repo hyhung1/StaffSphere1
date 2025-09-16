@@ -81,8 +81,6 @@ class EmployeeFilter(BaseModel):
     position: Optional[str] = None
     contract_type: Optional[str] = None
     gender: Optional[str] = None
-    min_salary: Optional[int] = None
-    max_salary: Optional[int] = None
     min_age: Optional[float] = None
     max_age: Optional[float] = None
     search: Optional[str] = None
@@ -119,8 +117,6 @@ def get_employees(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_salary: Optional[int] = None,
-    max_salary: Optional[int] = None,
     min_age: Optional[float] = None,
     max_age: Optional[float] = None,
     search: Optional[str] = None
@@ -146,12 +142,6 @@ def get_employees(
         if gender and emp.get("gender", "").lower() != gender.lower():
             continue
             
-        # Salary range filter
-        emp_salary = emp.get("salary", 0)
-        if min_salary is not None and emp_salary < min_salary:
-            continue
-        if max_salary is not None and emp_salary > max_salary:
-            continue
             
         # Age range filter
         emp_age = emp.get("age", 0)
@@ -340,15 +330,13 @@ def export_csv(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_salary: Optional[int] = None,
-    max_salary: Optional[int] = None,
     min_age: Optional[float] = None,
     max_age: Optional[float] = None,
     search: Optional[str] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             min_salary, max_salary, min_age, max_age, search)
+                             min_age, max_age, search)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
@@ -372,15 +360,13 @@ def export_excel(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_salary: Optional[int] = None,
-    max_salary: Optional[int] = None,
     min_age: Optional[float] = None,
     max_age: Optional[float] = None,
     search: Optional[str] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             min_salary, max_salary, min_age, max_age, search)
+                             min_age, max_age, search)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")

@@ -81,8 +81,6 @@ const EmployeeDashboard: React.FC = () => {
     position: '',
     contract_type: '',
     gender: '',
-    min_salary: '',
-    max_salary: '',
     min_age: '',
     max_age: '',
   });
@@ -102,8 +100,6 @@ const EmployeeDashboard: React.FC = () => {
       if (filters.position) params.append('position', filters.position);
       if (filters.contract_type) params.append('contract_type', filters.contract_type);
       if (filters.gender) params.append('gender', filters.gender);
-      if (filters.min_salary) params.append('min_salary', filters.min_salary);
-      if (filters.max_salary) params.append('max_salary', filters.max_salary);
       if (filters.min_age) params.append('min_age', filters.min_age);
       if (filters.max_age) params.append('max_age', filters.max_age);
 
@@ -128,8 +124,6 @@ const EmployeeDashboard: React.FC = () => {
       position: '',
       contract_type: '',
       gender: '',
-      min_salary: '',
-      max_salary: '',
       min_age: '',
       max_age: '',
     });
@@ -761,24 +755,6 @@ const EmployeeDashboard: React.FC = () => {
         </Grid>
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={3}>
-            <TextField
-              fullWidth
-              label="Min Salary"
-              type="number"
-              value={filters.min_salary}
-              onChange={(e) => setFilters({ ...filters, min_salary: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <TextField
-              fullWidth
-              label="Max Salary"
-              type="number"
-              value={filters.max_salary}
-              onChange={(e) => setFilters({ ...filters, max_salary: e.target.value })}
-            />
-          </Grid>
           <Grid item xs={12} md={2}>
             <TextField
               fullWidth
