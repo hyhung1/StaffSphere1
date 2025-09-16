@@ -691,10 +691,10 @@ const EmployeeDashboard: React.FC = () => {
         {viewMode !== 'cards' && (
           <>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={2.5}>
+          <Grid item xs={12} md={3.5}>
             <TextField
               fullWidth
-              label="Search employees"
+              label="Search employee name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Employee name..."
