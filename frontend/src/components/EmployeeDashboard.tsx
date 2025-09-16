@@ -378,58 +378,108 @@ const EmployeeDashboard: React.FC = () => {
                             sx={{ mb: 1 }}
                           />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
-                          <Typography variant="body2"><strong>Contract End Date:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_end_date || '-'}</Typography>
-                          <Typography variant="body2"><strong>Join Date:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('en-GB') : '-'}</Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('vi-VN')}</Typography>
+                          {employee.contract_end_date && (
+                            <>
+                              <Typography variant="body2"><strong>Contract End Date:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_end_date}</Typography>
+                            </>
+                          )}
+                          {employee.join_date && (
+                            <>
+                              <Typography variant="body2"><strong>Join Date:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.join_date).toLocaleDateString('vi-VN')}</Typography>
+                            </>
+                          )}
                         </Grid>
                         <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
-                          <Typography variant="body2"><strong>Dependent Count:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.dependent_count || '-'}</Typography>
+                          {employee.dependent_count && (
+                            <>
+                              <Typography variant="body2"><strong>Dependent Count:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.dependent_count}</Typography>
+                            </>
+                          )}
                           <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.social_insurance_number}</Typography>
-                          <Typography variant="body2"><strong>ID Issue Date:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('en-GB') : '-'}</Typography>
+                          {employee.Issue_date && (
+                            <>
+                              <Typography variant="body2"><strong>ID Issue Date:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.Issue_date).toLocaleDateString('vi-VN')}</Typography>
+                            </>
+                          )}
                         </Grid>
                         <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
-                          <Typography variant="body2"><strong>Allowance:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.allowance || '-'}</Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('vi-VN')}</Typography>
+                          {employee.allowance && (
+                            <>
+                              <Typography variant="body2"><strong>Allowance:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.allowance}</Typography>
+                            </>
+                          )}
                           <Typography variant="body2"><strong>Bank Account:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_account}</Typography>
-                          <Typography variant="body2"><strong>Bank Name:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_name || '-'}</Typography>
+                          {employee.bank_name && (
+                            <>
+                              <Typography variant="body2"><strong>Bank Name:</strong></Typography>
+                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_name}</Typography>
+                            </>
+                          )}
                         </Grid>
-                        <Grid item xs={12}>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                            <Box sx={{ flex: '1 1 200px' }}>
-                              <Typography variant="body2"><strong>Emergency Contact:</strong></Typography>
-                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.emergency_contact || '-'}</Typography>
+                        {(employee.emergency_contact || employee.pvi_care || employee.medical_insurance_hospital) && (
+                          <Grid item xs={12}>
+                            <Typography variant="subtitle2" sx={{ mb: 1, mt: 1, fontWeight: 600, color: 'text.secondary' }}>
+                              Contact & Insurance
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                              {employee.emergency_contact && (
+                                <Box sx={{ flex: '1 1 200px' }}>
+                                  <Typography variant="body2"><strong>Emergency Contact:</strong></Typography>
+                                  <Typography variant="body2" sx={{ mb: 1 }}>{employee.emergency_contact}</Typography>
+                                </Box>
+                              )}
+                              {employee.pvi_care && (
+                                <Box sx={{ flex: '1 1 100px' }}>
+                                  <Typography variant="body2"><strong>PVI Care:</strong></Typography>
+                                  <Chip label={employee.pvi_care === 'x' ? 'Yes' : employee.pvi_care} size="small" color="info" />
+                                </Box>
+                              )}
+                              {employee.medical_insurance_hospital && (
+                                <Box sx={{ flex: '1 1 300px' }}>
+                                  <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
+                                  <Typography variant="body2" sx={{ mb: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={employee.medical_insurance_hospital}>
+                                    {employee.medical_insurance_hospital}
+                                  </Typography>
+                                </Box>
+                              )}
                             </Box>
-                            <Box sx={{ flex: '1 1 100px' }}>
-                              <Typography variant="body2"><strong>PVI Care:</strong></Typography>
-                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
+                          </Grid>
+                        )}
+                        {(employee.training_courses || employee.training_skills) && (
+                          <Grid item xs={12}>
+                            <Typography variant="subtitle2" sx={{ mb: 1, mt: 1, fontWeight: 600, color: 'text.secondary' }}>
+                              Training & Development
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                              {employee.training_courses && (
+                                <Box sx={{ flex: '1 1 200px' }}>
+                                  <Typography variant="body2"><strong>Training Courses:</strong></Typography>
+                                  <Typography variant="body2" sx={{ mb: 1 }}>{employee.training_courses}</Typography>
+                                </Box>
+                              )}
+                              {employee.training_skills && (
+                                <Box sx={{ flex: '1 1 300px' }}>
+                                  <Typography variant="body2"><strong>Training Skills:</strong></Typography>
+                                  <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={employee.training_skills}>
+                                    {employee.training_skills}
+                                  </Typography>
+                                </Box>
+                              )}
                             </Box>
-                            <Box sx={{ flex: '1 1 300px' }}>
-                              <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
-                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.medical_insurance_hospital}</Typography>
-                            </Box>
-                          </Box>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 1 }}>
-                            <Box sx={{ flex: '1 1 200px' }}>
-                              <Typography variant="body2"><strong>Training Courses:</strong></Typography>
-                              <Typography variant="body2" sx={{ mb: 1 }}>{employee.training_courses || '-'}</Typography>
-                            </Box>
-                            <Box sx={{ flex: '1 1 300px' }}>
-                              <Typography variant="body2"><strong>Training Skills:</strong></Typography>
-                              <Typography variant="body2">{employee.training_skills}</Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
+                          </Grid>
+                        )}
                       </Grid>
                     </Box>
                   </Collapse>
