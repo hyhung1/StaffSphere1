@@ -767,7 +767,7 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} md={1}>
+          <Grid item xs={6} md={1.5}>
             <FormControl fullWidth size="small">
               <Select
                 value={filters.gender}
