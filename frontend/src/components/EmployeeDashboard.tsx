@@ -636,7 +636,7 @@ const EmployeeDashboard: React.FC = () => {
       {/* Actions */}
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
-          Employee List ({employees.length} records) - Testing Auto-refresh Now! 🔄
+          Employee List ({employees.length} records)
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
