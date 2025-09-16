@@ -141,19 +141,38 @@ const EmployeeDashboard: React.FC = () => {
         if (value) params.append(key, value);
       });
 
-      const response = await axios.get(`${API_BASE_URL}/export/csv?${params.toString()}`, {
+      const response = await axios.get(`${API_BASE_URL}/export/excel?${params.toString()}`, {
         responseType: 'blob',
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'employees.csv');
+      link.setAttribute('download', 'employees.xlsx');
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (error) {
       console.error('Error exporting data:', error);
+    }
+  };
+
+  const importData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      await axios.post(`${API_BASE_URL}/import/excel`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      fetchEmployees(); // Refresh the data after import
+    } catch (error) {
+      console.error('Error importing data:', error);
     }
   };
 
@@ -636,7 +655,31 @@ const EmployeeDashboard: React.FC = () => {
               }
             }}
           >
-            📥 Export CSV
+            📥 Export Excel
+          </Button>
+          <Button
+            variant="contained"
+            component="label"
+            color="info"
+            sx={{ 
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 3,
+              py: 1.2,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            📤 Import Excel
+            <input
+              type="file"
+              hidden
+              accept=".xlsx,.xls"
+              onChange={importData}
+            />
           </Button>
           <Button
             variant="contained"

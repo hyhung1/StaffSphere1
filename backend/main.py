@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -365,6 +365,70 @@ def export_csv(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=employees.csv"}
     )
+
+@app.get("/export/excel")
+def export_excel(
+    department: Optional[str] = None,
+    position: Optional[str] = None,
+    contract_type: Optional[str] = None,
+    gender: Optional[str] = None,
+    min_salary: Optional[int] = None,
+    max_salary: Optional[int] = None,
+    min_age: Optional[float] = None,
+    max_age: Optional[float] = None,
+    search: Optional[str] = None
+):
+    # Get filtered employees
+    employees = get_employees(department, position, contract_type, gender, 
+                             min_salary, max_salary, min_age, max_age, search)
+    
+    if not employees:
+        raise HTTPException(status_code=404, detail="No employees found with the given filters")
+    
+    # Convert to DataFrame and Excel
+    df = pd.DataFrame(employees)
+    excel_buffer = io.BytesIO()
+    
+    # Write to Excel with openpyxl engine
+    df.to_excel(excel_buffer, sheet_name='Employees', index=False, engine='openpyxl')
+    
+    excel_buffer.seek(0)
+    
+    # Return as streaming response
+    return StreamingResponse(
+        excel_buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=employees.xlsx"}
+    )
+
+@app.post("/import/excel")
+async def import_excel(file: UploadFile = File(...)):
+    if not file.filename or not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="Only Excel files are allowed")
+    
+    try:
+        # Read the Excel file
+        contents = await file.read()
+        df = pd.read_excel(io.BytesIO(contents))
+        
+        # Convert DataFrame to list of dictionaries
+        new_employees = df.to_dict('records')
+        
+        # Load existing employees
+        with open('nhan_vien.json', 'r', encoding='utf-8') as f:
+            employees = json.load(f)
+        
+        # Add new employees (you may want to add validation or update logic here)
+        employees.extend(new_employees)
+        
+        # Save back to file
+        with open('nhan_vien.json', 'w', encoding='utf-8') as f:
+            json.dump(employees, f, ensure_ascii=False, indent=2)
+        
+        return {"message": f"Successfully imported {len(new_employees)} employees"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
 
 # Mount the React build as static files (this must be last to not override API routes)
 app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="static")
