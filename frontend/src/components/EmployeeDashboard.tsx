@@ -404,7 +404,7 @@ const EmployeeDashboard: React.FC = () => {
             sx: { 
               maxHeight: '85vh',
               width: 'auto',
-              maxWidth: '92vw'
+              maxWidth: '88vw'
             }
           }}
         >
@@ -415,7 +415,7 @@ const EmployeeDashboard: React.FC = () => {
             <Grid container spacing={1}>
               {selectedEmployees.map((employee: Employee) => (
                 <Grid item xs={12} sm={6} md={3} lg={3} key={employee.Id_number}>
-                  <Card sx={{ height: 'auto', minHeight: '200px', mx: 0.5 }}>
+                  <Card sx={{ height: 'auto', minHeight: '200px' }}>
                     <CardContent sx={{ p: 2 }}>
                       {/* Row 1: Name - Department */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
