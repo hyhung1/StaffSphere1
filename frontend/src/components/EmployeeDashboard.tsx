@@ -82,11 +82,19 @@ const EmployeeDashboard: React.FC = () => {
     gender: '',
     birth_year: '',
   });
+  
+  const [filterOptions, setFilterOptions] = useState({
+    positions: [],
+    departments: [],
+    genders: [],
+    contract_types: []
+  });
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
   useEffect(() => {
     fetchEmployees();
+    fetchFilterOptions();
   }, []);
 
   // Realtime filtering - trigger when search term or filters change
@@ -116,6 +124,15 @@ const EmployeeDashboard: React.FC = () => {
       console.error('Error fetching employees:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchFilterOptions = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/filter-options`);
+      setFilterOptions(response.data);
+    } catch (error) {
+      console.error('Error fetching filter options:', error);
     }
   };
 
@@ -722,14 +739,11 @@ const EmployeeDashboard: React.FC = () => {
                 }}
               >
                 <MenuItem value="">All Positions</MenuItem>
-                <MenuItem value="Manager">Manager</MenuItem>
-                <MenuItem value="Developer">Developer</MenuItem>
-                <MenuItem value="Designer">Designer</MenuItem>
-                <MenuItem value="Analyst">Analyst</MenuItem>
-                <MenuItem value="Coordinator">Coordinator</MenuItem>
-                <MenuItem value="Specialist">Specialist</MenuItem>
-                <MenuItem value="Assistant">Assistant</MenuItem>
-                <MenuItem value="Executive">Executive</MenuItem>
+                {filterOptions.positions.map((position) => (
+                  <MenuItem key={position} value={position}>
+                    {position}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -747,11 +761,11 @@ const EmployeeDashboard: React.FC = () => {
                 }}
               >
                 <MenuItem value="">All Departments</MenuItem>
-                <MenuItem value="Sales">Sales</MenuItem>
-                <MenuItem value="Engineering">Engineering</MenuItem>
-                <MenuItem value="HR">HR</MenuItem>
-                <MenuItem value="Marketing">Marketing</MenuItem>
-                <MenuItem value="Finance">Finance</MenuItem>
+                {filterOptions.departments.map((department) => (
+                  <MenuItem key={department} value={department}>
+                    {department}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -769,8 +783,11 @@ const EmployeeDashboard: React.FC = () => {
                 }}
               >
                 <MenuItem value="">All Genders</MenuItem>
-                <MenuItem value="Nam">Nam</MenuItem>
-                <MenuItem value="Nữ">Nữ</MenuItem>
+                {filterOptions.genders.map((gender) => (
+                  <MenuItem key={gender} value={gender}>
+                    {gender}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>

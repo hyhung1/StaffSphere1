@@ -268,6 +268,47 @@ def delete_employee(employee_id: str):
     
     raise HTTPException(status_code=404, detail="Employee not found")
 
+@app.get("/filter-options")
+def get_filter_options():
+    """Get unique values for dropdown filter options"""
+    employees = load_employees()
+    
+    if not employees:
+        return {
+            "positions": [],
+            "departments": [],
+            "genders": [],
+            "contract_types": []
+        }
+    
+    # Extract unique values for each field
+    positions = set()
+    departments = set()
+    genders = set()
+    contract_types = set()
+    
+    for emp in employees:
+        # Add non-empty values to sets
+        if emp.get("position") and emp["position"].strip():
+            positions.add(emp["position"].strip())
+        
+        if emp.get("department") and emp["department"].strip():
+            departments.add(emp["department"].strip())
+        
+        if emp.get("gender") and emp["gender"].strip():
+            genders.add(emp["gender"].strip())
+        
+        if emp.get("contract_type") and emp["contract_type"].strip():
+            contract_types.add(emp["contract_type"].strip())
+    
+    # Convert to sorted lists
+    return {
+        "positions": sorted(list(positions)),
+        "departments": sorted(list(departments)),
+        "genders": sorted(list(genders)),
+        "contract_types": sorted(list(contract_types))
+    }
+
 @app.get("/statistics")
 def get_statistics():
     employees = load_employees()
