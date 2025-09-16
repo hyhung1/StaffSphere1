@@ -422,6 +422,10 @@ const EmployeeDashboard: React.FC = () => {
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Emergency Contact:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.emergency_contact || '-'}</Typography>
                           </Box>
+                          <Box sx={{ mb: 0.75 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>PVI Care:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.pvi_care || '-'}</Typography>
+                          </Box>
                         </Box>
                         
                         <Box>
@@ -433,6 +437,10 @@ const EmployeeDashboard: React.FC = () => {
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Dependent Count:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.dependent_count || '-'}</Typography>
                           </Box>
+                          <Box sx={{ mb: 0.75 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Medical Insurance:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.medical_insurance_hospital || '-'}</Typography>
+                          </Box>
                         </Box>
                         
                         <Box>
@@ -443,6 +451,10 @@ const EmployeeDashboard: React.FC = () => {
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Allowance:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.allowance || '-'}</Typography>
+                          </Box>
+                          <Box sx={{ mb: 0.75 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Training Skills:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.training_skills || '-'}</Typography>
                           </Box>
                         </Box>
                       </Box>
