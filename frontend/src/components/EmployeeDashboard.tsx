@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -336,7 +337,7 @@ const EmployeeDashboard: React.FC = () => {
                       height: 30
                     }}
                   >
-                    {expandedEmployees.has(employee.Id_number) ? '▲' : '▼'}
+                    {expandedEmployees.has(employee.Id_number) ? <ExpandLess /> : <ExpandMore />}
                   </Button>
                 </TableCell>
               </TableRow>
