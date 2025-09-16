@@ -436,7 +436,7 @@ const EmployeeDashboard: React.FC = () => {
                       {/* Row 3: Age - Contact */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          Age: {Math.ceil(employee.age)} ({employee.dob})
+                          Age: {Math.ceil(employee.age)} ({employee.tax_code})
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
                           {employee.phone}
@@ -453,10 +453,10 @@ const EmployeeDashboard: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Row 5: Date of Birth - Education */}
+                      {/* Row 5: Tax Code - Education */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          DOB: {employee.dob}
+                          Tax Code: {employee.tax_code}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
                           {employee.education_level}
