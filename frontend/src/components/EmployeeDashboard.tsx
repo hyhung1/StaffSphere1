@@ -427,33 +427,33 @@ const EmployeeDashboard: React.FC = () => {
                         </Typography>
                       </Box>
 
-                      {/* Row 2: ID - Gender */}
+                      {/* Row 2: ID - Position */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
                           ID: {employee.Id_number}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          {employee.position}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 3: DOB - Gender */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          DOB: {formatDate(employee.dob, true)?.replace(/\//g, '-')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
                           {employee.gender}
                         </Typography>
                       </Box>
 
-                      {/* Row 3: Age - Contact */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          DOB: {formatDate(employee.dob, true)?.replace(/\//g, '-')}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          {employee.phone}
-                        </Typography>
-                      </Box>
-
-                      {/* Row 4: Tax Code - Position */}
+                      {/* Row 4: Tax Code - Contact */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
                           Tax Code: {employee.tax_code}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          {employee.position}
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          {employee.phone}
                         </Typography>
                       </Box>
 
