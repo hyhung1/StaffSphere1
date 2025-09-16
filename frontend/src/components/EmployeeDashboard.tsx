@@ -256,17 +256,15 @@ const EmployeeDashboard: React.FC = () => {
       'Engineering': [],
       'Back office': [],
       'Contract': [],
-      'Drafter': []
+      'Commissioning': []
     };
 
     employees.forEach(emp => {
       const mappedDept = departmentMapping[emp.department] || emp.department;
       if (groups[mappedDept]) {
         groups[mappedDept].push(emp);
-      } else {
-        // If department doesn't match any of the 5, add to Back office
-        groups['Back office'].push(emp);
       }
+      // Note: Removed fallback to Back office to fix filtering issue
     });
 
     return groups;
@@ -378,17 +376,17 @@ const EmployeeDashboard: React.FC = () => {
             <g 
               style={{ cursor: 'pointer' }} 
               onClick={() => {
-                setSelectedDepartment('Drafter');
-                setSelectedEmployees(departmentGroups['Drafter'] || []);
+                setSelectedDepartment('Commissioning');
+                setSelectedEmployees(departmentGroups['Commissioning'] || []);
                 setDepartmentDialogOpen(true);
               }}
             >
               <circle cx="200" cy="200" r="35" fill="#00bcd4" />
               <text x="200" y="195" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
-                Drafter
+                Commissioning
               </text>
               <text x="200" y="210" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Drafter']?.length || 0})
+                ({departmentGroups['Commissioning']?.length || 0})
               </text>
             </g>
           </svg>
