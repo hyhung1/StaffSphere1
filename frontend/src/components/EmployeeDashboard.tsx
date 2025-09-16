@@ -773,7 +773,11 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
                     <Typography variant="body2">
-                      {employee.contract_end_date || '-'}
+                      {employee.contract_end_date === 'Không thời hạn' 
+                        ? 'Không thời hạn' 
+                        : employee.contract_end_date 
+                          ? new Date(employee.contract_end_date).toLocaleDateString('en-GB')
+                          : '-'}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
