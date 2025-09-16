@@ -36,22 +36,30 @@ interface Employee {
   age: number;
   gender: string;
   Id_number: string;
+  Issue_date?: string;
   address: string;
   current_address: string;
   phone: string;
+  emergency_contact?: string;
   education_level: string;
   department: string;
+  join_date?: string;
   position: string;
   contract_id: string;
   contract_type: string;
   contract_sign_date: string;
+  contract_end_date?: string;
   salary: number;
+  allowance?: string;
   last_salary_adjustment: string;
   tax_code: number;
+  dependent_count?: string;
   social_insurance_number: number;
   medical_insurance_hospital: string;
   bank_account: number;
+  bank_name?: string;
   pvi_care: string;
+  training_courses?: string;
   training_skills: string;
 }
 
@@ -371,22 +379,40 @@ const EmployeeDashboard: React.FC = () => {
                           />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
+                          <Typography variant="body2"><strong>Contract End Date:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_end_date || '-'}</Typography>
+                          <Typography variant="body2"><strong>Join Date:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('en-GB') : '-'}</Typography>
                         </Grid>
                         <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
+                          <Typography variant="body2"><strong>Dependent Count:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.dependent_count || '-'}</Typography>
                           <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.social_insurance_number}</Typography>
-                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
-                          <Typography variant="body2">{employee.bank_account}</Typography>
+                          <Typography variant="body2"><strong>ID Issue Date:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('en-GB') : '-'}</Typography>
                         </Grid>
                         <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
+                          <Typography variant="body2"><strong>Allowance:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.allowance || '-'}</Typography>
+                          <Typography variant="body2"><strong>Bank Account:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_account}</Typography>
+                          <Typography variant="body2"><strong>Bank Name:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.bank_name || '-'}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                          <Typography variant="body2"><strong>Emergency Contact:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.emergency_contact || '-'}</Typography>
                           <Typography variant="body2"><strong>PVI Care:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.medical_insurance_hospital}</Typography>
+                          <Typography variant="body2"><strong>Training Courses:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.training_courses || '-'}</Typography>
                           <Typography variant="body2"><strong>Training Skills:</strong></Typography>
                           <Typography variant="body2">{employee.training_skills}</Typography>
                         </Grid>
@@ -571,7 +597,7 @@ const EmployeeDashboard: React.FC = () => {
       {viewMode === 'compact' && renderCompactView()}
       {viewMode === 'table' && (
         <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 2400, tableLayout: 'auto' }}>
+          <Table sx={{ minWidth: 3800, tableLayout: 'auto' }}>
             <TableHead>
               <TableRow>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Full Name</Typography></TableCell>
@@ -579,22 +605,30 @@ const EmployeeDashboard: React.FC = () => {
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Age</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Issue Date</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Phone</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Emergency Contact</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Education Level</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Join Date</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract ID</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Type</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Sign Date</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract End Date</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Salary</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Allowance</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Last Salary Adjustment</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Dependent Count</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Social Insurance Number</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Medical Insurance Hospital</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Bank Account</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Bank Name</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">PVI Care</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Training Courses</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Training Skills</Typography></TableCell>
               </TableRow>
             </TableHead>
@@ -626,6 +660,11 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.Id_number}
                     </Typography>
                   </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('en-GB') : '-'}
+                    </Typography>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 250 }}>
                     <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                       {employee.address}
@@ -641,6 +680,11 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.phone}
                     </Typography>
                   </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.emergency_contact || '-'}
+                    </Typography>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
                     <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                       {employee.education_level}
@@ -649,6 +693,11 @@ const EmployeeDashboard: React.FC = () => {
                   <TableCell sx={{ minWidth: 150 }}>
                     <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                       {employee.department}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {employee.join_date ? new Date(employee.join_date).toLocaleDateString('en-GB') : '-'}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
@@ -671,9 +720,19 @@ const EmployeeDashboard: React.FC = () => {
                       {new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}
                     </Typography>
                   </TableCell>
+                  <TableCell sx={{ minWidth: 140 }}>
+                    <Typography variant="body2">
+                      {employee.contract_end_date || '-'}
+                    </Typography>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
                       {formatCurrency(employee.salary)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.allowance || '-'}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
@@ -684,6 +743,11 @@ const EmployeeDashboard: React.FC = () => {
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
                       {employee.tax_code}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>
+                    <Typography variant="body2">
+                      {employee.dependent_count || '-'}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 150 }}>
@@ -701,9 +765,19 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.bank_account}
                     </Typography>
                   </TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.bank_name || '-'}
+                    </Typography>
+                  </TableCell>
                   <TableCell sx={{ minWidth: 100 }}>
                     <Typography variant="body2">
                       {employee.pvi_care}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 200 }}>
+                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
+                      {employee.training_courses || '-'}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 200 }}>
