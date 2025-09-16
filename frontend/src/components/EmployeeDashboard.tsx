@@ -340,7 +340,7 @@ const EmployeeDashboard: React.FC = () => {
                         Complete Details
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Salary:</strong></Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                             <Typography variant="body2" fontWeight="bold" sx={{ mr: 1 }}>
@@ -360,6 +360,8 @@ const EmployeeDashboard: React.FC = () => {
                           </Box>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Contract Type:</strong></Typography>
                           <Chip 
                             label={employee.contract_type} 
@@ -370,7 +372,7 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
                           <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
@@ -378,7 +380,7 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2"><strong>Bank Account:</strong></Typography>
                           <Typography variant="body2">{employee.bank_account}</Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
+                        <Grid item xs={12} md={3}>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
                           <Typography variant="body2"><strong>PVI Care:</strong></Typography>
