@@ -258,6 +258,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Education</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
@@ -311,6 +312,11 @@ const EmployeeDashboard: React.FC = () => {
                     {employee.address}
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word', maxWidth: 150 }}>
+                    {employee.education_level}
+                  </Typography>
+                </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
                     size="small" 
@@ -327,7 +333,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={11}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
@@ -365,8 +371,6 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
-                          <Typography variant="body2"><strong>Education:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.tax_code}</Typography>
                           <Typography variant="body2"><strong>Social Insurance Number:</strong></Typography>
