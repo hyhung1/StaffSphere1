@@ -9,12 +9,13 @@ A comprehensive web application for HR departments to monitor and manage employe
 
 ## Features Implemented
 - ✅ Employee dashboard with comprehensive data display
-- ✅ Advanced filtering (department, position, contract type, gender, salary range, age range)
-- ✅ Smart search functionality (name, phone, ID, department)
+- ✅ Advanced filtering (department, position, contract type, gender, birth year)
+- ✅ Smart search functionality (employee name only)
 - ✅ CSV data export with filtering
 - ✅ Professional Material-UI interface
 - ✅ Complete employee information display with text wrapping
 - ✅ Responsive design with horizontal scrolling for large tables
+- ✅ Clean placeholder system for filter inputs
 
 ## Architecture
 - **Backend**: FastAPI (Python) serving both API endpoints and static React build
@@ -48,6 +49,10 @@ A comprehensive web application for HR departments to monitor and manage employe
 - Professional HR-focused UI design
 
 ## Recent Updates
-- **Latest**: Implemented text wrapping in employee table instead of text truncation
-- All employee information now displays completely without cutting off long text
-- Enhanced readability for Vietnamese addresses, education details, and training skills
+- **Latest**: Updated filter system with improved UI/UX
+- Removed salary range filters (min/max salary) as requested
+- Added Position filter dropdown for job role filtering
+- Replaced age range filtering with birth year filtering (extracts year from DOB)
+- Improved placeholder system - labels disappear when values are selected
+- Search functionality now filters employee names only (more focused search)
+- Optimized filter layout for single-line compact display

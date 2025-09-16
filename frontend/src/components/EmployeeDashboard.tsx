@@ -9,7 +9,6 @@ import {
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
   Chip,
   Card,
   CardContent,
@@ -81,8 +80,7 @@ const EmployeeDashboard: React.FC = () => {
     position: '',
     contract_type: '',
     gender: '',
-    min_age: '',
-    max_age: '',
+    birth_year: '',
   });
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || '';
@@ -100,8 +98,7 @@ const EmployeeDashboard: React.FC = () => {
       if (filters.position) params.append('position', filters.position);
       if (filters.contract_type) params.append('contract_type', filters.contract_type);
       if (filters.gender) params.append('gender', filters.gender);
-      if (filters.min_age) params.append('min_age', filters.min_age);
-      if (filters.max_age) params.append('max_age', filters.max_age);
+      if (filters.birth_year) params.append('birth_year', filters.birth_year);
 
       const response = await axios.get(`${API_BASE_URL}/employees?${params.toString()}`);
       setEmployees(response.data);
@@ -124,8 +121,7 @@ const EmployeeDashboard: React.FC = () => {
       position: '',
       contract_type: '',
       gender: '',
-      min_age: '',
-      max_age: '',
+      birth_year: '',
     });
     setPage(0);
   };
@@ -793,26 +789,12 @@ const EmployeeDashboard: React.FC = () => {
           <Grid item xs={6} md={1.5}>
             <TextField
               fullWidth
-              label={filters.min_age ? "" : "Min Age"}
-              placeholder="Min Age"
+              label={filters.birth_year ? "" : "Year"}
+              placeholder="Birth Year"
               type="number"
               size="small"
-              value={filters.min_age}
-              onChange={(e) => setFilters({ ...filters, min_age: e.target.value })}
-              InputLabelProps={{
-                shrink: false,
-              }}
-            />
-          </Grid>
-          <Grid item xs={6} md={1.5}>
-            <TextField
-              fullWidth
-              label={filters.max_age ? "" : "Max Age"}
-              placeholder="Max Age"
-              type="number"
-              size="small"
-              value={filters.max_age}
-              onChange={(e) => setFilters({ ...filters, max_age: e.target.value })}
+              value={filters.birth_year}
+              onChange={(e) => setFilters({ ...filters, birth_year: e.target.value })}
               InputLabelProps={{
                 shrink: false,
               }}

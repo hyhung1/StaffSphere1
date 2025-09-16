@@ -81,8 +81,7 @@ class EmployeeFilter(BaseModel):
     position: Optional[str] = None
     contract_type: Optional[str] = None
     gender: Optional[str] = None
-    min_age: Optional[float] = None
-    max_age: Optional[float] = None
+    birth_year: Optional[int] = None
     search: Optional[str] = None
 
 # Load employee data
@@ -117,8 +116,7 @@ def get_employees(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_age: Optional[float] = None,
-    max_age: Optional[float] = None,
+    birth_year: Optional[int] = None,
     search: Optional[str] = None
 ):
     employees = load_employees()
@@ -143,12 +141,18 @@ def get_employees(
             continue
             
             
-        # Age range filter
-        emp_age = emp.get("age", 0)
-        if min_age is not None and emp_age < min_age:
-            continue
-        if max_age is not None and emp_age > max_age:
-            continue
+        # Birth year filter
+        if birth_year is not None:
+            emp_dob = emp.get("dob", "")
+            if emp_dob:
+                try:
+                    emp_birth_year = int(emp_dob.split('-')[0])
+                    if emp_birth_year != birth_year:
+                        continue
+                except (ValueError, IndexError):
+                    continue
+            else:
+                continue
             
         # Search filter (searches in employee name only)
         if search:
@@ -325,13 +329,12 @@ def export_csv(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_age: Optional[float] = None,
-    max_age: Optional[float] = None,
+    birth_year: Optional[int] = None,
     search: Optional[str] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             min_age, max_age, search)
+                             birth_year, search)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
@@ -355,13 +358,12 @@ def export_excel(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    min_age: Optional[float] = None,
-    max_age: Optional[float] = None,
+    birth_year: Optional[int] = None,
     search: Optional[str] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             min_age, max_age, search)
+                             birth_year, search)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
