@@ -411,7 +411,7 @@ const EmployeeDashboard: React.FC = () => {
             <Grid container spacing={2}>
               {selectedEmployees.map((employee: Employee) => (
                 <Grid item xs={12} sm={3} key={employee.Id_number} sx={{ flexBasis: '25%', maxWidth: '25%' }}>
-                  <Card sx={{ height: 'auto', minHeight: '140px' }}>
+                  <Card sx={{ height: 'auto', minHeight: '200px' }}>
                     <CardContent sx={{ p: 2 }}>
                       {/* Row 1: Name - Department */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -444,12 +444,32 @@ const EmployeeDashboard: React.FC = () => {
                       </Box>
 
                       {/* Row 4: Position - Contract Type */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
                           {employee.position}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
                           {employee.contract_type}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 5: Date of Birth - Education */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          DOB: {employee.dob}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                          {employee.education_level}
+                        </Typography>
+                      </Box>
+
+                      {/* Row 6: Join Date - Address */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          Joined: {employee.join_date || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', maxWidth: '60%', textAlign: 'right' }}>
+                          {employee.current_address || employee.address || 'No address'}
                         </Typography>
                       </Box>
                     </CardContent>
