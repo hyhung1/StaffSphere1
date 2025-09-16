@@ -253,30 +253,14 @@ const EmployeeDashboard: React.FC = () => {
 
   // Group employees by department
   const groupEmployeesByDepartment = () => {
-    // Map department names to the required 5 departments
-    const departmentMapping: Record<string, string> = {
-      'Sales': 'Sales',
-      'Engineering': 'Engineering',
-      'HR': 'Back office',
-      'Marketing': 'Back office',
-      'Finance': 'Back office',
-      // Add default mappings for any other departments
-    };
+    const groups: Record<string, Employee[]> = {};
 
-    const groups: Record<string, Employee[]> = {
-      'Sales': [],
-      'Engineering': [],
-      'Back office': [],
-      'Contract': []
-    };
-
+    // Initialize groups for all departments
     employees.forEach(emp => {
-      const mappedDept = departmentMapping[emp.department] || emp.department;
-      // Map Commissioning to Engineering for consolidated display
-      const finalDept = mappedDept === 'Commissioning' ? 'Engineering' : mappedDept;
-      if (groups[finalDept]) {
-        groups[finalDept].push(emp);
+      if (!groups[emp.department]) {
+        groups[emp.department] = [];
       }
+      groups[emp.department].push(emp);
     });
 
     return groups;
@@ -297,12 +281,13 @@ const EmployeeDashboard: React.FC = () => {
           alignItems: 'center'
         }}>
           <svg width="800" height="600" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
-            {/* Draw lines from center to departments */}
+            {/* Draw lines from center to departments - 6 departments in circle */}
             <line x1="400" y1="300" x2="400" y2="100" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="600" y2="200" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="600" y2="400" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="200" y2="400" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="200" y2="200" stroke="#cccccc" strokeWidth="2" />
+            <line x1="400" y1="300" x2="550" y2="150" stroke="#cccccc" strokeWidth="2" />
+            <line x1="400" y1="300" x2="550" y2="450" stroke="#cccccc" strokeWidth="2" />
+            <line x1="400" y1="300" x2="400" y2="500" stroke="#cccccc" strokeWidth="2" />
+            <line x1="400" y1="300" x2="250" y2="450" stroke="#cccccc" strokeWidth="2" />
+            <line x1="400" y1="300" x2="250" y2="150" stroke="#cccccc" strokeWidth="2" />
             
             {/* Center VIVN node */}
             <g>
@@ -339,16 +324,34 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="600" cy="200" r="35" fill="#ff9800" />
-              <text x="600" y="195" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              <circle cx="550" cy="150" r="35" fill="#ff9800" />
+              <text x="550" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Engineering
               </text>
-              <text x="600" y="210" textAnchor="middle" fill="white" fontSize="12">
+              <text x="550" y="160" textAnchor="middle" fill="white" fontSize="12">
                 ({departmentGroups['Engineering']?.length || 0})
               </text>
             </g>
 
-            {/* Back office - Bottom Right */}
+            {/* Commissioning - Right */}
+            <g 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => {
+                setSelectedDepartment('Commissioning');
+                setSelectedEmployees(departmentGroups['Commissioning'] || []);
+                setDepartmentDialogOpen(true);
+              }}
+            >
+              <circle cx="550" cy="450" r="35" fill="#2196f3" />
+              <text x="550" y="445" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">
+                Commissioning
+              </text>
+              <text x="550" y="460" textAnchor="middle" fill="white" fontSize="12">
+                ({departmentGroups['Commissioning']?.length || 0})
+              </text>
+            </g>
+
+            {/* Back office - Bottom */}
             <g 
               style={{ cursor: 'pointer' }} 
               onClick={() => {
@@ -357,11 +360,11 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="600" cy="400" r="35" fill="#9c27b0" />
-              <text x="600" y="395" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              <circle cx="400" cy="500" r="35" fill="#9c27b0" />
+              <text x="400" y="495" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Back office
               </text>
-              <text x="600" y="410" textAnchor="middle" fill="white" fontSize="12">
+              <text x="400" y="510" textAnchor="middle" fill="white" fontSize="12">
                 ({departmentGroups['Back office']?.length || 0})
               </text>
             </g>
@@ -375,12 +378,30 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="200" cy="400" r="35" fill="#f44336" />
-              <text x="200" y="395" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              <circle cx="250" cy="450" r="35" fill="#f44336" />
+              <text x="250" y="445" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Contract
               </text>
-              <text x="200" y="410" textAnchor="middle" fill="white" fontSize="12">
+              <text x="250" y="460" textAnchor="middle" fill="white" fontSize="12">
                 ({departmentGroups['Contract']?.length || 0})
+              </text>
+            </g>
+
+            {/* Drafter - Top Left */}
+            <g 
+              style={{ cursor: 'pointer' }} 
+              onClick={() => {
+                setSelectedDepartment('Drafter');
+                setSelectedEmployees(departmentGroups['Drafter'] || []);
+                setDepartmentDialogOpen(true);
+              }}
+            >
+              <circle cx="250" cy="150" r="35" fill="#607d8b" />
+              <text x="250" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+                Drafter
+              </text>
+              <text x="250" y="160" textAnchor="middle" fill="white" fontSize="12">
+                ({departmentGroups['Drafter']?.length || 0})
               </text>
             </g>
 
