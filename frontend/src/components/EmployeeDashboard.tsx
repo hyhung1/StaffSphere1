@@ -347,8 +347,8 @@ const EmployeeDashboard: React.FC = () => {
                               onClick={() => toggleSalaryVisibility(employee.Id_number)}
                               sx={{ p: 0.25 }}
                             >
-                              <Typography variant="body2" sx={{ fontSize: 12 }}>
-                                {visibleSalaries.has(employee.Id_number) ? '🙈' : '👁️'}
+                              <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 'bold' }}>
+                                {visibleSalaries.has(employee.Id_number) ? '👁⃠' : '👁'}
                               </Typography>
                             </IconButton>
                           </Box>
