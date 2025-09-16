@@ -245,6 +245,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
@@ -290,6 +291,11 @@ const EmployeeDashboard: React.FC = () => {
                     {employee.current_address}
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word', maxWidth: 200 }}>
+                    {employee.address}
+                  </Typography>
+                </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
                     size="small" 
@@ -306,7 +312,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
