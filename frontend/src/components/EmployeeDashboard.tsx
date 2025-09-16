@@ -350,9 +350,9 @@ const EmployeeDashboard: React.FC = () => {
                       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 2, fontSize: '0.875rem' }}>
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Salary:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Salary:</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <Typography variant="body2" fontWeight="bold" sx={{ fontSize: '0.875rem' }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                                 {visibleSalaries.has(employee.Id_number) 
                                   ? formatCurrency(employee.salary) 
                                   : '••••••••••'}
@@ -369,33 +369,33 @@ const EmployeeDashboard: React.FC = () => {
                             </Box>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>ID Issue Date:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>ID Issue Date:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('vi-VN') : '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Join Date:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Join Date:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('vi-VN') : '-'}</Typography>
                           </Box>
                         </Box>
                         
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Contract ID:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Contract ID:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.contract_id || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Tax Code:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Tax Code:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.tax_code || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Account:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Bank Account:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_account || '-'}</Typography>
                           </Box>
                         </Box>
                         
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Contract Type:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Contract Type:</Typography>
                             <Chip 
                               label={employee.contract_type} 
                               size="small" 
@@ -404,56 +404,56 @@ const EmployeeDashboard: React.FC = () => {
                             />
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Social Insurance Number:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Social Insurance Number:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.social_insurance_number || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Name:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Bank Name:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_name || '-'}</Typography>
                           </Box>
                         </Box>
                         
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Contract Sign Date:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Contract Sign Date:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{new Date(employee.contract_sign_date).toLocaleDateString('vi-VN')}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Emergency Contact:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Emergency Contact:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.emergency_contact || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>PVI Care:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>PVI Care:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.pvi_care || '-'}</Typography>
                           </Box>
                         </Box>
                         
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Contract End Date:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Contract End Date:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.contract_end_date || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Dependent Count:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Dependent Count:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.dependent_count || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Medical Insurance:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Medical Insurance:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.medical_insurance_hospital || '-'}</Typography>
                           </Box>
                         </Box>
                         
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Last Salary Adjustment:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Last Salary Adjustment:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('vi-VN')}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Allowance:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Allowance:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.allowance || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Training Skills:</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Training Skills:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.training_skills || '-'}</Typography>
                           </Box>
                         </Box>
