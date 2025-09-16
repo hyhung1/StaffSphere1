@@ -812,7 +812,7 @@ const EmployeeDashboard: React.FC = () => {
 
 
       {/* Actions */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
         <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
           Employee List ({employees.length} records)
         </Typography>
