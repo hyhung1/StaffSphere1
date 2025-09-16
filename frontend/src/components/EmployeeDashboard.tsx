@@ -471,7 +471,7 @@ const EmployeeDashboard: React.FC = () => {
                         <Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Last Salary Adjustment:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.last_salary_adjustment)}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem', wordWrap: 'break-word', whiteSpace: 'normal' }}>{formatDate(employee.last_salary_adjustment, true)}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}>Allowance:</Typography>
@@ -803,7 +803,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 140 }}>
                     <Typography variant="body2">
-                      {formatDate(employee.last_salary_adjustment)}
+                      {formatDate(employee.last_salary_adjustment, true)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
