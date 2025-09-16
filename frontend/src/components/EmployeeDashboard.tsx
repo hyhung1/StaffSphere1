@@ -124,6 +124,7 @@ const EmployeeDashboard: React.FC = () => {
       birth_year: '',
     });
     setPage(0);
+    fetchEmployees();
   };
 
   const exportData = async () => {
