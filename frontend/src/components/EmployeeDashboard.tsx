@@ -244,6 +244,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
@@ -287,6 +288,9 @@ const EmployeeDashboard: React.FC = () => {
                   <Typography variant="body2">{employee.phone}</Typography>
                 </TableCell>
                 <TableCell>
+                  <Typography variant="body2">{employee.Id_number}</Typography>
+                </TableCell>
+                <TableCell>
                   <Typography variant="body2" sx={{ wordWrap: 'break-word', maxWidth: 200 }}>
                     {employee.current_address}
                   </Typography>
@@ -312,7 +316,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
@@ -339,8 +343,6 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2">{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
-                          <Typography variant="body2"><strong>ID Number:</strong></Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>{employee.Id_number}</Typography>
                           <Typography variant="body2"><strong>Education:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.education_level}</Typography>
                           <Typography variant="body2"><strong>Tax Code:</strong></Typography>
