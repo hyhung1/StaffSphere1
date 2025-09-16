@@ -241,43 +241,47 @@ const EmployeeDashboard: React.FC = () => {
     <Grid container spacing={3}>
       {paginatedEmployees.map((employee: Employee) => (
         <Grid item xs={12} sm={6} md={4} key={employee.Id_number}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="h2" gutterBottom sx={{ fontSize: '16px' }}>
-                {employee.full_name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                ID: {employee.Id_number}
-              </Typography>
-              
-              <Box sx={{ mb: 2 }}>
-                <Chip 
-                  label={employee.department} 
-                  color="primary" 
-                  size="small" 
-                  sx={{ mr: 1, mb: 1, fontWeight: 600 }}
-                />
-                <Chip 
-                  label={employee.gender} 
-                  color={employee.gender === 'Nam' ? 'info' : 'secondary'} 
-                  size="small" 
-                  sx={{ mr: 1, mb: 1, fontWeight: 600 }}
-                />
-                <Chip 
-                  label={employee.contract_type} 
-                  color={employee.contract_type === 'Không thời hạn' ? 'success' : 'secondary'} 
-                  size="small" 
-                  variant={employee.contract_type === 'Không thời hạn' ? 'filled' : 'outlined'}
-                  sx={{ mb: 1, fontWeight: 600 }}
-                />
+          <Card sx={{ height: 'auto', minHeight: '140px', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1, p: 2 }}>
+              {/* Row 1: Name - Department */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                <Typography variant="h6" component="h2" sx={{ fontSize: '16px', fontWeight: 600, flex: 1, mr: 1 }}>
+                  {employee.full_name}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'primary.main', fontWeight: 500 }}>
+                  {employee.department}
+                </Typography>
               </Box>
 
-              <Typography variant="body2"><strong>Position:</strong> {employee.position}</Typography>
-              <Typography variant="body2"><strong>Age:</strong> {Math.ceil(employee.age)} years</Typography>
-              <Typography variant="body2"><strong>Phone:</strong> {employee.phone}</Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Current Address:</strong> {employee.current_address}
-              </Typography>
+              {/* Row 2: ID - Gender */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                  ID: {employee.Id_number}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                  {employee.gender}
+                </Typography>
+              </Box>
+
+              {/* Row 3: Age - Contract Type */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                  Age: {Math.ceil(employee.age)}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
+                  {employee.contract_type}
+                </Typography>
+              </Box>
+
+              {/* Row 4: Position - Contact */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
+                  Position: {employee.position}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                  Contact: {employee.phone}
+                </Typography>
+              </Box>
               
             </CardContent>
           </Card>
