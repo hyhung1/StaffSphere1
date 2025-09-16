@@ -291,7 +291,7 @@ const EmployeeDashboard: React.FC = () => {
             
             {/* Center VIVN node */}
             <g>
-              <circle cx="400" cy="300" r="40" fill="#1976d2" />
+              <circle cx="400" cy="300" r="48" fill="#1976d2" />
               <text x="400" y="305" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold">
                 VIVN
               </text>
@@ -306,7 +306,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="400" cy="100" r="35" fill="#4caf50" />
+              <circle cx="400" cy="100" r="44" fill="#4caf50" />
               <text x="400" y="95" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Sales
               </text>
@@ -324,7 +324,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="550" cy="150" r="35" fill="#ff9800" />
+              <circle cx="550" cy="150" r="44" fill="#ff9800" />
               <text x="550" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Engineering
               </text>
@@ -342,7 +342,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="550" cy="450" r="35" fill="#2196f3" />
+              <circle cx="550" cy="450" r="44" fill="#2196f3" />
               <text x="550" y="445" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">
                 Commissioning
               </text>
@@ -360,7 +360,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="400" cy="500" r="35" fill="#9c27b0" />
+              <circle cx="400" cy="500" r="44" fill="#9c27b0" />
               <text x="400" y="495" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Back office
               </text>
@@ -378,7 +378,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="250" cy="450" r="35" fill="#f44336" />
+              <circle cx="250" cy="450" r="44" fill="#f44336" />
               <text x="250" y="445" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Contract
               </text>
@@ -396,7 +396,7 @@ const EmployeeDashboard: React.FC = () => {
                 setDepartmentDialogOpen(true);
               }}
             >
-              <circle cx="250" cy="150" r="35" fill="#607d8b" />
+              <circle cx="250" cy="150" r="44" fill="#607d8b" />
               <text x="250" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
                 Drafter
               </text>
