@@ -709,13 +709,13 @@ const EmployeeDashboard: React.FC = () => {
         {viewMode !== 'cards' && (
           <>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={2.5}>
             <TextField
               fullWidth
               label="Search employees"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Name, phone, ID, department..."
+              placeholder="Employee name..."
               size="small"
               InputProps={{
                 endAdornment: (
@@ -723,6 +723,25 @@ const EmployeeDashboard: React.FC = () => {
                 ),
               }}
             />
+          </Grid>
+          <Grid item xs={6} md={2}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Position</InputLabel>
+              <Select
+                value={filters.position}
+                onChange={(e) => setFilters({ ...filters, position: e.target.value })}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Manager">Manager</MenuItem>
+                <MenuItem value="Developer">Developer</MenuItem>
+                <MenuItem value="Designer">Designer</MenuItem>
+                <MenuItem value="Analyst">Analyst</MenuItem>
+                <MenuItem value="Coordinator">Coordinator</MenuItem>
+                <MenuItem value="Specialist">Specialist</MenuItem>
+                <MenuItem value="Assistant">Assistant</MenuItem>
+                <MenuItem value="Executive">Executive</MenuItem>
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={6} md={2}>
             <FormControl fullWidth size="small">
@@ -740,7 +759,7 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} md={1.5}>
+          <Grid item xs={6} md={1}>
             <FormControl fullWidth size="small">
               <InputLabel>Gender</InputLabel>
               <Select

@@ -150,16 +150,11 @@ def get_employees(
         if max_age is not None and emp_age > max_age:
             continue
             
-        # Search filter (searches in name, phone, ID number, department)
+        # Search filter (searches in employee name only)
         if search:
             search_lower = search.lower()
-            searchable_fields = [
-                emp.get("full_name", ""),
-                emp.get("phone", ""),
-                emp.get("Id_number", ""),
-                emp.get("department", "")
-            ]
-            if not any(search_lower in str(field).lower() for field in searchable_fields):
+            emp_name = emp.get("full_name", "").lower()
+            if search_lower not in emp_name:
                 continue
         
         filtered_employees.append(emp)
