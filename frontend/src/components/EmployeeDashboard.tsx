@@ -906,7 +906,7 @@ const EmployeeDashboard: React.FC = () => {
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Salary</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Allowance</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Last Salary Adjustment</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
+                <TableCell><Typography variant="subtitle2" fontWeight="bold">Education</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Dependent Count</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Social Insurance Number</Typography></TableCell>
                 <TableCell><Typography variant="subtitle2" fontWeight="bold">Medical Insurance Hospital</Typography></TableCell>
@@ -1022,7 +1022,7 @@ const EmployeeDashboard: React.FC = () => {
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
                     <Typography variant="body2">
-                      {employee.tax_code}
+                      {employee.education_level}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ minWidth: 120 }}>
