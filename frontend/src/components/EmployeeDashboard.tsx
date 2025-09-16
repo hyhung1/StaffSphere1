@@ -263,23 +263,23 @@ const EmployeeDashboard: React.FC = () => {
                 </Typography>
               </Box>
 
-              {/* Row 3: Age - Contract Type */}
+              {/* Row 3: Age - Contact */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
                   Age: {Math.ceil(employee.age)}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
-                  {employee.contract_type}
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                  Contact: {employee.phone}
                 </Typography>
               </Box>
 
-              {/* Row 4: Position - Contact */}
+              {/* Row 4: Position - Contract Type */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
                   Position: {employee.position}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                  Contact: {employee.phone}
+                <Typography variant="body2" sx={{ fontSize: '14px', color: 'success.main', fontWeight: 500 }}>
+                  {employee.contract_type}
                 </Typography>
               </Box>
               
