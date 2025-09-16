@@ -458,36 +458,6 @@ const EmployeeDashboard: React.FC = () => {
                           </Box>
                         </Box>
                       </Box>
-                      
-                      <Box sx={{ mt: 1.5 }}>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>PVI Care:</Typography>
-                            {employee.pvi_care ? (
-                              <Chip label={employee.pvi_care === 'x' ? 'Yes' : employee.pvi_care} size="small" color="info" sx={{ height: 20, fontSize: '0.75rem' }} />
-                            ) : (
-                              <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>-</Typography>
-                            )}
-                          </Box>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Medical Insurance:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.medical_insurance_hospital || '-'}</Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      
-                      <Box sx={{ mt: 1.5 }}>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Training Courses:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.training_courses || '-'}</Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Training Skills:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.training_skills || '-'}</Typography>
-                          </Box>
-                        </Box>
-                      </Box>
                     </Box>
                   </Collapse>
                 </TableCell>
