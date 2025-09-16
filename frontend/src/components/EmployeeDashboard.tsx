@@ -67,7 +67,7 @@ const EmployeeDashboard: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('compact');
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
@@ -1075,7 +1075,7 @@ const EmployeeDashboard: React.FC = () => {
       {/* Pagination */}
       <Paper sx={{ mt: 2 }}>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[20, 60, 100]}
           component="div"
           count={employees.length}
           rowsPerPage={rowsPerPage}
