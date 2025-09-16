@@ -244,7 +244,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
-            <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Type</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
@@ -286,11 +286,9 @@ const EmployeeDashboard: React.FC = () => {
                   <Typography variant="body2">{employee.phone}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Chip 
-                    label={employee.contract_type} 
-                    size="small" 
-                    color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                  />
+                  <Typography variant="body2" sx={{ wordWrap: 'break-word', maxWidth: 200 }}>
+                    {employee.current_address}
+                  </Typography>
                 </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
                   <Button 
@@ -322,6 +320,13 @@ const EmployeeDashboard: React.FC = () => {
                           </Typography>
                           <Typography variant="body2"><strong>Contract ID:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.contract_id}</Typography>
+                          <Typography variant="body2"><strong>Contract Type:</strong></Typography>
+                          <Chip 
+                            label={employee.contract_type} 
+                            size="small" 
+                            color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                            sx={{ mb: 1 }}
+                          />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
                           <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
