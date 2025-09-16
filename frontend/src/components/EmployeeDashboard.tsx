@@ -369,12 +369,12 @@ const EmployeeDashboard: React.FC = () => {
                             </Box>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Tax Code:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.tax_code || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>ID Issue Date:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('vi-VN') : '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Dependent Count:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.dependent_count || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Join Date:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('vi-VN') : '-'}</Typography>
                           </Box>
                         </Box>
                         
@@ -384,12 +384,12 @@ const EmployeeDashboard: React.FC = () => {
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.contract_id || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Social Insurance Number:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.social_insurance_number || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Tax Code:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.tax_code || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>ID Issue Date:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.Issue_date ? new Date(employee.Issue_date).toLocaleDateString('vi-VN') : '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Account:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_account || '-'}</Typography>
                           </Box>
                         </Box>
                         
@@ -404,12 +404,12 @@ const EmployeeDashboard: React.FC = () => {
                             />
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Join Date:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.join_date ? new Date(employee.join_date).toLocaleDateString('vi-VN') : '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Social Insurance Number:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.social_insurance_number || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Account:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_account || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Name:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_name || '-'}</Typography>
                           </Box>
                         </Box>
                         
@@ -419,12 +419,8 @@ const EmployeeDashboard: React.FC = () => {
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{new Date(employee.contract_sign_date).toLocaleDateString('vi-VN')}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Bank Name:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.bank_name || '-'}</Typography>
-                          </Box>
-                          <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Allowance:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.allowance || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Emergency Contact:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.emergency_contact || '-'}</Typography>
                           </Box>
                         </Box>
                         
@@ -434,8 +430,8 @@ const EmployeeDashboard: React.FC = () => {
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.contract_end_date || '-'}</Typography>
                           </Box>
                           <Box sx={{ mb: 0.75 }}>
-                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Emergency Contact:</Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.emergency_contact || '-'}</Typography>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Dependent Count:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.dependent_count || '-'}</Typography>
                           </Box>
                         </Box>
                         
@@ -443,6 +439,10 @@ const EmployeeDashboard: React.FC = () => {
                           <Box sx={{ mb: 0.75 }}>
                             <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Last Salary Adjustment:</Typography>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('vi-VN')}</Typography>
+                          </Box>
+                          <Box sx={{ mb: 0.75 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.75rem' }}>Allowance:</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{employee.allowance || '-'}</Typography>
                           </Box>
                         </Box>
                       </Box>
