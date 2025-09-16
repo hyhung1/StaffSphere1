@@ -709,8 +709,9 @@ const EmployeeDashboard: React.FC = () => {
         {viewMode !== 'cards' && (
           <>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={4}>
             <TextField
+              fullWidth
               label="Search employees"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -723,8 +724,8 @@ const EmployeeDashboard: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid item xs={6} md={1.5}>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Grid item xs={6} md={2}>
+            <FormControl fullWidth size="small">
               <InputLabel>Department</InputLabel>
               <Select
                 value={filters.department}
@@ -740,7 +741,7 @@ const EmployeeDashboard: React.FC = () => {
             </FormControl>
           </Grid>
           <Grid item xs={6} md={1.5}>
-            <FormControl size="small" sx={{ minWidth: 100 }}>
+            <FormControl fullWidth size="small">
               <InputLabel>Gender</InputLabel>
               <Select
                 value={filters.gender}
@@ -754,25 +755,25 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
           <Grid item xs={6} md={1.5}>
             <TextField
+              fullWidth
               label="Min Age"
               type="number"
               size="small"
               value={filters.min_age}
               onChange={(e) => setFilters({ ...filters, min_age: e.target.value })}
-              sx={{ width: 100 }}
             />
           </Grid>
           <Grid item xs={6} md={1.5}>
             <TextField
+              fullWidth
               label="Max Age"
               type="number"
               size="small"
               value={filters.max_age}
               onChange={(e) => setFilters({ ...filters, max_age: e.target.value })}
-              sx={{ width: 100 }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} md={1.5}>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
               <Button variant="contained" onClick={handleSearch} size="small">
                 Apply
