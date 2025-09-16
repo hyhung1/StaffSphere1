@@ -398,13 +398,13 @@ const EmployeeDashboard: React.FC = () => {
         <Dialog
           open={departmentDialogOpen}
           onClose={() => setDepartmentDialogOpen(false)}
-          maxWidth={false}
+          maxWidth="xl"
           fullWidth
           PaperProps={{
             sx: { 
               maxHeight: '85vh',
-              maxWidth: '95vw',
-              width: '95vw'
+              width: 'auto',
+              maxWidth: '88vw'
             }
           }}
         >
@@ -412,9 +412,9 @@ const EmployeeDashboard: React.FC = () => {
             <Typography variant="h6">{selectedDepartment} Department Employees</Typography>
           </DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={2}>
+            <Grid container spacing={1}>
               {selectedEmployees.map((employee: Employee) => (
-                <Grid item xs={12} sm={4} key={employee.Id_number} sx={{ flexBasis: '33.33%', maxWidth: '33.33%' }}>
+                <Grid item xs={12} sm={6} md={3} lg={3} key={employee.Id_number}>
                   <Card sx={{ height: 'auto', minHeight: '200px' }}>
                     <CardContent sx={{ p: 2 }}>
                       {/* Row 1: Name - Department */}
