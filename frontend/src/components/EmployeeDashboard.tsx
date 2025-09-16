@@ -347,10 +347,10 @@ const EmployeeDashboard: React.FC = () => {
                       <Typography variant="h6" gutterBottom component="div">
                         Complete Details
                       </Typography>
-                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3 }}>
                         <Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Salary:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Salary:</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                               <Typography variant="body2" fontWeight="bold">
                                 {visibleSalaries.has(employee.Id_number) 
@@ -368,114 +368,105 @@ const EmployeeDashboard: React.FC = () => {
                               </IconButton>
                             </Box>
                           </Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Contract ID:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Contract ID:</Typography>
                             <Typography variant="body2">{employee.contract_id}</Typography>
                           </Box>
+                          {employee.emergency_contact && (
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Emergency Contact:</Typography>
+                              <Typography variant="body2">{employee.emergency_contact}</Typography>
+                            </Box>
+                          )}
                         </Box>
                         
                         <Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Contract Type:</Typography>
-                            <Box>
-                              <Chip 
-                                label={employee.contract_type} 
-                                size="small" 
-                                color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
-                              />
-                            </Box>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Contract Type:</Typography>
+                            <Chip 
+                              label={employee.contract_type} 
+                              size="small" 
+                              color={employee.contract_type === 'Không thời hạn' ? 'success' : 'default'}
+                            />
                           </Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Contract Sign Date:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Contract Sign Date:</Typography>
                             <Typography variant="body2">{new Date(employee.contract_sign_date).toLocaleDateString('vi-VN')}</Typography>
                           </Box>
                           {employee.contract_end_date && employee.contract_end_date !== 'Không thời hạn' && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">Contract End Date:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Contract End Date:</Typography>
                               <Typography variant="body2">{employee.contract_end_date}</Typography>
                             </Box>
                           )}
                           {employee.join_date && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">Join Date:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Join Date:</Typography>
                               <Typography variant="body2">{new Date(employee.join_date).toLocaleDateString('vi-VN')}</Typography>
                             </Box>
                           )}
                         </Box>
                         
                         <Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Tax Code:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Tax Code:</Typography>
                             <Typography variant="body2">{employee.tax_code}</Typography>
                           </Box>
                           {employee.dependent_count && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">Dependent Count:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Dependent Count:</Typography>
                               <Typography variant="body2">{employee.dependent_count}</Typography>
                             </Box>
                           )}
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Social Insurance Number:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Social Insurance Number:</Typography>
                             <Typography variant="body2">{employee.social_insurance_number}</Typography>
                           </Box>
                           {employee.Issue_date && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">ID Issue Date:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">ID Issue Date:</Typography>
                               <Typography variant="body2">{new Date(employee.Issue_date).toLocaleDateString('vi-VN')}</Typography>
                             </Box>
                           )}
                         </Box>
                         
                         <Box>
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Last Salary Adjustment:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Last Salary Adjustment:</Typography>
                             <Typography variant="body2">{new Date(employee.last_salary_adjustment).toLocaleDateString('vi-VN')}</Typography>
                           </Box>
                           {employee.allowance && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">Allowance:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Allowance:</Typography>
                               <Typography variant="body2">{employee.allowance}</Typography>
                             </Box>
                           )}
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="caption" color="text.secondary">Bank Account:</Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" display="block">Bank Account:</Typography>
                             <Typography variant="body2">{employee.bank_account}</Typography>
                           </Box>
                           {employee.bank_name && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="caption" color="text.secondary">Bank Name:</Typography>
+                            <Box sx={{ mb: 1 }}>
+                              <Typography variant="caption" color="text.secondary" display="block">Bank Name:</Typography>
                               <Typography variant="body2">{employee.bank_name}</Typography>
                             </Box>
                           )}
                         </Box>
                       </Box>
                       
-                      {(employee.emergency_contact || employee.pvi_care || employee.medical_insurance_hospital) && (
-                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: 'text.secondary' }}>
-                            Contact & Insurance
-                          </Typography>
-                          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+                      {(employee.pvi_care || employee.medical_insurance_hospital) && (
+                        <Box sx={{ mt: 2 }}>
+                          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 3 }}>
                             {employee.pvi_care && (
                               <Box>
-                                <Typography variant="caption" color="text.secondary">PVI Care:</Typography>
-                                <Box>
-                                  <Chip label={employee.pvi_care === 'x' ? 'Yes' : employee.pvi_care} size="small" color="info" />
-                                </Box>
+                                <Typography variant="caption" color="text.secondary" display="block">PVI Care:</Typography>
+                                <Chip label={employee.pvi_care === 'x' ? 'Yes' : employee.pvi_care} size="small" color="info" />
                               </Box>
                             )}
                             {employee.medical_insurance_hospital && (
                               <Box>
-                                <Typography variant="caption" color="text.secondary">Medical Insurance:</Typography>
-                                <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={employee.medical_insurance_hospital}>
-                                  {employee.medical_insurance_hospital}
-                                </Typography>
-                              </Box>
-                            )}
-                            {employee.emergency_contact && (
-                              <Box>
-                                <Typography variant="caption" color="text.secondary">Emergency Contact:</Typography>
-                                <Typography variant="body2">{employee.emergency_contact}</Typography>
+                                <Typography variant="caption" color="text.secondary" display="block">Medical Insurance:</Typography>
+                                <Typography variant="body2">{employee.medical_insurance_hospital}</Typography>
                               </Box>
                             )}
                           </Box>
@@ -483,23 +474,18 @@ const EmployeeDashboard: React.FC = () => {
                       )}
                       
                       {(employee.training_courses || employee.training_skills) && (
-                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600, color: 'text.secondary' }}>
-                            Training & Development
-                          </Typography>
-                          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+                        <Box sx={{ mt: 2 }}>
+                          <Box sx={{ display: 'grid', gridTemplateColumns: employee.training_courses && employee.training_skills ? 'repeat(2, 1fr)' : '1fr', gap: 3 }}>
                             {employee.training_courses && (
                               <Box>
-                                <Typography variant="caption" color="text.secondary">Training Courses:</Typography>
+                                <Typography variant="caption" color="text.secondary" display="block">Training Courses:</Typography>
                                 <Typography variant="body2">{employee.training_courses}</Typography>
                               </Box>
                             )}
                             {employee.training_skills && (
                               <Box>
-                                <Typography variant="caption" color="text.secondary">Training Skills:</Typography>
-                                <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={employee.training_skills}>
-                                  {employee.training_skills}
-                                </Typography>
+                                <Typography variant="caption" color="text.secondary" display="block">Training Skills:</Typography>
+                                <Typography variant="body2">{employee.training_skills}</Typography>
                               </Box>
                             )}
                           </Box>
