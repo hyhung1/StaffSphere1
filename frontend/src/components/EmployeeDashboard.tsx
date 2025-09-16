@@ -718,16 +718,14 @@ const EmployeeDashboard: React.FC = () => {
   return (
     <Box>
       {/* View Mode Selector and Search/Filter Section */}
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        {viewMode !== 'cards' && (
+      {viewMode !== 'cards' && (
+        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
               🔍 Search & Filter
             </Typography>
           </Box>
-        )}
 
-        {viewMode !== 'cards' && (
           <>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={3.5}>
@@ -815,8 +813,8 @@ const EmployeeDashboard: React.FC = () => {
           </Grid>
         </Grid>
           </>
-        )}
-      </Paper>
+        </Paper>
+      )}
 
 
       {/* Actions */}
