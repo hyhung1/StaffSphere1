@@ -407,25 +407,141 @@ async def import_excel(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only Excel files are allowed")
     
     try:
-        # Read the Excel file
+        # Read the Excel file with string data types for ID-like fields
         contents = await file.read()
-        df = pd.read_excel(io.BytesIO(contents))
         
-        # Convert DataFrame to list of dictionaries
-        new_employees = df.to_dict('records')
+        # Specify dtype for columns that should be strings to preserve leading zeros
+        dtype_mapping = {
+            'CMND/CCCD': str,
+            'Số điện thoại': str,
+            'Số liên hệ khi khẩn cấp': str,
+            'MST TNCN': str,
+            'Số BHXH': str,
+            'TK NGÂN HÀNG ': str,
+            'Số người phụ thuộc': str
+        }
+        
+        df = pd.read_excel(io.BytesIO(contents), dtype=dtype_mapping)
+        
+        # Field mapping from Vietnamese to English
+        field_mapping = {
+            'ID': 'id',
+            'Họ và tên': 'full_name',
+            'Ngày sinh': 'dob',
+            'Số tuổi': 'age',
+            'Giới tính': 'gender',
+            'CMND/CCCD': 'Id_number',
+            'Ngày cấp ': 'Issue_date',
+            'Địa chỉ thường trú': 'address',
+            'địa chỉ hiện tại ': 'current_address',
+            'Số điện thoại': 'phone',
+            'Số liên hệ khi khẩn cấp': 'emergency_contact',
+            'Trình độ học vấn': 'education_level',
+            'Ngày vào công ty': 'join_date',
+            'Thuộc bộ phận': 'department',
+            'Chức vụ': 'position',
+            'HĐLĐ': 'contract_id',
+            'Loại HĐLĐ': 'contract_type',
+            'Ngày kí HĐLĐ': 'contract_sign_date',
+            'Ngày hết hạn HĐLĐ': 'contract_end_date',
+            'Lương': 'salary',
+            'Trợ cấp': 'allowance',
+            'Thời gian điều chỉnh lương gần nhất': 'last_salary_adjustment',
+            'MST TNCN': 'tax_code',
+            'Số người phụ thuộc': 'dependent_count',
+            'Số BHXH': 'social_insurance_number',
+            'Bệnh viện đăng ký KCB': 'medical_insurance_hospital',
+            'TK NGÂN HÀNG ': 'bank_account',
+            'TÊN NGÂN HÀNG': 'bank_name',
+            'PVI Care': 'pvi_care',
+            'Các khóa đào tạo đã tham gia': 'training_courses',
+            'Các khóa đào tạo kỹ năng': 'training_skills'
+        }
+        
+        # Rename columns to English
+        df = df.rename(columns=field_mapping)
+        
+        # Process each row
+        new_employees = []
+        for _, row in df.iterrows():
+            employee = {}
+            for field in field_mapping.values():
+                value = row.get(field)
+                
+                # Handle NaN values
+                if pd.isna(value):
+                    value = ""
+                # Handle datetime values
+                elif hasattr(value, 'strftime'):
+                    value = value.strftime('%Y-%m-%d')
+                # Handle numeric values
+                elif isinstance(value, (int, float)):
+                    # Keep salary as integer, age as float
+                    if field == 'salary':
+                        value = int(value)
+                    elif field == 'age':
+                        value = float(value)
+                    # Convert numeric fields to string without decimals if they're whole numbers
+                    elif field in ['id', 'tax_code', 'social_insurance_number', 'bank_account', 'Id_number', 'phone']:
+                        # Remove .0 from floats that are actually integers
+                        if isinstance(value, float) and value.is_integer():
+                            value = str(int(value))
+                        else:
+                            value = str(value)
+                    else:
+                        value = str(value)
+                else:
+                    value = str(value).strip()
+                
+                # Remove .0 from string values that end with it (for emergency contact, dependent count, etc.)
+                if isinstance(value, str) and value.endswith('.0'):
+                    value = value[:-2]
+                
+                # Add leading zeros for phone numbers (Vietnamese phone numbers should be 10 digits)
+                if field in ['phone', 'emergency_contact'] and value and value != "":
+                    value_str = str(value)
+                    # Remove any decimal points
+                    if '.' in value_str:
+                        value_str = value_str.split('.')[0]
+                    # Add leading zero if it's a 9-digit phone number
+                    if len(value_str) == 9:
+                        value_str = '0' + value_str
+                    value = value_str
+                
+                # Add leading zeros for ID numbers if needed (Vietnamese CMND/CCCD are typically 9 or 12 digits)
+                if field == 'Id_number' and value and value != "":
+                    value_str = str(value)
+                    # Remove any decimal points
+                    if '.' in value_str:
+                        value_str = value_str.split('.')[0]
+                    # Add leading zero if it's an 11-digit ID that should be 12
+                    if len(value_str) == 11:
+                        value_str = '0' + value_str
+                    value = value_str
+                
+                # Special handling for PVI Care - more robust
+                if field == 'pvi_care':
+                    if value and str(value).lower() in ['x', 'có', 'co', 'yes', '1', 'true']:
+                        value = "Có"
+                    elif not value or str(value).lower() in ['', 'không', 'khong', 'no', '0', 'false']:
+                        value = "Không"
+                    else:
+                        value = ""
+                
+                employee[field] = value
+            
+            new_employees.append(employee)
         
         # Load existing employees
         with open('nhan_vien.json', 'r', encoding='utf-8') as f:
-            employees = json.load(f)
+            existing_employees = json.load(f)
         
-        # Add new employees (you may want to add validation or update logic here)
-        employees.extend(new_employees)
-        
-        # Save back to file
+        # Replace existing data with new import (not append)
+        # This ensures we have a fresh dataset from the Excel
         with open('nhan_vien.json', 'w', encoding='utf-8') as f:
-            json.dump(employees, f, ensure_ascii=False, indent=2)
+            json.dump(new_employees, f, ensure_ascii=False, indent=2)
         
-        return {"message": f"Successfully imported {len(new_employees)} employees"}
+        return {"message": f"Successfully imported {len(new_employees)} employees", "count": len(new_employees)}
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
