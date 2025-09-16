@@ -414,7 +414,7 @@ const EmployeeDashboard: React.FC = () => {
           <DialogContent dividers>
             <Grid container spacing={2}>
               {selectedEmployees.map((employee: Employee) => (
-                <Grid item xs={12} sm={4} key={employee.Id_number}>
+                <Grid item xs={12} sm={3} key={employee.Id_number}>
                   <Card sx={{ height: 'auto', minHeight: '140px' }}>
                     <CardContent sx={{ p: 2 }}>
                       {/* Row 1: Name - Department */}
