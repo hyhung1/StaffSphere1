@@ -485,7 +485,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
-            <TableCell><Typography variant="subtitle2" fontWeight="bold">Education</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
@@ -538,7 +538,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2" sx={{ wordWrap: 'break-word', maxWidth: 150 }}>
-                    {employee.education_level}
+                    {employee.tax_code}
                   </Typography>
                 </TableCell>
                 <TableCell sx={{ width: 50, textAlign: 'center' }}>
