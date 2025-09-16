@@ -339,8 +339,6 @@ const EmployeeDashboard: React.FC = () => {
                           />
                           <Typography variant="body2"><strong>Contract Sign Date:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.contract_sign_date).toLocaleDateString('en-GB')}</Typography>
-                          <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
-                          <Typography variant="body2">{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
                           <Typography variant="body2"><strong>Education:</strong></Typography>
@@ -353,6 +351,8 @@ const EmployeeDashboard: React.FC = () => {
                           <Typography variant="body2">{employee.bank_account}</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>
+                          <Typography variant="body2"><strong>Last Salary Adjustment:</strong></Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>{new Date(employee.last_salary_adjustment).toLocaleDateString('en-GB')}</Typography>
                           <Typography variant="body2"><strong>PVI Care:</strong></Typography>
                           <Typography variant="body2" sx={{ mb: 1 }}>{employee.pvi_care}</Typography>
                           <Typography variant="body2"><strong>Medical Insurance:</strong></Typography>
