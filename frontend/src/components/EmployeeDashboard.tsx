@@ -440,7 +440,7 @@ const EmployeeDashboard: React.FC = () => {
                       {/* Row 3: Age - Contact */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          DOB: {employee.dob}
+                          DOB: {formatDate(employee.dob, true)?.replace(/\//g, '-')}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
                           {employee.phone}
