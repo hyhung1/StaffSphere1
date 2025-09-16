@@ -1094,17 +1094,19 @@ const EmployeeDashboard: React.FC = () => {
       )}
 
       {/* Pagination */}
-      <Paper sx={{ mt: 2 }}>
-        <TablePagination
-          rowsPerPageOptions={[20, 60, 100]}
-          component="div"
-          count={employees.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+      {viewMode !== 'cards' && (
+        <Paper sx={{ mt: 2 }}>
+          <TablePagination
+            rowsPerPageOptions={[20, 60, 100]}
+            component="div"
+            count={employees.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      )}
     </Box>
   );
 };
