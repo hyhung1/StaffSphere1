@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExpandMore, ExpandLess, Close } from '@mui/icons-material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -27,7 +27,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import axios from 'axios';
@@ -405,11 +404,8 @@ const EmployeeDashboard: React.FC = () => {
             sx: { maxHeight: '80vh' }
           }}
         >
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <DialogTitle>
             <Typography variant="h6">{selectedDepartment} Department Employees</Typography>
-            <IconButton onClick={() => setDepartmentDialogOpen(false)}>
-              <Close />
-            </IconButton>
           </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
@@ -462,9 +458,6 @@ const EmployeeDashboard: React.FC = () => {
               ))}
             </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDepartmentDialogOpen(false)}>Close</Button>
-          </DialogActions>
         </Dialog>
       </>
     );
