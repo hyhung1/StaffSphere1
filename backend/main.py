@@ -29,22 +29,30 @@ class Employee(BaseModel):
     age: float
     gender: str
     Id_number: str
+    Issue_date: str = ""
     address: str
     current_address: str
     phone: str
+    emergency_contact: str = ""
     education_level: str
     department: str
+    join_date: str = ""
     position: str
     contract_id: str
     contract_type: str
     contract_sign_date: str
+    contract_end_date: str = ""
     salary: int
+    allowance: str = ""
     last_salary_adjustment: str
     tax_code: int
+    dependent_count: str = ""
     social_insurance_number: int
     medical_insurance_hospital: str
     bank_account: int
+    bank_name: str = ""
     pvi_care: str
+    training_courses: str = ""
     training_skills: str
 
 class EmployeeCreate(BaseModel):

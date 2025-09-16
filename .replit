@@ -26,13 +26,13 @@ args = "Frontend"
 name = "Backend API"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd backend && python main.py"
 waitForPort = 8000
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "Frontend"
@@ -57,3 +57,7 @@ externalPort = 3000
 [[ports]]
 localPort = 46477
 externalPort = 3001
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
