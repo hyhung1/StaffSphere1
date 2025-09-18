@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, AppBar, Toolbar, Typography, Container } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, Container, IconButton } from '@mui/material';
+import { Menu } from '@mui/icons-material';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import EmployeeDetail from './components/EmployeeDetail';
 import Statistics from './components/Statistics';
+import Sidebar from './components/Sidebar';
+import PermanentSidebar, { drawerWidth } from './components/PermanentSidebar';
 
 // Create a sophisticated professional theme for HR application
 const theme = createTheme({
@@ -219,33 +222,58 @@ const theme = createTheme({
 });
 
 function App() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar position="static">
+        <Box sx={{ display: 'flex' }}>
+          {/* AppBar */}
+          <AppBar 
+            position="fixed" 
+            sx={{ 
+              width: { md: `calc(100% - ${drawerWidth}px)` },
+              ml: { md: `${drawerWidth}px` },
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
             <Toolbar>
-              <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { md: 'none' } }}
+              >
+                <Menu />
+              </IconButton>
+              
+              <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 3 }}>
                 <img 
                   src="/logo.png" 
                   alt="Company Logo" 
                   style={{ 
-                    height: '56px', 
+                    height: '40px', 
                     width: 'auto',
                     marginRight: '16px'
                   }} 
                 />
               </Box>
+              
               <Typography 
-                variant="h5" 
+                variant="h6" 
                 component="div" 
                 sx={{ 
                   flexGrow: 1, 
-                  textAlign: 'center',
+                  textAlign: { xs: 'left', md: 'center' },
                   color: '#FFFFFF',
                   fontWeight: 700,
-                  fontSize: '1.5rem',
+                  fontSize: { xs: '1.1rem', md: '1.3rem' },
                   textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
                   letterSpacing: '0.5px'
                 }}
@@ -254,12 +282,32 @@ function App() {
               </Typography>
             </Toolbar>
           </AppBar>
-          <Box sx={{ 
-            background: 'linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)',
-            minHeight: 'calc(100vh - 64px)',
-            pt: 4,
-            pb: 4
-          }}>
+
+          {/* Navigation Drawer */}
+          <Box
+            component="nav"
+            sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+            aria-label="mailbox folders"
+          >
+            {/* Mobile drawer */}
+            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+            
+            {/* Desktop permanent drawer */}
+            <PermanentSidebar />
+          </Box>
+
+          {/* Main content */}
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: { md: `calc(100% - ${drawerWidth}px)` },
+              background: 'linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)',
+              minHeight: '100vh',
+              pt: { xs: 10, md: 11 }, // Account for AppBar height
+            }}
+          >
             <Container maxWidth="xl">
               <Routes>
                 <Route path="/" element={<EmployeeDashboard />} />

@@ -69,7 +69,7 @@ const EmployeeDashboard: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'compact'>('compact');
+  const [viewMode, setViewMode] = useState<'cards' | 'compact'>('compact');
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [visibleSalaries, setVisibleSalaries] = useState<Set<string>>(new Set());
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
@@ -80,6 +80,8 @@ const EmployeeDashboard: React.FC = () => {
     position: '',
     contract_type: '',
     gender: '',
+    min_age: '',
+    max_age: '',
   });
   
   const [filterOptions, setFilterOptions] = useState({
@@ -115,6 +117,8 @@ const EmployeeDashboard: React.FC = () => {
       if (filters.position) params.append('position', filters.position);
       if (filters.contract_type) params.append('contract_type', filters.contract_type);
       if (filters.gender) params.append('gender', filters.gender);
+      if (filters.min_age) params.append('min_age', filters.min_age);
+      if (filters.max_age) params.append('max_age', filters.max_age);
 
       const response = await axios.get(`${API_BASE_URL}/employees?${params.toString()}`);
       setEmployees(response.data);
@@ -143,6 +147,8 @@ const EmployeeDashboard: React.FC = () => {
       position: '',
       contract_type: '',
       gender: '',
+      min_age: '',
+      max_age: '',
     });
     setPage(0);
     // fetchEmployees will be called automatically by useEffect
@@ -233,7 +239,7 @@ const EmployeeDashboard: React.FC = () => {
     setVisibleSalaries(newVisible);
   };
 
-  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newView: 'table' | 'cards' | 'compact') => {
+  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newView: 'cards' | 'compact') => {
     if (newView !== null) {
       setViewMode(newView);
     }
@@ -491,6 +497,25 @@ const EmployeeDashboard: React.FC = () => {
     );
   };
 
+  // Calculate age from DOB
+  const calculateAge = (dobString: string) => {
+    if (!dobString) return 'N/A';
+    
+    const dob = new Date(dobString);
+    const today = new Date();
+    
+    if (isNaN(dob.getTime())) return 'N/A';
+    
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    
+    return age.toString();
+  };
+
   // Compact Table View Component
   const renderCompactView = () => (
     <TableContainer component={Paper}>
@@ -498,6 +523,7 @@ const EmployeeDashboard: React.FC = () => {
         <TableHead>
           <TableRow>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Employee</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Age</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
@@ -520,6 +546,11 @@ const EmployeeDashboard: React.FC = () => {
                       {employee.full_name}
                     </Typography>
                   </Box>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {calculateAge(employee.dob)}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
@@ -578,7 +609,7 @@ const EmployeeDashboard: React.FC = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={11}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
@@ -728,7 +759,7 @@ const EmployeeDashboard: React.FC = () => {
 
           <>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3.5}>
+          <Grid item xs={12} md={1.8}>
             <TextField
               fullWidth
               label="Search employee name"
@@ -738,7 +769,62 @@ const EmployeeDashboard: React.FC = () => {
               size="small"
             />
           </Grid>
-          <Grid item xs={6} md={2}>
+          <Grid item xs={3} md={1.3}>
+            <FormControl fullWidth size="small">
+              <Select
+                value={filters.min_age}
+                onChange={(e) => setFilters({ ...filters, min_age: e.target.value })}
+                displayEmpty
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return <span style={{ color: '#999' }}>Min Age</span>;
+                  }
+                  return selected === '' ? 'All Ages' : selected;
+                }}
+              >
+                <MenuItem value="">All Ages</MenuItem>
+                <MenuItem value="18">18</MenuItem>
+                <MenuItem value="20">20</MenuItem>
+                <MenuItem value="25">25</MenuItem>
+                <MenuItem value="30">30</MenuItem>
+                <MenuItem value="35">35</MenuItem>
+                <MenuItem value="40">40</MenuItem>
+                <MenuItem value="45">45</MenuItem>
+                <MenuItem value="50">50</MenuItem>
+                <MenuItem value="55">55</MenuItem>
+                <MenuItem value="60">60</MenuItem>
+                <MenuItem value="65">65</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={3} md={1.3}>
+            <FormControl fullWidth size="small">
+              <Select
+                value={filters.max_age}
+                onChange={(e) => setFilters({ ...filters, max_age: e.target.value })}
+                displayEmpty
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return <span style={{ color: '#999' }}>Max Age</span>;
+                  }
+                  return selected === '' ? 'All Ages' : selected;
+                }}
+              >
+                <MenuItem value="">All Ages</MenuItem>
+                <MenuItem value="25">25</MenuItem>
+                <MenuItem value="30">30</MenuItem>
+                <MenuItem value="35">35</MenuItem>
+                <MenuItem value="40">40</MenuItem>
+                <MenuItem value="45">45</MenuItem>
+                <MenuItem value="50">50</MenuItem>
+                <MenuItem value="55">55</MenuItem>
+                <MenuItem value="60">60</MenuItem>
+                <MenuItem value="65">65</MenuItem>
+                <MenuItem value="70">70</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6} md={1.4}>
             <FormControl fullWidth size="small">
               <Select
                 value={filters.position}
@@ -746,7 +832,7 @@ const EmployeeDashboard: React.FC = () => {
                 displayEmpty
                 renderValue={(selected) => {
                   if (!selected) {
-                    return <em style={{ color: '#999' }}>Position</em>;
+                    return <span style={{ color: '#999' }}>Position</span>;
                   }
                   return selected === '' ? 'All Positions' : selected;
                 }}
@@ -760,7 +846,7 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} md={2}>
+          <Grid item xs={6} md={1.4}>
             <FormControl fullWidth size="small">
               <Select
                 value={filters.department}
@@ -768,7 +854,7 @@ const EmployeeDashboard: React.FC = () => {
                 displayEmpty
                 renderValue={(selected) => {
                   if (!selected) {
-                    return <em style={{ color: '#999' }}>Department</em>;
+                    return <span style={{ color: '#999' }}>Department</span>;
                   }
                   return selected === '' ? 'All Departments' : selected;
                 }}
@@ -782,7 +868,7 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} md={1.5}>
+          <Grid item xs={6} md={1.2}>
             <FormControl fullWidth size="small">
               <Select
                 value={filters.gender}
@@ -790,7 +876,7 @@ const EmployeeDashboard: React.FC = () => {
                 displayEmpty
                 renderValue={(selected) => {
                   if (!selected) {
-                    return <em style={{ color: '#999' }}>Gender</em>;
+                    return <span style={{ color: '#999' }}>Gender</span>;
                   }
                   return selected === '' ? 'All Genders' : selected;
                 }}
@@ -804,12 +890,27 @@ const EmployeeDashboard: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={1.5}>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Button variant="outlined" onClick={clearFilters} size="small">
-                Clear
-              </Button>
-            </Box>
+          <Grid item xs={6} md={1.6}>
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              onClick={clearFilters} 
+              size="medium"
+              fullWidth
+              sx={{ 
+                fontWeight: 600,
+                borderRadius: 2,
+                py: 1,
+                textTransform: 'none',
+                boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              🧹 Clear All
+            </Button>
           </Grid>
         </Grid>
           </>
@@ -893,203 +994,12 @@ const EmployeeDashboard: React.FC = () => {
         >
           <ToggleButton value="compact" sx={{ fontWeight: 600 }}>📋 Compact</ToggleButton>
           <ToggleButton value="cards" sx={{ fontWeight: 600 }}>🎴 Cards</ToggleButton>
-          <ToggleButton value="table" sx={{ fontWeight: 600 }}>📊 Full Table</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
       {/* Employee Display */}
       {viewMode === 'cards' && renderCardView()}
       {viewMode === 'compact' && renderCompactView()}
-      {viewMode === 'table' && (
-        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: 3800, tableLayout: 'auto' }}>
-            <TableHead>
-              <TableRow>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Full Name</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">DOB</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Issue Date</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Phone</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Emergency Contact</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Education Level</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Department</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Join Date</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Position</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract ID</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Type</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract Sign Date</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Contract End Date</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Salary</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Allowance</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Last Salary Adjustment</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Education</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Dependent Count</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Social Insurance Number</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Medical Insurance Hospital</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Bank Account</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Bank Name</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">PVI Care</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Training Courses</Typography></TableCell>
-                <TableCell><Typography variant="subtitle2" fontWeight="bold">Training Skills</Typography></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedEmployees.map((employee: Employee) => (
-                <TableRow key={employee.Id_number} hover>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.full_name}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.dob, true)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>
-                    <Typography variant="body2">
-                      {employee.gender}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 130 }}>
-                    <Typography variant="body2">
-                      {employee.Id_number}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.Issue_date)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 250 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.address}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 250 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.current_address}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {employee.phone}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.emergency_contact || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.education_level}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.department}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.join_date)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.position}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 180 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.contract_id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.contract_type}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 140 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.contract_sign_date)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 140 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.contract_end_date)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {formatCurrency(employee.salary)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.allowance || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 140 }}>
-                    <Typography variant="body2">
-                      {formatDate(employee.last_salary_adjustment, true)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {employee.education_level}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <Typography variant="body2">
-                      {employee.dependent_count || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2">
-                      {employee.social_insurance_number}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.medical_insurance_hospital}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2">
-                      {employee.bank_account}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.bank_name || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>
-                    <Typography variant="body2">
-                      {employee.pvi_care}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.training_courses || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 200 }}>
-                    <Typography variant="body2" sx={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
-                      {employee.training_skills}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
 
       {/* Pagination */}
       {viewMode !== 'cards' && (

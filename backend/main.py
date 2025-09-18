@@ -106,9 +106,27 @@ def get_employees(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    min_age: Optional[int] = None,
+    max_age: Optional[int] = None
 ):
     employees = load_employees()
+    
+    # Helper function to calculate age from DOB
+    def calculate_age(dob_str):
+        if not dob_str:
+            return None
+        try:
+            from datetime import datetime
+            dob = datetime.strptime(dob_str, '%Y-%m-%d')
+            today = datetime.now()
+            age = today.year - dob.year
+            if today.month < dob.month or (today.month == dob.month and today.day < dob.day):
+                age -= 1
+            return age
+        except (ValueError, TypeError):
+            return None
+    
     
     # Apply filters
     filtered_employees = []
@@ -135,6 +153,18 @@ def get_employees(
             search_lower = search.lower()
             emp_name = emp.get("full_name", "").lower()
             if search_lower not in emp_name:
+                continue
+        
+        # Age filters
+        if min_age is not None or max_age is not None:
+            emp_age = calculate_age(emp.get("dob"))
+            if emp_age is None:
+                continue  # Skip employees with invalid DOB
+            
+            if min_age is not None and emp_age < min_age:
+                continue
+                
+            if max_age is not None and emp_age > max_age:
                 continue
         
         filtered_employees.append(emp)
@@ -328,12 +358,13 @@ def export_csv(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    birth_year: Optional[int] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    min_age: Optional[int] = None,
+    max_age: Optional[int] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             birth_year, search)
+                             search, min_age, max_age)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
@@ -357,12 +388,13 @@ def export_excel(
     position: Optional[str] = None,
     contract_type: Optional[str] = None,
     gender: Optional[str] = None,
-    birth_year: Optional[int] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    min_age: Optional[int] = None,
+    max_age: Optional[int] = None
 ):
     # Get filtered employees
     employees = get_employees(department, position, contract_type, gender, 
-                             birth_year, search)
+                             search, min_age, max_age)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
