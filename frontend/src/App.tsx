@@ -9,6 +9,7 @@ import EmployeeDetail from './components/EmployeeDetail';
 import Statistics from './components/Statistics';
 import Sidebar from './components/Sidebar';
 import PermanentSidebar, { drawerWidth } from './components/PermanentSidebar';
+import Login from './components/Login';
 
 // Create a sophisticated professional theme for HR application
 const theme = createTheme({
@@ -223,11 +224,36 @@ const theme = createTheme({
 
 function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+    // Simple authentication - in a real app, this would be an API call
+    if (username === 'admin' && password === 'password') {
+      setIsAuthenticated(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Login onLogin={handleLogin} />
+      </ThemeProvider>
+    );
+  }
+
+  // Show main application if authenticated
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -290,10 +316,10 @@ function App() {
             aria-label="mailbox folders"
           >
             {/* Mobile drawer */}
-            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} />
             
             {/* Desktop permanent drawer */}
-            <PermanentSidebar />
+            <PermanentSidebar onLogout={handleLogout} />
           </Box>
 
           {/* Main content */}

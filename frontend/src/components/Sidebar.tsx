@@ -14,72 +14,55 @@ import {
   alpha,
 } from '@mui/material';
 import {
-  Dashboard,
-  People,
-  BarChart,
-  Settings,
-  ExitToApp,
+  Analytics,
   Business,
+  ExitToApp,
+  AccountBalance,
 } from '@mui/icons-material';
 
-const drawerWidth = 224;
+const drawerWidth = 202;
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
 
   const menuItems = [
     {
-      text: 'Dashboard',
-      icon: <Dashboard />,
-      path: '/',
-      description: 'Employee Overview'
-    },
-    {
-      text: 'Employee List',
-      icon: <People />,
-      path: '/',
-      description: 'Manage Staff'
-    },
-    {
-      text: 'Statistics',
-      icon: <BarChart />,
-      path: '/statistics',
-      description: 'Analytics & Reports'
-    },
-    {
-      text: 'Departments',
+      text: 'Company Overview',
       icon: <Business />,
-      path: '/departments',
-      description: 'Department Management'
+      path: '/?view=cards'
+    },
+    {
+      text: 'Dashboard',
+      icon: <Analytics />,
+      path: '/?view=compact'
+    },
+    {
+      text: 'Payroll',
+      icon: <AccountBalance />,
+      path: '/payroll'
     },
   ];
 
   const bottomMenuItems = [
     {
-      text: 'Settings',
-      icon: <Settings />,
-      path: '/settings',
-      description: 'System Configuration'
-    },
-    {
       text: 'Logout',
       icon: <ExitToApp />,
-      path: '/logout',
-      description: 'Sign Out'
+      path: '/logout'
     },
   ];
 
   const handleNavigation = (path: string, text: string) => {
     if (text === 'Logout') {
-      // Handle logout logic here
-      console.log('Logout clicked');
+      onLogout();
+      onClose();
       return;
     }
     navigate(path);
@@ -95,27 +78,29 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
       {/* Header */}
       <Box sx={{ 
         p: 3, 
-        backgroundColor: theme.palette.primary.main,
-        color: 'white',
-        textAlign: 'center'
+        textAlign: 'center',
+        borderBottom: `1px solid ${theme.palette.divider}`
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
           <img 
-            src="/logo.png" 
-            alt="StaffSphere" 
+            src="/female-avatar.png" 
+            alt="Mrs Nhung Ho" 
             style={{ 
-              height: '40px', 
-              width: 'auto',
-              marginRight: '12px'
+              width: '60px', 
+              height: '60px',
+              borderRadius: '50%',
+              marginRight: '12px',
+              objectFit: 'cover'
             }} 
           />
-          <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: '0.5px' }}>
-            StaffSphere
+          <Typography variant="h6" sx={{ 
+            fontWeight: 700, 
+            letterSpacing: '0.5px',
+            color: theme.palette.text.primary
+          }}>
+            Mrs Nhung Ho
           </Typography>
         </Box>
-        <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.85rem' }}>
-          HR Management System
-        </Typography>
       </Box>
 
       {/* Navigation Items */}
@@ -143,30 +128,28 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
                 }}
               >
                 <ListItemIcon sx={{ 
-                  minWidth: 40,
+                  minWidth: 50,
                   color: isActive(item.path) 
                     ? theme.palette.primary.main 
                     : theme.palette.text.secondary,
+                  '& .MuiSvgIcon-root': {
+                    fontSize: '1.4rem',
+                  },
                 }}>
                   {item.icon}
                 </ListItemIcon>
                 <Box sx={{ flexGrow: 1 }}>
-                  <ListItemText 
-                    primary={item.text}
-                    secondary={item.description}
-                    primaryTypographyProps={{
-                      fontSize: '0.95rem',
-                      fontWeight: isActive(item.path) ? 600 : 500,
-                      color: isActive(item.path) 
-                        ? theme.palette.primary.main 
-                        : theme.palette.text.primary,
-                    }}
-                    secondaryTypographyProps={{
-                      fontSize: '0.8rem',
-                      color: theme.palette.text.secondary,
-                    }}
-                  />
-                </Box>
+                   <ListItemText 
+                     primary={item.text}
+                     primaryTypographyProps={{
+                       fontSize: '1.1rem',
+                       fontWeight: isActive(item.path) ? 600 : 500,
+                       color: isActive(item.path) 
+                         ? theme.palette.primary.main 
+                         : theme.palette.text.primary,
+                     }}
+                   />
+                 </Box>
               </ListItemButton>
             </ListItem>
           ))}
@@ -198,58 +181,32 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
                 }}
               >
                 <ListItemIcon sx={{ 
-                  minWidth: 40,
+                  minWidth: 50,
                   color: isActive(item.path) 
                     ? theme.palette.primary.main 
                     : theme.palette.text.secondary,
+                  '& .MuiSvgIcon-root': {
+                    fontSize: '1.4rem',
+                  },
                 }}>
                   {item.icon}
                 </ListItemIcon>
                 <Box sx={{ flexGrow: 1 }}>
-                  <ListItemText 
-                    primary={item.text}
-                    secondary={item.description}
-                    primaryTypographyProps={{
-                      fontSize: '0.95rem',
-                      fontWeight: isActive(item.path) ? 600 : 500,
-                      color: isActive(item.path) 
-                        ? theme.palette.primary.main 
-                        : theme.palette.text.primary,
-                    }}
-                    secondaryTypographyProps={{
-                      fontSize: '0.8rem',
-                      color: theme.palette.text.secondary,
-                    }}
-                  />
-                </Box>
+                   <ListItemText 
+                     primary={item.text}
+                     primaryTypographyProps={{
+                       fontSize: '1.1rem',
+                       fontWeight: isActive(item.path) ? 600 : 500,
+                       color: isActive(item.path) 
+                         ? theme.palette.primary.main 
+                         : theme.palette.text.primary,
+                     }}
+                   />
+                 </Box>
               </ListItemButton>
             </ListItem>
           ))}
         </List>
-      </Box>
-
-      {/* Footer */}
-      <Box sx={{ 
-        p: 2, 
-        borderTop: `1px solid ${theme.palette.divider}`,
-        backgroundColor: alpha(theme.palette.grey[50], 0.5)
-      }}>
-        <Typography variant="caption" sx={{ 
-          color: theme.palette.text.secondary,
-          display: 'block',
-          textAlign: 'center',
-          fontSize: '0.75rem'
-        }}>
-          © 2024 StaffSphere
-        </Typography>
-        <Typography variant="caption" sx={{ 
-          color: theme.palette.text.secondary,
-          display: 'block',
-          textAlign: 'center',
-          fontSize: '0.75rem'
-        }}>
-          Version 1.0.0
-        </Typography>
       </Box>
     </Box>
   );

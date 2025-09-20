@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import {
   Box,
@@ -20,8 +21,6 @@ import {
   TableRow,
   TablePagination,
   IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
   Collapse,
   Dialog,
   DialogTitle,
@@ -64,17 +63,28 @@ interface Employee {
 }
 
 const EmployeeDashboard: React.FC = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const location = useLocation();
+  
+  // Get view mode from URL parameters
+  const getViewModeFromURL = (): 'cards' | 'compact' => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewParam = searchParams.get('view');
+    return viewParam === 'cards' ? 'cards' : 'compact';
+  };
+
+  const [employees, setEmployees] = useState<Employee[]>([]); // Filtered employees for Dashboard
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]); // All employees for Company Overview
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'cards' | 'compact'>('compact');
+  const [viewMode, setViewMode] = useState<'cards' | 'compact'>(getViewModeFromURL());
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
   const [visibleSalaries, setVisibleSalaries] = useState<Set<string>>(new Set());
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+  const [showDepartments, setShowDepartments] = useState(false);
   const [filters, setFilters] = useState({
     department: '',
     position: '',
@@ -94,23 +104,55 @@ const EmployeeDashboard: React.FC = () => {
   const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
   useEffect(() => {
-    fetchEmployees();
+    fetchAllEmployees(); // Always fetch all employees for Company Overview
+    fetchFilteredEmployees(); // Fetch filtered employees for Dashboard
     fetchFilterOptions();
   }, []);
 
-  // Realtime filtering - trigger when search term or filters change
+  // Realtime filtering - trigger when search term or filters change (only for Dashboard)
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(0);
-      fetchEmployees();
+      fetchFilteredEmployees();
     }, 300); // 300ms debounce to avoid too many API calls
 
     return () => clearTimeout(timer);
   }, [searchTerm, filters]);
 
-  const fetchEmployees = async () => {
+  // Update view mode when URL changes
+  useEffect(() => {
+    setViewMode(getViewModeFromURL());
+  }, [location.search]);
+
+  // Animation effect for organizational chart
+  useEffect(() => {
+    if (viewMode === 'cards') {
+      // Reset animation
+      setShowDepartments(false);
+      
+      // Show departments after 0.5s delay
+      const timer = setTimeout(() => {
+        setShowDepartments(true);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [viewMode]);
+
+  const fetchAllEmployees = async () => {
     try {
       setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/employees`);
+      setAllEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching all employees:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFilteredEmployees = async () => {
+    try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (filters.department) params.append('department', filters.department);
@@ -123,9 +165,7 @@ const EmployeeDashboard: React.FC = () => {
       const response = await axios.get(`${API_BASE_URL}/employees?${params.toString()}`);
       setEmployees(response.data);
     } catch (error) {
-      console.error('Error fetching employees:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching filtered employees:', error);
     }
   };
 
@@ -191,7 +231,8 @@ const EmployeeDashboard: React.FC = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      fetchEmployees(); // Refresh the data after import
+      fetchAllEmployees(); // Refresh all employees data after import
+      fetchFilteredEmployees(); // Refresh filtered employees data after import
     } catch (error) {
       console.error('Error importing data:', error);
     }
@@ -239,11 +280,6 @@ const EmployeeDashboard: React.FC = () => {
     setVisibleSalaries(newVisible);
   };
 
-  const handleViewChange = (event: React.MouseEvent<HTMLElement>, newView: 'cards' | 'compact') => {
-    if (newView !== null) {
-      setViewMode(newView);
-    }
-  };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -254,15 +290,21 @@ const EmployeeDashboard: React.FC = () => {
     setPage(0);
   };
 
-  // Calculate paginated employees
-  const paginatedEmployees = employees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  // Get current dataset based on view mode
+  const getCurrentEmployees = () => {
+    return viewMode === 'cards' ? allEmployees : employees;
+  };
+
+  // Calculate paginated employees based on current view
+  const paginatedEmployees = getCurrentEmployees().slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   // Group employees by department
   const groupEmployeesByDepartment = () => {
     const groups: Record<string, Employee[]> = {};
+    const currentEmployees = getCurrentEmployees();
 
     // Initialize groups for all departments
-    employees.forEach(emp => {
+    currentEmployees.forEach(emp => {
       if (!groups[emp.department]) {
         groups[emp.department] = [];
       }
@@ -273,7 +315,7 @@ const EmployeeDashboard: React.FC = () => {
   };
 
 
-  // Card View Component with Network Diagram
+  // Professional Organizational Chart Component
   const renderCardView = () => {
     const departmentGroups = groupEmployeesByDepartment();
 
@@ -281,137 +323,343 @@ const EmployeeDashboard: React.FC = () => {
       <>
         <Box sx={{ 
           width: '100%', 
-          height: '600px', 
+          minHeight: '550px',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          borderRadius: 3,
+          p: 1,
+          pt: 0.5,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
         }}>
-          <svg width="800" height="600" style={{ border: '1px solid #e0e0e0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
-            {/* Draw lines from center to departments - 6 departments in circle */}
-            <line x1="400" y1="300" x2="400" y2="100" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="550" y2="150" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="550" y2="450" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="400" y2="500" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="250" y2="450" stroke="#cccccc" strokeWidth="2" />
-            <line x1="400" y1="300" x2="250" y2="150" stroke="#cccccc" strokeWidth="2" />
-            
-            {/* Center VIVN node */}
-            <g>
-              <circle cx="400" cy="300" r="48" fill="#1976d2" />
-              <text x="400" y="305" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold">
-                VIVN
-              </text>
-            </g>
-
-            {/* Sales - Top */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Sales');
-                setSelectedEmployees(departmentGroups['Sales'] || []);
-                setDepartmentDialogOpen(true);
+          {/* SVG Organizational Chart */}
+          <Box sx={{ 
+            position: 'relative',
+            width: '100%',
+            maxWidth: '900px',
+            height: '600px'
+          }}>
+            <svg 
+              width="100%" 
+              height="100%" 
+              viewBox="0 0 900 600" 
+              style={{ 
+                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                borderRadius: '16px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+                border: '1px solid rgba(255,255,255,0.2)'
               }}
             >
-              <circle cx="400" cy="100" r="44" fill="#4caf50" />
-              <text x="400" y="95" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              <style>
+                {`
+                  .dept-animation {
+                    opacity: ${showDepartments ? 1 : 0};
+                    transition: opacity 0.8s ease-in-out;
+                  }
+                  .line-animation {
+                    opacity: ${showDepartments ? 1 : 0};
+                    transition: opacity 0.6s ease-in-out 0.2s;
+                  }
+                `}
+              </style>
+              {/* Professional connecting lines with gradient */}
+              <defs>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4299E1" stopOpacity="0.3"/>
+                  <stop offset="50%" stopColor="#2C5282" stopOpacity="0.6"/>
+                  <stop offset="100%" stopColor="#4299E1" stopOpacity="0.3"/>
+                </linearGradient>
+                <linearGradient id="verticalLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#4299E1" stopOpacity="0.8"/>
+                  <stop offset="50%" stopColor="#2C5282" stopOpacity="1.0"/>
+                  <stop offset="100%" stopColor="#4299E1" stopOpacity="0.8"/>
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="dropshadow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000000" floodOpacity="0.1"/>
+                </filter>
+              </defs>
+
+              {/* Connecting Lines */}
+              <g strokeWidth="5" opacity="0.9" className="line-animation">
+                {/* Sales - Top - Use vertical gradient for proper visibility */}
+                <line x1="450" y1="300" x2="451" y2="120" stroke="url(#verticalLineGradient)" />
+                {/* Engineering - Top Right */}
+                <line x1="450" y1="300" x2="650" y2="180" stroke="url(#lineGradient)" />
+                {/* Commissioning - Bottom Right */}
+                <line x1="450" y1="300" x2="650" y2="420" stroke="url(#lineGradient)" />
+                {/* Back Office - Bottom - Use vertical gradient for proper visibility */}
+                <line x1="450" y1="300" x2="451" y2="480" stroke="url(#verticalLineGradient)" />
+                {/* Contract - Bottom Left */}
+                <line x1="450" y1="300" x2="250" y2="420" stroke="url(#lineGradient)" />
+                {/* Drafter - Top Left */}
+                <line x1="450" y1="300" x2="250" y2="180" stroke="url(#lineGradient)" />
+              </g>
+
+              {/* Center Company Logo */}
+              <g transform="translate(450, 300)">
+                <circle 
+                  cx="0" 
+                  cy="0" 
+                  r="70" 
+                  fill="url(#centerGradient)" 
+                  filter="url(#dropshadow)"
+                  stroke="#2C5282" 
+                  strokeWidth="3"
+                />
+                <defs>
+                  <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff"/>
+                    <stop offset="100%" stopColor="#f7fafc"/>
+                  </linearGradient>
+                </defs>
+                <image 
+                  x="-35" 
+                  y="-35" 
+                  width="70" 
+                  height="70" 
+                  href="/logo.png"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                />
+              </g>
+
+              {/* Sales Department - Top */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Sales');
+                  setSelectedEmployees(departmentGroups['Sales'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(450, 120)"
+              >
+                <rect 
+                  x="-60" 
+                  y="-25" 
+                  width="120" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #48bb78, #38a169)" 
+                  filter="url(#dropshadow)"
+                  stroke="#2f855a" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-58" 
+                  y="-23" 
+                  width="116" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
                 Sales
               </text>
-              <text x="400" y="110" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Sales']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Sales']?.length || 0} Members
               </text>
             </g>
 
-            {/* Engineering - Top Right */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Engineering');
-                setSelectedEmployees(departmentGroups['Engineering'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="550" cy="150" r="44" fill="#ff9800" />
-              <text x="550" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              {/* Engineering Department - Top Right */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Engineering');
+                  setSelectedEmployees(departmentGroups['Engineering'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(650, 180)"
+              >
+                <rect 
+                  x="-65" 
+                  y="-25" 
+                  width="130" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #ed8936, #dd6b20)" 
+                  filter="url(#dropshadow)"
+                  stroke="#c05621" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-63" 
+                  y="-23" 
+                  width="126" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
                 Engineering
               </text>
-              <text x="550" y="160" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Engineering']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Engineering']?.length || 0} Members
               </text>
             </g>
 
-            {/* Commissioning - Right */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Commissioning');
-                setSelectedEmployees(departmentGroups['Commissioning'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="550" cy="450" r="44" fill="#2196f3" />
-              <text x="550" y="445" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">
+              {/* Commissioning Department - Bottom Right */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Commissioning');
+                  setSelectedEmployees(departmentGroups['Commissioning'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(650, 420)"
+              >
+                <rect 
+                  x="-70" 
+                  y="-25" 
+                  width="140" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #4299e1, #3182ce)" 
+                  filter="url(#dropshadow)"
+                  stroke="#2c5282" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-68" 
+                  y="-23" 
+                  width="136" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
                 Commissioning
               </text>
-              <text x="550" y="460" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Commissioning']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Commissioning']?.length || 0} Members
               </text>
             </g>
 
-            {/* Back office - Bottom */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Back office');
-                setSelectedEmployees(departmentGroups['Back office'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="400" cy="500" r="44" fill="#9c27b0" />
-              <text x="400" y="495" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
-                Back office
+              {/* Back Office Department - Bottom */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Back office');
+                  setSelectedEmployees(departmentGroups['Back office'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(450, 480)"
+              >
+                <rect 
+                  x="-65" 
+                  y="-25" 
+                  width="130" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #9f7aea, #805ad5)" 
+                  filter="url(#dropshadow)"
+                  stroke="#6b46c1" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-63" 
+                  y="-23" 
+                  width="126" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
+                  Back Office
               </text>
-              <text x="400" y="510" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Back office']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Back office']?.length || 0} Members
               </text>
             </g>
 
-            {/* Contract - Bottom Left */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Contract');
-                setSelectedEmployees(departmentGroups['Contract'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="250" cy="450" r="44" fill="#f44336" />
-              <text x="250" y="445" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              {/* Contract Department - Bottom Left */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Contract');
+                  setSelectedEmployees(departmentGroups['Contract'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(250, 420)"
+              >
+                <rect 
+                  x="-60" 
+                  y="-25" 
+                  width="120" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #f56565, #e53e3e)" 
+                  filter="url(#dropshadow)"
+                  stroke="#c53030" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-58" 
+                  y="-23" 
+                  width="116" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
                 Contract
               </text>
-              <text x="250" y="460" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Contract']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Contract']?.length || 0} Members
               </text>
             </g>
 
-            {/* Drafter - Top Left */}
-            <g 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => {
-                setSelectedDepartment('Drafter');
-                setSelectedEmployees(departmentGroups['Drafter'] || []);
-                setDepartmentDialogOpen(true);
-              }}
-            >
-              <circle cx="250" cy="150" r="44" fill="#607d8b" />
-              <text x="250" y="145" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">
+              {/* Drafter Department - Top Left */}
+              <g 
+                className="dept-animation"
+                style={{ cursor: 'pointer' }} 
+                onClick={() => {
+                  setSelectedDepartment('Drafter');
+                  setSelectedEmployees(departmentGroups['Drafter'] || []);
+                  setDepartmentDialogOpen(true);
+                }}
+                transform="translate(250, 180)"
+              >
+                <rect 
+                  x="-60" 
+                  y="-25" 
+                  width="120" 
+                  height="50" 
+                  rx="12" 
+                  fill="linear-gradient(145deg, #718096, #4a5568)" 
+                  filter="url(#dropshadow)"
+                  stroke="#2d3748" 
+                  strokeWidth="2"
+                />
+                <rect 
+                  x="-58" 
+                  y="-23" 
+                  width="116" 
+                  height="46" 
+                  rx="10" 
+                  fill="rgba(255,255,255,0.2)" 
+                />
+                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
                 Drafter
               </text>
-              <text x="250" y="160" textAnchor="middle" fill="white" fontSize="12">
-                ({departmentGroups['Drafter']?.length || 0})
+                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
+                  {departmentGroups['Drafter']?.length || 0} Members
               </text>
             </g>
 
           </svg>
+          </Box>
         </Box>
 
         {/* Department Employees Dialog */}
@@ -531,7 +779,7 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Contact</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">ID Number</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
-            <TableCell><Typography variant="subtitle2" fontWeight="bold">Address</Typography></TableCell>
+            <TableCell><Typography variant="subtitle2" fontWeight="bold">Permanent Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
             <TableCell sx={{ width: 50 }}></TableCell>
           </TableRow>
@@ -918,84 +1166,78 @@ const EmployeeDashboard: React.FC = () => {
       )}
 
 
-      {/* Actions */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
-            Employee List ({employees.length} records)
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={exportData}
-              sx={{ 
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 3,
-                py: 1.2,
-                boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                  transform: 'translateY(-1px)'
-                }
-              }}
-            >
-              📥 Export Excel
-            </Button>
-            <Button
-              variant="contained"
-              component="label"
-              color="info"
-              sx={{ 
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 3,
-                py: 1.2,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                  transform: 'translateY(-1px)'
-                }
-              }}
-            >
-              📤 Upload Excel
-              <input
-                type="file"
-                hidden
-                accept=".xlsx,.xls"
-                onChange={importData}
-              />
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ 
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 3,
-                py: 1.2,
-                boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
-                  transform: 'translateY(-1px)'
-                }
-              }}
-            >
-              ➕ Add Employee
-            </Button>
+      {/* Actions - Only show for non-Cards view */}
+      {viewMode !== 'cards' && (
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600 }}>
+              Employee List ({getCurrentEmployees().length} records)
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={exportData}
+                sx={{ 
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1.2,
+                  boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                📥 Export Excel
+              </Button>
+              <Button
+                variant="contained"
+                component="label"
+                color="info"
+                sx={{ 
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1.2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                📤 Upload Excel
+                <input
+                  type="file"
+                  hidden
+                  accept=".xlsx,.xls"
+                  onChange={importData}
+                />
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ 
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1.2,
+                  boxShadow: '0px 2px 4px 0px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    boxShadow: '0px 4px 8px 0px rgba(0, 0, 0, 0.15)',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                ➕ Add Employee
+              </Button>
+            </Box>
           </Box>
         </Box>
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={handleViewChange}
-          size="small"
-        >
-          <ToggleButton value="compact" sx={{ fontWeight: 600 }}>📋 Compact</ToggleButton>
-          <ToggleButton value="cards" sx={{ fontWeight: 600 }}>🎴 Cards</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+      )}
+
 
       {/* Employee Display */}
       {viewMode === 'cards' && renderCardView()}
@@ -1007,7 +1249,7 @@ const EmployeeDashboard: React.FC = () => {
           <TablePagination
             rowsPerPageOptions={[20, 60, 100]}
             component="div"
-            count={employees.length}
+            count={getCurrentEmployees().length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
