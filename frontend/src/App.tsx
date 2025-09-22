@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, AppBar, Toolbar, Typography, Container, IconButton } from '@mui/material';
+import { Box, Container, Fab } from '@mui/material';
 import { Menu } from '@mui/icons-material';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import EmployeeDetail from './components/EmployeeDetail';
@@ -259,55 +259,6 @@ function App() {
       <CssBaseline />
       <Router>
         <Box sx={{ display: 'flex' }}>
-          {/* AppBar */}
-          <AppBar 
-            position="fixed" 
-            sx={{ 
-              width: { md: `calc(100% - ${drawerWidth}px)` },
-              ml: { md: `${drawerWidth}px` },
-              zIndex: (theme) => theme.zIndex.drawer + 1,
-            }}
-          >
-            <Toolbar>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="start"
-                onClick={handleDrawerToggle}
-                sx={{ mr: 2, display: { md: 'none' } }}
-              >
-                <Menu />
-              </IconButton>
-              
-              <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', mr: 3 }}>
-                <img 
-                  src="/logo.png" 
-                  alt="Company Logo" 
-                  style={{ 
-                    height: '40px', 
-                    width: 'auto',
-                    marginRight: '16px'
-                  }} 
-                />
-              </Box>
-              
-              <Typography 
-                variant="h6" 
-                component="div" 
-                sx={{ 
-                  flexGrow: 1, 
-                  textAlign: { xs: 'left', md: 'center' },
-                  color: '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: { xs: '1.1rem', md: '1.3rem' },
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Employee Management Dashboard
-              </Typography>
-            </Toolbar>
-          </AppBar>
 
           {/* Navigation Drawer */}
           <Box
@@ -327,14 +278,32 @@ function App() {
             component="main"
             sx={{
               flexGrow: 1,
-              p: 3,
+              pt: 3,
+              pr: 3,
+              pb: 3,
+              pl: 1, // Small left padding for comfortable spacing from sidebar
               width: { md: `calc(100% - ${drawerWidth}px)` },
-              background: 'linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%)',
+              background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
               minHeight: '100vh',
-              pt: { xs: 10, md: 11 }, // Account for AppBar height
             }}
           >
-            <Container maxWidth="xl">
+            {/* Mobile Menu Button */}
+            <Fab
+              color="primary"
+              aria-label="menu"
+              onClick={handleDrawerToggle}
+              sx={{
+                position: 'fixed',
+                top: 16,
+                left: 16,
+                display: { xs: 'flex', md: 'none' },
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+              }}
+            >
+              <Menu />
+            </Fab>
+
+            <Container maxWidth="xl" sx={{ pl: 0, ml: 0 }}>
               <Routes>
                 <Route path="/" element={<EmployeeDashboard />} />
                 <Route path="/employee/:id" element={<EmployeeDetail />} />

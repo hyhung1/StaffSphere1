@@ -69,7 +69,7 @@ const EmployeeDashboard: React.FC = () => {
   const getViewModeFromURL = (): 'cards' | 'compact' => {
     const searchParams = new URLSearchParams(location.search);
     const viewParam = searchParams.get('view');
-    return viewParam === 'cards' ? 'cards' : 'compact';
+    return viewParam === 'compact' ? 'compact' : 'cards';
   };
 
   const [employees, setEmployees] = useState<Employee[]>([]); // Filtered employees for Dashboard
@@ -84,7 +84,7 @@ const EmployeeDashboard: React.FC = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [departmentDialogOpen, setDepartmentDialogOpen] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
-  const [showDepartments, setShowDepartments] = useState(false);
+  const [showDepartments, setShowDepartments] = useState(true);
   const [filters, setFilters] = useState({
     department: '',
     position: '',
@@ -101,7 +101,7 @@ const EmployeeDashboard: React.FC = () => {
     contract_types: []
   });
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
   useEffect(() => {
     fetchAllEmployees(); // Always fetch all employees for Company Overview
@@ -136,8 +136,18 @@ const EmployeeDashboard: React.FC = () => {
       }, 500);
 
       return () => clearTimeout(timer);
+    } else {
+      // Ensure departments are visible for other views
+      setShowDepartments(true);
     }
   }, [viewMode]);
+
+  // Ensure chart shows on initial load
+  useEffect(() => {
+    if (allEmployees.length > 0 && viewMode === 'cards') {
+      setShowDepartments(true);
+    }
+  }, [allEmployees, viewMode]);
 
   const fetchAllEmployees = async () => {
     try {
@@ -321,34 +331,57 @@ const EmployeeDashboard: React.FC = () => {
 
     return (
       <>
-        <Box sx={{ 
-          width: '100%', 
-          minHeight: '550px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-          borderRadius: 3,
-          p: 1,
-          pt: 0.5,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-        }}>
-          {/* SVG Organizational Chart */}
-          <Box sx={{ 
-            position: 'relative',
-            width: '100%',
-            maxWidth: '900px',
-            height: '600px'
-          }}>
+        <Grid container spacing={2} sx={{ pl: 0, ml: -1, mr: 0 }}>
+          {/* Left side - Organizational Chart */}
+          <Grid item xs={12} lg={7} sx={{ pl: 0, ml: 0 }}>
+            <Box sx={{ 
+              width: '100%', 
+              minHeight: '600px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'linear-gradient(135deg, #1A365D 0%, #2C5282 50%, #1A365D 100%)',
+              borderRadius: 4,
+              p: 3,
+              boxShadow: '0 8px 32px rgba(44, 82, 130, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at 20% 50%, rgba(44, 82, 130, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)',
+                pointerEvents: 'none'
+              }
+            }}>
+              {/* SVG Organizational Chart */}
+              <Box sx={{ 
+                position: 'relative',
+                width: '100%',
+                maxWidth: '900px',
+                height: '600px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
             <svg 
               width="100%" 
               height="100%" 
               viewBox="0 0 900 600" 
+              preserveAspectRatio="xMidYMid meet"
               style={{ 
-                background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+                background: 'rgba(255, 255, 255, 0.1)',
                 borderRadius: '16px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
-                border: '1px solid rgba(255,255,255,0.2)'
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                position: 'relative',
+                zIndex: 1
               }}
             >
               <style>
@@ -359,22 +392,22 @@ const EmployeeDashboard: React.FC = () => {
                   }
                   .line-animation {
                     opacity: ${showDepartments ? 1 : 0};
-                    transition: opacity 0.6s ease-in-out 0.2s;
+                    transition: opacity 0.8s ease-in-out;
                   }
                 `}
               </style>
-              {/* Professional connecting lines with gradient */}
+              {/* Modern gradients and effects */}
               <defs>
-                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#4299E1" stopOpacity="0.3"/>
-                  <stop offset="50%" stopColor="#2C5282" stopOpacity="0.6"/>
-                  <stop offset="100%" stopColor="#4299E1" stopOpacity="0.3"/>
+                <linearGradient id="modernLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8"/>
+                  <stop offset="50%" stopColor="#a7f3d0" stopOpacity="1.0"/>
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.8"/>
                 </linearGradient>
-                <linearGradient id="verticalLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#4299E1" stopOpacity="0.8"/>
-                  <stop offset="50%" stopColor="#2C5282" stopOpacity="1.0"/>
-                  <stop offset="100%" stopColor="#4299E1" stopOpacity="0.8"/>
-                </linearGradient>
+                <radialGradient id="modernCenterGradient" cx="50%" cy="50%">
+                  <stop offset="0%" stopColor="#ffffff"/>
+                  <stop offset="50%" stopColor="#f0f9ff"/>
+                  <stop offset="100%" stopColor="#e0f2fe"/>
+                </radialGradient>
                 <filter id="glow">
                   <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
                   <feMerge> 
@@ -387,46 +420,83 @@ const EmployeeDashboard: React.FC = () => {
                 </filter>
               </defs>
 
-              {/* Connecting Lines */}
-              <g strokeWidth="5" opacity="0.9" className="line-animation">
-                {/* Sales - Top - Use vertical gradient for proper visibility */}
-                <line x1="450" y1="300" x2="451" y2="120" stroke="url(#verticalLineGradient)" />
-                {/* Engineering - Top Right */}
-                <line x1="450" y1="300" x2="650" y2="180" stroke="url(#lineGradient)" />
-                {/* Commissioning - Bottom Right */}
-                <line x1="450" y1="300" x2="650" y2="420" stroke="url(#lineGradient)" />
-                {/* Back Office - Bottom - Use vertical gradient for proper visibility */}
-                <line x1="450" y1="300" x2="451" y2="480" stroke="url(#verticalLineGradient)" />
-                {/* Contract - Bottom Left */}
-                <line x1="450" y1="300" x2="250" y2="420" stroke="url(#lineGradient)" />
-                {/* Drafter - Top Left */}
-                <line x1="450" y1="300" x2="250" y2="180" stroke="url(#lineGradient)" />
+              {/* Modern Connecting Lines - BIGGER VERSION */}
+              <g strokeWidth="8" opacity="0.9">
+                {/* Sales - Top: Connect to center of Sales box (y=60) - shorter line */}
+                <path d="M 450 265 L 450 60" stroke="rgba(255,255,255,0.9)" fill="none" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </path>
+
+                {/* Back Office - Bottom: Connect to center of Back Office box (y=570) */}
+                <path d="M 450 365 L 450 570" stroke="rgba(255,255,255,0.9)" fill="none" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </path>
+
+                {/* Engineering - Top Right: Straight line to center of Engineering box (720, 180) */}
+                <line x1="503" y1="262" x2="720" y2="180" stroke="url(#modernLineGradient)" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </line>
+                {/* Commissioning - Bottom Right: Straight line to center of Commissioning box (720, 420) */}
+                <line x1="503" y1="368" x2="720" y2="420" stroke="url(#modernLineGradient)" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </line>
+                {/* Contract - Bottom Left: Straight line to center of Contract box (180, 420) */}
+                <line x1="397" y1="368" x2="180" y2="420" stroke="url(#modernLineGradient)" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </line>
+                {/* Drafter - Top Left: Straight line to center of Drafter box (180, 180) */}
+                <line x1="397" y1="262" x2="180" y2="180" stroke="url(#modernLineGradient)" strokeLinecap="round" strokeWidth="8" strokeDasharray="12,6">
+                  <animate attributeName="stroke-dashoffset" values="0;18;0" dur="3s" repeatCount="indefinite"/>
+                </line>
               </g>
 
-              {/* Center Company Logo */}
-              <g transform="translate(450, 300)">
+              {/* Enhanced Center Company Logo - PERFECTLY CENTERED */}
+              <g transform="translate(450, 315)">
+                {/* Outer glow ring - BIGGER */}
                 <circle 
                   cx="0" 
                   cy="0" 
-                  r="70" 
-                  fill="url(#centerGradient)" 
-                  filter="url(#dropshadow)"
-                  stroke="#2C5282" 
+                  r="110"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="3"
+                  strokeDasharray="25,8"
+                  opacity="0.6"
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    values="0;360"
+                    dur="20s"
+                    repeatCount="indefinite"/>
+                </circle>
+                {/* Main circle - BIGGER */}
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="95"
+                  fill="url(#modernCenterGradient)"
+                  filter="url(#dropshadow)"
+                  stroke="rgba(255,255,255,0.8)"
+                  strokeWidth="4"
                 />
-                <defs>
-                  <linearGradient id="centerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#ffffff"/>
-                    <stop offset="100%" stopColor="#f7fafc"/>
-                  </linearGradient>
-                </defs>
+                {/* Inner shadow - BIGGER */}
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="88"
+                  fill="none"
+                  stroke="rgba(0,0,0,0.1)"
+                  strokeWidth="2"
+                />
+                {/* Logo image - perfectly centered */}
                 <image 
-                  x="-35" 
-                  y="-35" 
-                  width="70" 
-                  height="70" 
+                  x="-50"
+                  y="-50"
+                  width="100"
+                  height="100"
                   href="/logo.png"
-                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                  style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.3))' }}
                 />
               </g>
 
@@ -439,34 +509,42 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Sales'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(450, 120)"
+                transform="translate(450, 60)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-60" 
-                  y="-25" 
-                  width="120" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #48bb78, #38a169)" 
+                  x="-90"
+                  y="-40"
+                  width="180"
+                  height="80"
+                  rx="20"
+                  fill="url(#salesGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#2f855a" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-58" 
-                  y="-23" 
-                  width="116" 
-                  height="46" 
-                  rx="10" 
+                  x="-88"
+                  y="-38"
+                  width="176"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
                 Sales
               </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Sales']?.length || 0} Members
+                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Sales']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="salesGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#38A169"/>
+                  <stop offset="100%" stopColor="#2F855A"/>
+                </linearGradient>
+              </defs>
 
               {/* Engineering Department - Top Right */}
               <g 
@@ -477,34 +555,42 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Engineering'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(650, 180)"
+                transform="translate(720, 180)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-65" 
-                  y="-25" 
-                  width="130" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #ed8936, #dd6b20)" 
+                  x="-100"
+                  y="-40"
+                  width="200"
+                  height="80"
+                  rx="20"
+                  fill="url(#engineeringGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#c05621" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-63" 
-                  y="-23" 
-                  width="126" 
-                  height="46" 
-                  rx="10" 
+                  x="-98"
+                  y="-38"
+                  width="196"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
                 Engineering
               </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Engineering']?.length || 0} Members
+                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Engineering']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="engineeringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#D69E2E"/>
+                  <stop offset="100%" stopColor="#B7791F"/>
+                </linearGradient>
+              </defs>
 
               {/* Commissioning Department - Bottom Right */}
               <g 
@@ -515,34 +601,42 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Commissioning'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(650, 420)"
+                transform="translate(720, 420)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-70" 
-                  y="-25" 
-                  width="140" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #4299e1, #3182ce)" 
+                  x="-110"
+                  y="-40"
+                  width="220"
+                  height="80"
+                  rx="20"
+                  fill="url(#commissioningGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#2c5282" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-68" 
-                  y="-23" 
-                  width="136" 
-                  height="46" 
-                  rx="10" 
+                  x="-108"
+                  y="-38"
+                  width="216"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
                 Commissioning
               </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Commissioning']?.length || 0} Members
+                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Commissioning']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="commissioningGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3182CE"/>
+                  <stop offset="100%" stopColor="#2C5282"/>
+                </linearGradient>
+              </defs>
 
               {/* Back Office Department - Bottom */}
               <g 
@@ -553,34 +647,42 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Back office'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(450, 480)"
+                transform="translate(450, 570)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-65" 
-                  y="-25" 
-                  width="130" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #9f7aea, #805ad5)" 
+                  x="-100"
+                  y="-40"
+                  width="200"
+                  height="80"
+                  rx="20"
+                  fill="url(#backofficeGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#6b46c1" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-63" 
-                  y="-23" 
-                  width="126" 
-                  height="46" 
-                  rx="10" 
+                  x="-98"
+                  y="-38"
+                  width="196"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
                   Back Office
-              </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Back office']?.length || 0} Members
+                </text>
+                                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Back office']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="backofficeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#805AD5"/>
+                  <stop offset="100%" stopColor="#553C9A"/>
+                </linearGradient>
+              </defs>
 
               {/* Contract Department - Bottom Left */}
               <g 
@@ -591,34 +693,42 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Contract'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(250, 420)"
+                transform="translate(180, 420)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-60" 
-                  y="-25" 
-                  width="120" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #f56565, #e53e3e)" 
+                  x="-90"
+                  y="-40"
+                  width="180"
+                  height="80"
+                  rx="20"
+                  fill="url(#contractGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#c53030" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-58" 
-                  y="-23" 
-                  width="116" 
-                  height="46" 
-                  rx="10" 
+                  x="-88"
+                  y="-38"
+                  width="176"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
-                Contract
-              </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Contract']?.length || 0} Members
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
+                  Contract
+                </text>
+                                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Contract']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="contractGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#E53E3E"/>
+                  <stop offset="100%" stopColor="#C53030"/>
+                </linearGradient>
+              </defs>
 
               {/* Drafter Department - Top Left */}
               <g 
@@ -629,38 +739,199 @@ const EmployeeDashboard: React.FC = () => {
                   setSelectedEmployees(departmentGroups['Drafter'] || []);
                   setDepartmentDialogOpen(true);
                 }}
-                transform="translate(250, 180)"
+                transform="translate(180, 180)"
               >
+                {/* Card background with gradient - BIGGER */}
                 <rect 
-                  x="-60" 
-                  y="-25" 
-                  width="120" 
-                  height="50" 
-                  rx="12" 
-                  fill="linear-gradient(145deg, #718096, #4a5568)" 
+                  x="-90"
+                  y="-40"
+                  width="180"
+                  height="80"
+                  rx="20"
+                  fill="url(#drafterGradient)"
                   filter="url(#dropshadow)"
-                  stroke="#2d3748" 
+                  stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                 />
+                {/* Glass effect overlay */}
                 <rect 
-                  x="-58" 
-                  y="-23" 
-                  width="116" 
-                  height="46" 
-                  rx="10" 
+                  x="-88"
+                  y="-38"
+                  width="176"
+                  height="35"
+                  rx="18"
                   fill="rgba(255,255,255,0.2)" 
                 />
-                <text x="0" y="-5" textAnchor="middle" fill="white" fontSize="16" fontWeight="700" fontFamily="Poppins">
-                Drafter
-              </text>
-                <text x="0" y="12" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="12" fontWeight="500">
-                  {departmentGroups['Drafter']?.length || 0} Members
+                <text x="0" y="-10" textAnchor="middle" fill="white" fontSize="22" fontWeight="700" fontFamily="Poppins">
+                  Drafter
+                </text>
+                                <text x="0" y="21" textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize="22" fontWeight="500">
+                  ({departmentGroups['Drafter']?.length || 0})
               </text>
             </g>
+              <defs>
+                <linearGradient id="drafterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#319795"/>
+                  <stop offset="100%" stopColor="#2C7A7B"/>
+                </linearGradient>
+              </defs>
 
-          </svg>
-          </Box>
-        </Box>
+              </svg>
+              </Box>
+            </Box>
+          </Grid>
+          
+          {/* Right side - Company Statistics */}
+          <Grid item xs={12} lg={5}>
+            <Box sx={{ 
+              width: '100%', 
+              minHeight: '600px',
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'linear-gradient(135deg, #2C5282 0%, #1A365D 100%)',
+              borderRadius: 3,
+              p: 3,
+              boxShadow: '0 4px 16px rgba(44,82,130,0.2)',
+              border: '1px solid rgba(44,82,130,0.3)',
+              gap: 1.5
+            }}>
+              <Typography variant="h6" sx={{ 
+                color: 'white', 
+                mb: 1.5, 
+                textAlign: 'center',
+                fontWeight: 600,
+                fontSize: '1.1rem'
+              }}>
+                📊 Company Statistics Dashboard
+              </Typography>
+
+              {/* Key Metrics Row */}
+              <Grid container spacing={2} sx={{ mb: 1.5 }}>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 1.5, textAlign: 'center', bgcolor: 'primary.main', color: 'white' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+                      {allEmployees.length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                      Total Employees
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 1.5, textAlign: 'center', bgcolor: 'success.main', color: 'white' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700, fontSize: '1.5rem' }}>
+                      {(() => {
+                        const uniqueDepartments = new Set(allEmployees.map(emp => emp.department));
+                        return uniqueDepartments.size;
+                      })()}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                      Departments
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              {/* Employment Details and Department Analysis */}
+              <Grid container spacing={2}>
+                {/* Employment Details */}
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.1)', height: '450px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600, fontSize: '1rem', color: 'white' }}>
+                      📋 Employment Details
+                    </Typography>
+                    {(() => {
+                      const genderStats = allEmployees.reduce((acc, emp) => {
+                        acc[emp.gender] = (acc[emp.gender] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>);
+                      const educationStats = allEmployees.reduce((acc, emp) => {
+                        acc[emp.education_level] = (acc[emp.education_level] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>);
+                      return (
+                        <>
+                          <Typography variant="body2" sx={{ fontSize: '0.9rem', mb: 0.8, fontWeight: 500, color: 'white' }}>Gender Distribution:</Typography>
+                          {Object.entries(genderStats).map(([gender, count]) => (
+                            <Box key={gender} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.9rem', color: 'white' }}>
+                                {gender === 'Nam' ? '♂️ Male' : '♀️ Female'}
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'white' }}>
+                                {count} ({Math.round((count / allEmployees.length) * 100)}%)
+                              </Typography>
+                            </Box>
+                          ))}
+                          <Typography variant="body2" sx={{ fontSize: '0.9rem', mt: 2.5, mb: 0.8, fontWeight: 500, color: 'white' }}>Education Levels:</Typography>
+                          {Object.entries(educationStats)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 5)
+                            .map(([education, count]) => (
+                            <Box key={education} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.9rem', maxWidth: '65%', color: 'white' }} noWrap>
+                                {education}
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'white' }}>
+                                {count} ({Math.round((count / allEmployees.length) * 100)}%)
+                              </Typography>
+                            </Box>
+                          ))}
+                        </>
+                      );
+                    })()}
+                  </Paper>
+                </Grid>
+
+                {/* Department Analysis */}
+                <Grid item xs={6}>
+                  <Paper sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.1)', height: '450px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 600, fontSize: '1rem', color: 'white' }}>
+                      🏢 Department Size
+                    </Typography>
+                    {(() => {
+                      const deptStats = allEmployees.reduce((acc, emp) => {
+                        acc[emp.department] = (acc[emp.department] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>);
+                      const contractStats = allEmployees.reduce((acc, emp) => {
+                        acc[emp.contract_type] = (acc[emp.contract_type] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>);
+                      return (
+                        <>
+                          {Object.entries(deptStats)
+                            .sort(([,a], [,b]) => b - a)
+                            .map(([dept, count]) => (
+                            <Box key={dept} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.9rem', maxWidth: '60%', color: 'white' }} noWrap>
+                                {dept}
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'white' }}>
+                                {count} ({Math.round((count / allEmployees.length) * 100)}%)
+                              </Typography>
+                            </Box>
+                          ))}
+                          <Typography variant="body2" sx={{ fontSize: '0.9rem', mt: 2.5, mb: 0.8, fontWeight: 500, color: 'white' }}>Contract Types:</Typography>
+                          {Object.entries(contractStats).map(([type, count]) => (
+                            <Box key={type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.8 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.9rem', maxWidth: '65%', color: 'white' }} noWrap>
+                                {type === 'Không thời hạn' ? 'Permanent' : 'Fixed-term'}
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'white' }}>
+                                {count}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </>
+                      );
+                    })()}
+                  </Paper>
+                </Grid>
+              </Grid>
+
+            </Box>
+          </Grid>
+        </Grid>
 
         {/* Department Employees Dialog */}
         <Dialog
@@ -995,7 +1266,7 @@ const EmployeeDashboard: React.FC = () => {
   );
 
   return (
-    <Box>
+    <Box sx={{ pl: 0, ml: 0 }}>
       {/* View Mode Selector and Search/Filter Section */}
       {viewMode !== 'cards' && (
         <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>

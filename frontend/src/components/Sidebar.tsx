@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
           <img 
             src="/female-avatar.png" 
-            alt="Mrs Nhung Ho" 
+            alt="Mrs Nhung" 
             style={{ 
               width: '60px', 
               height: '60px',
@@ -93,12 +93,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
               objectFit: 'cover'
             }} 
           />
-          <Typography variant="h6" sx={{ 
-            fontWeight: 700, 
+          <Typography variant="subtitle1" sx={{
+            fontWeight: 700,
             letterSpacing: '0.5px',
             color: theme.palette.text.primary
           }}>
-            Mrs Nhung Ho
+            Mrs Nhung
           </Typography>
         </Box>
       </Box>
@@ -224,8 +224,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
         '& .MuiDrawer-paper': {
           boxSizing: 'border-box',
           width: drawerWidth,
-          backgroundColor: theme.palette.background.paper,
-          borderRight: `1px solid ${theme.palette.divider}`,
+          background: 'linear-gradient(180deg, #F7FAFC 0%, #EDF2F7 50%, #E2E8F0 100%)',
+          borderRight: `1px solid rgba(44, 82, 130, 0.1)`,
+          boxShadow: '2px 0 8px rgba(44, 82, 130, 0.08)',
         },
       }}
     >

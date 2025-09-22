@@ -66,7 +66,17 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
   };
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    // Handle the special case for Company Overview and Dashboard views
+    if (path === '/?view=cards') {
+      // Company Overview is active if we're on / with view=cards or / with no view parameter (default)
+      return location.pathname === '/' && (location.search === '?view=cards' || location.search === '');
+    }
+    if (path === '/?view=compact') {
+      // Dashboard is active only if we're explicitly on view=compact
+      return location.pathname === '/' && location.search === '?view=compact';
+    }
+    // For other paths, check exact match
+    return location.pathname === path || location.pathname + location.search === path;
   };
 
   const drawerContent = (
@@ -75,27 +85,57 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
       <Box sx={{ 
         p: 3, 
         textAlign: 'center',
-        borderBottom: `1px solid ${theme.palette.divider}`
+        background: 'linear-gradient(135deg, rgba(44, 82, 130, 0.05) 0%, rgba(44, 82, 130, 0.02) 100%)',
+        borderBottom: `1px solid rgba(44, 82, 130, 0.1)`,
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-          <img 
-            src="/female-avatar.png" 
-            alt="Mrs Nhung Ho" 
-            style={{ 
-              width: '60px', 
-              height: '60px',
-              borderRadius: '50%',
-              marginRight: '12px',
-              objectFit: 'cover'
-            }} 
-          />
-          <Typography variant="h6" sx={{ 
-            fontWeight: 700, 
-            letterSpacing: '0.5px',
-            color: theme.palette.text.primary
+          <Box sx={{
+            position: 'relative',
+            mr: 2,
           }}>
-            Mrs Nhung Ho
-          </Typography>
+            <img 
+              src="/female-avatar.png" 
+              alt="Mrs Nhung" 
+              style={{ 
+                width: '64px', 
+                height: '64px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid rgba(44, 82, 130, 0.2)',
+                boxShadow: '0 4px 12px rgba(44, 82, 130, 0.15)',
+              }} 
+            />
+            <Box sx={{
+              position: 'absolute',
+              bottom: 2,
+              right: 2,
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              backgroundColor: '#38A169',
+              border: '2px solid #F7FAFC',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            }} />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" sx={{
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              color: '#2C5282',
+              fontSize: '1.1rem',
+              mb: 0.2,
+            }}>
+              Mrs Nhung
+            </Typography>
+            <Typography variant="caption" sx={{
+              color: 'rgba(44, 82, 130, 0.7)',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              letterSpacing: '0.3px',
+            }}>
+              HR Administrator
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
@@ -110,15 +150,22 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                   borderRadius: 2,
                   py: 1.5,
                   px: 2,
-                  backgroundColor: isActive(item.path) 
-                    ? alpha(theme.palette.primary.main, 0.1)
+                  background: isActive(item.path) 
+                    ? 'linear-gradient(135deg, rgba(44, 82, 130, 0.12) 0%, rgba(44, 82, 130, 0.08) 100%)'
                     : 'transparent',
                   border: isActive(item.path) 
-                    ? `1px solid ${alpha(theme.palette.primary.main, 0.3)}`
+                    ? `1px solid rgba(44, 82, 130, 0.25)`
                     : '1px solid transparent',
+                  boxShadow: isActive(item.path) 
+                    ? '0 2px 8px rgba(44, 82, 130, 0.12)'
+                    : 'none',
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                    background: isActive(item.path) 
+                      ? 'linear-gradient(135deg, rgba(44, 82, 130, 0.15) 0%, rgba(44, 82, 130, 0.1) 100%)'
+                      : 'linear-gradient(135deg, rgba(44, 82, 130, 0.06) 0%, rgba(44, 82, 130, 0.04) 100%)',
+                    border: `1px solid rgba(44, 82, 130, 0.2)`,
+                    boxShadow: '0 2px 8px rgba(44, 82, 130, 0.1)',
+                    transform: 'translateY(-1px)',
                   },
                   transition: 'all 0.2s ease',
                 }}
@@ -126,8 +173,8 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                 <ListItemIcon sx={{ 
                   minWidth: 50,
                   color: isActive(item.path) 
-                    ? theme.palette.primary.main 
-                    : theme.palette.text.secondary,
+                    ? '#2C5282' 
+                    : 'rgba(44, 82, 130, 0.6)',
                   '& .MuiSvgIcon-root': {
                     fontSize: '1.4rem',
                   },
@@ -141,8 +188,8 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                        fontSize: '1.1rem',
                        fontWeight: isActive(item.path) ? 600 : 500,
                        color: isActive(item.path) 
-                         ? theme.palette.primary.main 
-                         : theme.palette.text.primary,
+                         ? '#2C5282' 
+                         : 'rgba(44, 82, 130, 0.8)',
                      }}
                    />
                  </Box>
@@ -163,15 +210,22 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                   borderRadius: 2,
                   py: 1.5,
                   px: 2,
-                  backgroundColor: isActive(item.path) 
-                    ? alpha(theme.palette.primary.main, 0.1)
+                  background: isActive(item.path) 
+                    ? 'linear-gradient(135deg, rgba(44, 82, 130, 0.12) 0%, rgba(44, 82, 130, 0.08) 100%)'
                     : 'transparent',
                   border: isActive(item.path) 
-                    ? `1px solid ${alpha(theme.palette.primary.main, 0.3)}`
+                    ? `1px solid rgba(44, 82, 130, 0.25)`
                     : '1px solid transparent',
+                  boxShadow: isActive(item.path) 
+                    ? '0 2px 8px rgba(44, 82, 130, 0.12)'
+                    : 'none',
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                    background: isActive(item.path) 
+                      ? 'linear-gradient(135deg, rgba(44, 82, 130, 0.15) 0%, rgba(44, 82, 130, 0.1) 100%)'
+                      : 'linear-gradient(135deg, rgba(44, 82, 130, 0.06) 0%, rgba(44, 82, 130, 0.04) 100%)',
+                    border: `1px solid rgba(44, 82, 130, 0.2)`,
+                    boxShadow: '0 2px 8px rgba(44, 82, 130, 0.1)',
+                    transform: 'translateY(-1px)',
                   },
                   transition: 'all 0.2s ease',
                 }}
@@ -179,8 +233,8 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                 <ListItemIcon sx={{ 
                   minWidth: 50,
                   color: isActive(item.path) 
-                    ? theme.palette.primary.main 
-                    : theme.palette.text.secondary,
+                    ? '#2C5282' 
+                    : 'rgba(44, 82, 130, 0.6)',
                   '& .MuiSvgIcon-root': {
                     fontSize: '1.4rem',
                   },
@@ -194,8 +248,8 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
                        fontSize: '1.1rem',
                        fontWeight: isActive(item.path) ? 600 : 500,
                        color: isActive(item.path) 
-                         ? theme.palette.primary.main 
-                         : theme.palette.text.primary,
+                         ? '#2C5282' 
+                         : 'rgba(44, 82, 130, 0.8)',
                      }}
                    />
                  </Box>
@@ -216,8 +270,9 @@ const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
         '& .MuiDrawer-paper': {
           boxSizing: 'border-box',
           width: drawerWidth,
-          backgroundColor: theme.palette.background.paper,
-          borderRight: `1px solid ${theme.palette.divider}`,
+          background: 'linear-gradient(180deg, #F7FAFC 0%, #EDF2F7 50%, #E2E8F0 100%)',
+          borderRight: `1px solid rgba(44, 82, 130, 0.1)`,
+          boxShadow: '2px 0 8px rgba(44, 82, 130, 0.08)',
         },
       }}
       open
