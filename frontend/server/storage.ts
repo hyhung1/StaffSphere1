@@ -20,6 +20,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  [x: string]: any;
   private calculations: Map<string, SalaryResult>;
   private employees: Map<string, SelectEmployee>;
 

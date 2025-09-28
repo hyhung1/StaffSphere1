@@ -311,7 +311,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
       // Upload successful - no popup dialog needed
       
       // Refresh employee list
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      //queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
       
       // Show toast with complete information
       const toastDescription = result.deleted > 0 

@@ -34,7 +34,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
       return res.json();
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/employees/buld-update"] });
       toast({
         title: "Success",
         description: `Updated ${variables.field} for all employees`,
