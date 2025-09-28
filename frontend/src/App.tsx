@@ -10,6 +10,12 @@ import Statistics from './components/Statistics';
 import Sidebar from './components/Sidebar';
 import PermanentSidebar, { drawerWidth } from './components/PermanentSidebar';
 import Login from './components/Login';
+import NotFound from './components/pages/not-found';
+import SalaryCalculator from './components/pages/calculator';
+import { queryClient } from "./components/lib/queryClient";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 // Create a sophisticated professional theme for HR application
 const theme = createTheme({
@@ -257,62 +263,69 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Box sx={{ display: 'flex' }}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+         <Toaster />
+          <Router>
+            <Box sx={{ display: 'flex' }}>
 
-          {/* Navigation Drawer */}
-          <Box
-            component="nav"
-            sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-            aria-label="mailbox folders"
-          >
-            {/* Mobile drawer */}
-            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} />
-            
-            {/* Desktop permanent drawer */}
-            <PermanentSidebar onLogout={handleLogout} />
-          </Box>
+              {/* Navigation Drawer */}
+              <Box
+                component="nav"
+                sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+                aria-label="mailbox folders"
+              >
+                {/* Mobile drawer */}
+                <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} />
+                
+                {/* Desktop permanent drawer */}
+                <PermanentSidebar onLogout={handleLogout} />
+              </Box>
 
-          {/* Main content */}
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              pt: 3,
-              pr: 3,
-              pb: 3,
-              pl: 1, // Small left padding for comfortable spacing from sidebar
-              width: { md: `calc(100% - ${drawerWidth}px)` },
-              background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
-              minHeight: '100vh',
-            }}
-          >
-            {/* Mobile Menu Button */}
-            <Fab
-              color="primary"
-              aria-label="menu"
-              onClick={handleDrawerToggle}
-              sx={{
-                position: 'fixed',
-                top: 16,
-                left: 16,
-                display: { xs: 'flex', md: 'none' },
-                zIndex: (theme) => theme.zIndex.drawer + 1,
-              }}
-            >
-              <Menu />
-            </Fab>
+              {/* Main content */}
+              <Box
+                component="main"
+                sx={{
+                  flexGrow: 1,
+                  pt: 3,
+                  pr: 3,
+                  pb: 3,
+                  pl: 1, // Small left padding for comfortable spacing from sidebar
+                  width: { md: `calc(100% - ${drawerWidth}px)` },
+                  background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
+                  minHeight: '100vh',
+                }}
+              >
+                {/* Mobile Menu Button */}
+                <Fab
+                  color="primary"
+                  aria-label="menu"
+                  onClick={handleDrawerToggle}
+                  sx={{
+                    position: 'fixed',
+                    top: 16,
+                    left: 16,
+                    display: { xs: 'flex', md: 'none' },
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                  }}
+                >
+                  <Menu />
+                </Fab>
 
-            <Container maxWidth="xl" sx={{ pl: 0, ml: 0 }}>
-              <Routes>
-                <Route path="/" element={<EmployeeDashboard />} />
-                <Route path="/employee/:id" element={<EmployeeDetail />} />
-                <Route path="/statistics" element={<Statistics />} />
-              </Routes>
-            </Container>
-          </Box>
-        </Box>
-      </Router>
+                <Container maxWidth="xl" sx={{ pl: 0, ml: 0 }}>
+                  <Routes>
+                    <Route path="/" element={<EmployeeDashboard />} />
+                    <Route path="/employee/:id" element={<EmployeeDetail />} />
+                    <Route path="/statistics" element={<Statistics />} />
+                    <Route path="/payroll" element={<SalaryCalculator />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Container>
+              </Box>
+            </Box>
+          </Router>
+        </TooltipProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
