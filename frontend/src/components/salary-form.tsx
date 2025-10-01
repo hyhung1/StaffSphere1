@@ -25,6 +25,8 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
   const [, forceUpdate] = useState({});
+  const [actualDaysWorked, setActualDaysWorked] = useState<number>(20);
+  const [totalWorkdays, setTotalWorkdays] = useState<number>(20);
   const { toast } = useToast();
   
   // Mutation to bulk update a field for all employees
@@ -66,9 +68,9 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
     resolver: zodResolver(salaryInputSchema),
     defaultValues: {
       employeeNo: "VIVN-0001",
-      name: "Nguyễn Văn A",
+      name: "Huỳnh Nguyễn Gia Hoàng",
       salary: 10000000,
-      bonus: 500000,
+      bonus: 0,
       allowanceTax: 200000,
       ot15: 10,
       ot20: 5,
@@ -84,7 +86,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
   // Force re-render when salary or other key values change
   useEffect(() => {
     forceUpdate({});
-  }, [watchedValues.salary, watchedValues.bonus, watchedValues.allowanceTax, watchedValues.personalRelief, watchedValues.dependentRelief, watchedValues.dependants]);
+  }, [watchedValues.salary, watchedValues.bonus, watchedValues.allowanceTax, watchedValues.personalRelief, watchedValues.dependentRelief, watchedValues.dependants, actualDaysWorked, totalWorkdays]);
   
   // Populate form when an employee is selected
   useEffect(() => {
@@ -122,7 +124,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
     const advance = watchedValues.advance || 0;
     
     // Calculate all derived values
-    const augSalary = Math.round((salary / 21) * 20);
+    const augSalary = Math.round((salary / totalWorkdays) * actualDaysWorked);
     const overtimePayPIT = Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30));
     const personalRelief = watchedValues.personalRelief || 11000000;
     const dependentRelief = watchedValues.dependentRelief !== undefined ? watchedValues.dependentRelief : 4400000 * dependants;
@@ -131,9 +133,9 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
     const hesoCoeff = ot15 * 0.5 + ot20 + ot30 * 2;
     const overtimePayNonPIT = Math.round((augSalary / 22 / 8) * hesoCoeff);
     
-    // A. Salary and Allowance = Day-work salary + Over Time + Allowance must pay PIT + Bonus
+    // A. Salary and Allowance = Day-work salary + Over Time + Allowance must pay PIT (excluding bonus)
     const totalOverTimePay = overtimePayPIT + overtimePayNonPIT;
-    const totalSalary = Math.round(augSalary + totalOverTimePay + allowanceTax + bonus);
+    const totalSalary = Math.round(augSalary + totalOverTimePay + allowanceTax);
     const assessableIncome = Math.max(0, totalSalary - (employeeInsurance + personalRelief + dependentRelief));
     
     // Calculate progressive tax
@@ -157,7 +159,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
     const personalIncomeTax = Math.round(Math.max(pit, 0));
     // Match the form's Total OT hours calculation  
     const totalOTHours = Math.round(ot15 + ot20 + ot30 + ot15 * 0.5 + ot20 + ot30 * 2);
-    const totalNetIncome = Math.round(totalSalary - personalIncomeTax - employeeInsurance - unionFee + overtimePayNonPIT - advance);
+    const totalNetIncome = Math.round(totalSalary - personalIncomeTax - employeeInsurance - unionFee - advance);
     
     // Pass the calculated result to parent
     onCalculationChange({
@@ -183,9 +185,11 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
       overtimePayNonPIT,
       totalOTHours,
       totalNetIncome,
+      actualDaysWorked,
+      totalWorkdays,
       calculatedAt: new Date().toISOString(),
     });
-  }, [watchedValues, onCalculationChange]);
+  }, [watchedValues, onCalculationChange, actualDaysWorked, totalWorkdays]);
   
   // Helper function for handling Enter key press
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, fieldName: string) => {
@@ -251,101 +255,98 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
 
 
   return (
-    <Card className="w-full max-w-[48rem]">
-      <CardContent className="p-8">
-        <div className="space-y-8">
-          {/* Employee Information */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
-              Employee Information
-            </h3>
+    <Card className="w-full max-w-[48rem] h-full flex flex-col">
+      <CardContent className="p-6 pt-2 flex-1 overflow-auto">
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4 pb-3 border-b">
+            <div className="space-y-1.5">
+              <Label htmlFor="employeeNo" className="text-xs font-medium text-muted-foreground">Employee No</Label>
+              <Input
+                id="employeeNo"
+                data-testid="input-employee-no"
+                {...form.register("employeeNo")}
+                className="w-[90%] h-9 text-[16rem] font-semibold"
+              />
+              {form.formState.errors.employeeNo && (
+                <p className="text-sm text-red-500">{form.formState.errors.employeeNo.message}</p>
+              )}
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="space-y-1">
-                <Label htmlFor="employeeNo">Employee No.</Label>
-                <Input
-                  id="employeeNo"
-                  data-testid="input-employee-no"
-                  {...form.register("employeeNo")}
-                  className="w-full"
-                />
-                {form.formState.errors.employeeNo && (
-                  <p className="text-sm text-red-500">{form.formState.errors.employeeNo.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-1">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  data-testid="input-employee-name"
-                  {...form.register("name")}
-                  className="w-full"
-                />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
-                )}
-              </div>
-              
-              <div className="space-y-1">
-                <Label htmlFor="totalNetIncome" className="block min-h-[24px]">Total Net Income</Label>
-                <Input
-                  id="totalNetIncome"
-                  type="text"
-                  value={(() => {
-                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / 21 * 20);
-                    const bonus = form.watch("bonus") || 0;
-                    const allowanceTax = form.watch("allowanceTax") || 0;
-                    const ot15 = form.watch("ot15") || 0;
-                    const ot20 = form.watch("ot20") || 0;
-                    const ot30 = form.watch("ot30") || 0;
-                    const otPayPit = Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30));
-                    const otNonePayPit = Math.round((augSalary / 22 / 8) * (ot15 * 0.5 + ot20 + ot30 * 2));
-                    const totalSalary = Math.round(augSalary + bonus + allowanceTax + otPayPit);
-                    
-                    const personalRelief = form.watch("personalRelief") || 11000000;
-                    const dependentRelief = form.watch("dependentRelief") !== undefined ? form.watch("dependentRelief") || 0 : 4400000 * (form.watch("dependants") || 0);
-                    const insuranceEmployee = (form.watch("salary") || 0) * 0.105;
-                    const unionFee = Math.min((form.watch("salary") || 0) * 0.005, 234000);
-                    const advance = form.watch("advance") || 0;
-                    
-                    const taxableIncome = Math.max(0, totalSalary - (insuranceEmployee + personalRelief + dependentRelief));
-                    
-                    // Progressive tax calculation
-                    const brackets = [
-                      [5000000, 0.05, 0],
-                      [10000000, 0.10, 250000],
-                      [18000000, 0.15, 750000],
-                      [32000000, 0.20, 1650000],
-                      [52000000, 0.25, 3250000],
-                      [80000000, 0.30, 5850000],
-                      [Infinity, 0.35, 9850000]
-                    ];
-                    
-                    let pit = 0;
-                    for (const [limit, rate, deduction] of brackets) {
-                      if (taxableIncome <= limit) {
-                        pit = taxableIncome * rate - deduction;
-                        break;
-                      }
-                    }
-                    const personalIncomeTax = Math.round(Math.max(pit, 0));
-                    
-                    return formatNumberWithVND(Math.round(totalSalary - personalIncomeTax - insuranceEmployee - unionFee + otNonePayPit - advance));
-                  })()}
-                  readOnly
-                  data-testid="input-total-net-income"
-                  className="w-full"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">Full Name</Label>
+              <Input
+                id="name"
+                data-testid="input-employee-name"
+                {...form.register("name")}
+                className="w-[90%] h-9 text-[16rem] font-semibold"
+              />
+              {form.formState.errors.name && (
+                <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-1.5">
+              <Label htmlFor="advance" className="text-xs font-medium text-muted-foreground">Adv</Label>
+              <Input
+                id="advance"
+                type="text"
+                value={
+                  focusedField === "advance"
+                    ? rawInputValues.advance || form.watch("advance")?.toString() || ""
+                    : formatNumberWithVND(form.watch("advance") || 0)
+                }
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  setRawInputValues(prev => ({ ...prev, advance: inputValue }));
+                  const value = parseFormattedNumber(inputValue);
+                  form.setValue("advance", value, { shouldValidate: true });
+                }}
+                onFocus={() => {
+                  setFocusedField("advance");
+                  if (!rawInputValues.advance && form.watch("advance")) {
+                    setRawInputValues(prev => ({ ...prev, advance: form.watch("advance").toString() }));
+                  }
+                }}
+                onBlur={() => {
+                  setFocusedField(null);
+                  setRawInputValues(prev => ({ ...prev, advance: "" }));
+                }}
+                onKeyDown={(e) => handleKeyDown(e, "advance")}
+                data-testid="input-advance"
+                className="w-[90%] h-9 text-[16rem] font-semibold"
+              />
             </div>
           </div>
 
           {/* Salary Components */}
           <div className="space-y-4">
-            <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
-              Basic Information
-            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              <div className="flex items-center">
+                <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
+                  Basic Information:
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Present days:</span>
+                <Input
+                  id="actualDaysWorked"
+                  type="number"
+                  value={actualDaysWorked}
+                  onChange={(e) => setActualDaysWorked(Number(e.target.value) || 20)}
+                  className="w-16 h-8 text-sm"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground">Total workdays:</span>
+                <Input
+                  id="totalWorkday"
+                  type="number"
+                  value={totalWorkdays}
+                  onChange={(e) => setTotalWorkdays(Number(e.target.value) || 20)}
+                  className="w-16 h-8 text-sm"
+                />
+              </div>
+            </div>
             
             {/* First row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -381,7 +382,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, salary: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "salary")}
-                  className="w-full"
+                  className="w-[81%]"
                 />
                 {form.formState.errors.salary && (
                   <p className="text-sm text-red-500">{form.formState.errors.salary.message}</p>
@@ -389,14 +390,14 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="augSalary" className=" h-[40px] flex items-end pb-1">Aug's Salary</Label>
+                <Label htmlFor="augSalary" className=" h-[40px] flex items-end pb-1">Actual Salary</Label>
                 <Input
                   id="augSalary"
                   type="text"
                   data-testid="input-aug-salary"
-                  value={formatNumberWithVND(Math.round((form.watch("salary") || 0) / 21 * 20))}
+                  value={formatNumberWithVND(Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked))}
                   readOnly
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
               
@@ -449,7 +450,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, bonus: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "bonus")}
-                  className="w-full"
+                  className="w-[81%]"
                 />
                 {form.formState.errors.bonus && (
                   <p className="text-sm text-red-500">{form.formState.errors.bonus.message}</p>
@@ -468,7 +469,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-dependents"
                   {...form.register("dependants", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "dependants")}
-                  className="w-full"
+                  className="w-[81%]"
                 />
                 {form.formState.errors.dependants && (
                   <p className="text-sm text-red-500">{form.formState.errors.dependants.message}</p>
@@ -524,7 +525,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, dependentRelief: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "dependentRelief")}
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
               
@@ -571,7 +572,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, personalRelief: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "personalRelief")}
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
             </div>
@@ -585,11 +586,11 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   type="text"
                   data-testid="input-insurance-company"
                   value={(() => {
-                    const augSalary = Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     return formatNumberWithVND(augSalary * 0.215);
                   })()}
                   readOnly
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
               
@@ -601,7 +602,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-insurance-employee"
                   value={formatNumberWithVND((form.watch("salary") || 0) * 0.105)}
                   readOnly
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
               
@@ -618,16 +619,16 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(personalRelief + dependentRelief + insuranceEmployee);
                   })()}
                   readOnly
-                  className="w-full"
+                  className="w-[81%]"
                 />
               </div>
             </div>
           </div>
 
           {/* Overtime Hours */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
-              Overtime Information
+              Overtime Information:
             </h3>
             
             {/* First row: OT15, OT20, OT30, Total OT hours */}
@@ -642,7 +643,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-15"
                   {...form.register("ot15", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot15")}
-                  className="w-full"
+                  className="w-[64%]"
                 />
                 {form.formState.errors.ot15 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot15.message}</p>
@@ -659,7 +660,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-20"
                   {...form.register("ot20", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot20")}
-                  className="w-full"
+                  className="w-[64%]"
                 />
                 {form.formState.errors.ot20 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot20.message}</p>
@@ -676,7 +677,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-30"
                   {...form.register("ot30", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot30")}
-                  className="w-full"
+                  className="w-[64%]"
                 />
                 {form.formState.errors.ot30 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot30.message}</p>
@@ -691,7 +692,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-total-ot-hours"
                   value={formatNumber(Math.round((form.watch("ot15") || 0) + (form.watch("ot20") || 0) + (form.watch("ot30") || 0) + (form.watch("ot15") || 0) * 0.5 + (form.watch("ot20") || 0) + (form.watch("ot30") || 0) * 2))}
                   readOnly
-                  className="w-full"
+                  className="w-[64%]"
                 />
               </div>
             </div>
@@ -752,7 +753,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   type="text"
                   data-testid="input-overtime-none-pay-pit"
                   value={(() => {
-                    const augSalary = Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     const ot15 = form.watch("ot15") || 0;
                     const ot20 = form.watch("ot20") || 0;
                     const ot30 = form.watch("ot30") || 0;
@@ -770,7 +771,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   type="text"
                   data-testid="input-overtime-pay-pit"
                   value={(() => {
-                    const augSalary = Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     const ot15 = form.watch("ot15") || 0;
                     const ot20 = form.watch("ot20") || 0;
                     const ot30 = form.watch("ot30") || 0;
@@ -788,7 +789,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   type="text"
                   data-testid="input-total-salary"
                   value={(() => {
-                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     const bonus = form.watch("bonus") || 0;
                     const allowanceTax = form.watch("allowanceTax") || 0;
                     const ot15 = form.watch("ot15") || 0;
@@ -798,7 +799,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(Math.round(augSalary + bonus + allowanceTax + otPayPit));
                   })()}
                   readOnly
-                  className="w-full"
+                  className="w-[105%]"
                 />
               </div>
             </div>
@@ -809,43 +810,11 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
           {/* After Tax */}
           <div className="space-y-4">
             <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
-              After Tax
+              After Tax:
             </h3>
             
-            {/* Row: Adv, Đoàn phí, Assessable income, Personal Income tax */}
+            {/* Row: Đoàn phí, Assessable income, Personal Income tax, Total Net Income */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="space-y-1">
-                <Label htmlFor="advance" className="block min-h-[24px]">Adv</Label>
-                <Input
-                  id="advance"
-                  type="text"
-                  value={
-                    focusedField === "advance"
-                      ? rawInputValues.advance || form.watch("advance")?.toString() || ""
-                      : formatNumberWithVND(form.watch("advance") || 0)
-                  }
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    setRawInputValues(prev => ({ ...prev, advance: inputValue }));
-                    const value = parseFormattedNumber(inputValue);
-                    form.setValue("advance", value, { shouldValidate: true });
-                  }}
-                  onFocus={() => {
-                    setFocusedField("advance");
-                    if (!rawInputValues.advance && form.watch("advance")) {
-                      setRawInputValues(prev => ({ ...prev, advance: form.watch("advance").toString() }));
-                    }
-                  }}
-                  onBlur={() => {
-                    setFocusedField(null);
-                    setRawInputValues(prev => ({ ...prev, advance: "" }));
-                  }}
-                  onKeyDown={(e) => handleKeyDown(e, "advance")}
-                  data-testid="input-advance"
-                  className="w-full"
-                />
-              </div>
-              
               <div className="space-y-1">
                 <Label htmlFor="doanPhi" className="block min-h-[24px]">Đoàn phí</Label>
                 <Input
@@ -867,7 +836,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   id="assessableIncome"
                   type="text"
                   value={(() => {
-                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     const bonus = form.watch("bonus") || 0;
                     const allowanceTax = form.watch("allowanceTax") || 0;
                     const ot15 = form.watch("ot15") || 0;
@@ -894,7 +863,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   id="personalIncomeTax"
                   type="text"
                   value={(() => {
-                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / 21 * 20);
+                    const augSalary = form.watch("augSalary") !== undefined ? form.watch("augSalary") || 0 : Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked);
                     const bonus = form.watch("bonus") || 0;
                     const allowanceTax = form.watch("allowanceTax") || 0;
                     const ot15 = form.watch("ot15") || 0;
@@ -933,6 +902,66 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   readOnly
                   data-testid="input-personal-income-tax"
                   className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="totalNetIncome" className="block min-h-[24px]">Total Net Income</Label>
+                <Input
+                  id="totalNetIncome"
+                  type="text"
+                  value={(() => {
+                    // Use the same calculation logic as the main useEffect to ensure consistency
+                    const salary = watchedValues.salary || 0;
+                    const bonus = watchedValues.bonus || 0;
+                    const allowanceTax = watchedValues.allowanceTax || 0;
+                    const ot15 = watchedValues.ot15 || 0;
+                    const ot20 = watchedValues.ot20 || 0;
+                    const ot30 = watchedValues.ot30 || 0;
+                    const dependants = watchedValues.dependants || 0;
+                    const advance = watchedValues.advance || 0;
+                    
+                    // Calculate all derived values using the same logic as main calculation
+                    const augSalary = Math.round((salary / totalWorkdays) * actualDaysWorked);
+                    const overtimePayPIT = Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30));
+                    const personalRelief = watchedValues.personalRelief || 11000000;
+                    const dependentRelief = watchedValues.dependentRelief !== undefined ? watchedValues.dependentRelief : 4400000 * dependants;
+                    const employeeInsurance = salary * 0.105;
+                    const unionFee = Math.min(salary * 0.005, 234000);
+                    const hesoCoeff = ot15 * 0.5 + ot20 + ot30 * 2;
+                    const overtimePayNonPIT = Math.round((augSalary / 22 / 8) * hesoCoeff);
+                    
+                    // Calculate totalSalary to match section B (includes both taxable and non-taxable overtime, excluding bonus)
+                    const totalOverTimePay = overtimePayPIT + overtimePayNonPIT;
+                    const totalSalary = Math.round(augSalary + totalOverTimePay + allowanceTax);
+                    const assessableIncome = Math.max(0, totalSalary - (employeeInsurance + personalRelief + dependentRelief));
+                    
+                    // Calculate progressive tax
+                    const TAX_BRACKETS = [
+                      { limit: 5000000, rate: 0.05, deduction: 0 },
+                      { limit: 10000000, rate: 0.10, deduction: 250000 },
+                      { limit: 18000000, rate: 0.15, deduction: 750000 },
+                      { limit: 32000000, rate: 0.20, deduction: 1650000 },
+                      { limit: 52000000, rate: 0.25, deduction: 3250000 },
+                      { limit: 80000000, rate: 0.30, deduction: 5850000 },
+                      { limit: Infinity, rate: 0.35, deduction: 9850000 },
+                    ];
+                    
+                    let pit = 0;
+                    for (const { limit, rate, deduction } of TAX_BRACKETS) {
+                      if (assessableIncome <= limit) {
+                        pit = assessableIncome * rate - deduction;
+                        break;
+                      }
+                    }
+                    const personalIncomeTax = Math.round(Math.max(pit, 0));
+                    
+                    // Total Net Income = B - F - D - D.6 - G (matches employee section display)
+                    return formatNumberWithVND(Math.round(totalSalary - personalIncomeTax - employeeInsurance - unionFee - advance));
+                  })()}
+                  readOnly
+                  data-testid="input-total-net-income"
+                  className="w-full bg-muted/50"
                 />
               </div>
             </div>

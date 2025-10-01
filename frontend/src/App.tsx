@@ -287,10 +287,10 @@ function App() {
                 component="main"
                 sx={{
                   flexGrow: 1,
-                  pt: 3,
-                  pr: 3,
+                  pt: 'calc(0.75rem - 2px)',
+                  pr: -0.5,
                   pb: 3,
-                  pl: 1, // Small left padding for comfortable spacing from sidebar
+                  pl: -6, // Reduced left padding to move content closer to sidebar
                   width: { md: `calc(100% - ${drawerWidth}px)` },
                   background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
                   minHeight: '100vh',
@@ -312,7 +312,7 @@ function App() {
                   <Menu />
                 </Fab>
 
-                <Container maxWidth="xl" sx={{ pl: 0, ml: 0 }}>
+                <Container maxWidth="xl" sx={{ pl: 0, ml: -1.5 }}>
                   <Routes>
                     <Route path="/" element={<EmployeeDashboard />} />
                     <Route path="/employee/:id" element={<EmployeeDetail />} />

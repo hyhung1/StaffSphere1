@@ -22,6 +22,10 @@ export const salaryInputSchema = z.object({
   dependants: z.number().min(0, "Dependents must be positive").default(0),
   advance: z.number().min(0, "Advance payment must be positive").default(0),
   
+  // Present days and Total workdays for dynamic calculation
+  actualDaysWorked: z.number().min(1, "Present days must be positive").default(20),
+  totalWorkdays: z.number().min(1, "Total workdays must be positive").default(20),
+  
   // Additional editable fields
   augSalary: z.number().min(0).optional(),
   insuranceEmployee: z.number().min(0).optional(),
@@ -52,6 +56,8 @@ export const salaryResultSchema = z.object({
   ot30: z.number(),
   dependants: z.number(),
   advance: z.number(),
+  actualDaysWorked: z.number(),
+  totalWorkdays: z.number(),
   
   // Calculated fields
   augSalary: z.number(),
@@ -93,6 +99,8 @@ export const employees = pgTable("employees", {
   ot30: real("ot_30").notNull(),
   dependants: real("dependants").notNull(),
   advance: real("advance").notNull(),
+  actualDaysWorked: real("actual_days_worked").notNull(),
+  totalWorkdays: real("total_workdays").notNull(),
   overtimePayPIT: real("overtime_pay_pit").notNull(),
   totalSalary: real("total_salary").notNull(),
   personalRelief: real("personal_relief").notNull(),

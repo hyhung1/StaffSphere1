@@ -60,13 +60,15 @@ def calculate_salary(input_data: SalaryInput) -> SalaryResult:
     ot30 = input_data.ot30
     dependants = input_data.dependants
     advance = input_data.advance
+    actual_days_worked = getattr(input_data, 'actualDaysWorked', 20)  # Default to 20 if not provided
+    total_workdays = getattr(input_data, 'totalWorkdays', 20)  # Default to 20 if not provided
     
     # Constants
     personal_relief = 11_000_000
     dependent_relief_rate = 4_400_000
     
-    # Calculations based on JavaScript logic
-    aug_salary = (salary / 21) * 20
+    # Calculations using dynamic workdays
+    aug_salary = (salary / total_workdays) * actual_days_worked
     overtime_pay_pit = js_floor((aug_salary / 22 / 8) * (ot15 + ot20 + ot30))
     total_salary = js_round(aug_salary + bonus + allowance_tax + overtime_pay_pit)
     dependent_relief = dependent_relief_rate * dependants
@@ -105,6 +107,8 @@ def calculate_salary(input_data: SalaryInput) -> SalaryResult:
         ot30=ot30,
         dependants=dependants,
         advance=advance,
+        actualDaysWorked=actual_days_worked,
+        totalWorkdays=total_workdays,
         augSalary=js_round(aug_salary),
         overtimePayPIT=overtime_pay_pit,
         totalSalary=total_salary,

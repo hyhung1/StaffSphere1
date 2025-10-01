@@ -30,9 +30,11 @@ def calculate_employee_salary_data(employee: SelectEmployee) -> Dict[str, Any]:
     ot30 = employee.ot30
     dependants = employee.dependants
     advance = employee.advance
+    actual_days_worked = getattr(employee, 'actualDaysWorked', 20)  # Default to 20 if not provided
+    total_workdays = getattr(employee, 'totalWorkdays', 20)  # Default to 20 if not provided
     
-    # Calculate derived values (matching frontend logic)
-    aug_salary = round((salary / 21) * 20)
+    # Calculate derived values using dynamic workdays
+    aug_salary = round((salary / total_workdays) * actual_days_worked)
     overtime_pay_pit = int((aug_salary / 22 / 8) * (ot15 + ot20 + ot30))  # Math.floor equivalent
     personal_relief = 11000000  # Default value
     dependent_relief = 4400000 * dependants
@@ -79,6 +81,8 @@ def calculate_employee_salary_data(employee: SelectEmployee) -> Dict[str, Any]:
         "ot30": ot30,
         "dependants": dependants,
         "advance": advance,
+        "actualDaysWorked": actual_days_worked,
+        "totalWorkdays": total_workdays,
         "augSalary": aug_salary,
         "overtimePayPIT": overtime_pay_pit,
         "totalSalary": total_salary,

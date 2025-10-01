@@ -21,8 +21,8 @@ export default function SalaryCalculator() {
   };
 
   return (
-    <div className="w-full h-full ">
-      <div className="grid grid-cols-1 xl:grid-cols-[40%_60%] gap-3">
+    <div className="w-full h-[calc(100vh-6rem)]">
+      <div className="grid grid-cols-1 xl:grid-cols-[47%_53%] gap-2 h-full">
           {/* Input Form Section */}
           <SalaryForm 
             onCalculationChange={handleCalculationComplete}

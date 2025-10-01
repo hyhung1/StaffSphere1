@@ -68,7 +68,7 @@ class MemStorage:
         sample_data = [
             {
                 "employeeNo": "VIVN-0001",
-                "name": "Nguyễn Văn A",
+                "name": "Huỳnh Nguyễn Gia Hoàng",
                 "salary": sample_info.get("salary", 10000000),
                 "bonus": sample_info.get("bonus", 500000),
                 "allowanceTax": sample_info.get("allowanceTax", 200000),

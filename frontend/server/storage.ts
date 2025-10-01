@@ -42,9 +42,11 @@ export class MemStorage implements IStorage {
     const ot30 = 2;
     const dependants = 2;
     const advance = 0;
+    const actualDaysWorked = 20;
+    const totalWorkdays = 20;
     
     // Calculate derived values
-    const augSalary = Math.round((salary / 21) * 20);
+    const augSalary = Math.round((salary / totalWorkdays) * actualDaysWorked);
     const overtimePayPIT = Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30));
     const totalSalary = Math.round(augSalary + bonus + allowanceTax + overtimePayPIT);
     const personalRelief = 11000000;
@@ -81,7 +83,7 @@ export class MemStorage implements IStorage {
     const sampleEmployee: SelectEmployee = {
       id: "sample-001",
       employeeNo: "VIVN-0001",
-      name: "Nguyễn Văn A",
+      name: "Huỳnh Nguyễn Gia Hoàng",
       augSalary,
       totalOTHours,
       totalNetIncome,
@@ -93,6 +95,8 @@ export class MemStorage implements IStorage {
       ot30,
       dependants,
       advance,
+      actualDaysWorked,
+      totalWorkdays,
       overtimePayPIT,
       totalSalary,
       personalRelief,

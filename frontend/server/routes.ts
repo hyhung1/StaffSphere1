@@ -29,12 +29,14 @@ function calculateSalary(input: SalaryInput): SalaryResult {
     ot30,
     dependants,
     advance,
+    actualDaysWorked = 20,
+    totalWorkdays = 20,
   } = input;
 
   const personalRelief = 11_000_000;
   const dependentReliefRate = 4_400_000;
 
-  const augSalary = (salary / 21) * 20;
+  const augSalary = (salary / totalWorkdays) * actualDaysWorked;
   const overtimePayPIT = Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30));
   const totalSalary = Math.round(augSalary + bonus + allowanceTax + overtimePayPIT);
 
@@ -72,6 +74,8 @@ function calculateSalary(input: SalaryInput): SalaryResult {
     ot30,
     dependants,
     advance,
+    actualDaysWorked,
+    totalWorkdays,
     augSalary: Math.round(augSalary),
     overtimePayPIT,
     totalSalary,

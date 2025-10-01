@@ -12,12 +12,20 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Trash2, Users, UserPlus, Check, AlertTriangle, RotateCcw, Upload, Download, FileDown } from "lucide-react";
+import { Trash2, Users, UserPlus, Check, AlertTriangle, RotateCcw, Upload, Download, FileDown, List } from "lucide-react";
 import { useToast } from "./hooks/use-toast";
 import { queryClient, apiRequest } from "./lib/queryClient";
 import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
 import { PaySlip } from "./payslip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 
 interface EmployeeTableProps {
   onAddEmployee?: () => void;
@@ -28,7 +36,50 @@ interface EmployeeTableProps {
 export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmployee }: EmployeeTableProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle sidebar visibility when summary dialog opens/closes
+  const handleSummaryDialogChange = (open: boolean) => {
+    setSummaryDialogOpen(open);
+    
+    // Hide/show sidebar by adding/removing CSS class to body
+    if (open) {
+      document.body.classList.add('hide-sidebar');
+    } else {
+      document.body.classList.remove('hide-sidebar');
+    }
+  };
+
+  // Add CSS to hide sidebar when component mounts, clean up when unmounts
+  useEffect(() => {
+    // Add CSS rule to hide sidebar
+    const style = document.createElement('style');
+    style.textContent = `
+      .hide-sidebar .MuiDrawer-root {
+        display: none !important;
+      }
+      .hide-sidebar main {
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding-left: 1rem !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Cleanup function to remove CSS and class when component unmounts
+    return () => {
+      document.head.removeChild(style);
+      document.body.classList.remove('hide-sidebar');
+    };
+  }, []);
+
+  // Additional cleanup when dialog state changes to ensure sidebar is always shown when dialog closes
+  useEffect(() => {
+    if (!summaryDialogOpen) {
+      document.body.classList.remove('hide-sidebar');
+    }
+  }, [summaryDialogOpen]);
   
   const { data: employees = [], isLoading } = useQuery<SelectEmployee[]>({
     queryKey: ["/api/employees"],
@@ -405,9 +456,97 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader>
+      <CardHeader className="pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <Dialog open={summaryDialogOpen} onOpenChange={handleSummaryDialogChange}>
+              <DialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (employees.length === 0) {
+                      toast({
+                        title: "Error", 
+                        description: "No employees found to show summary",
+                        variant: "destructive",
+                      });
+                    } else {
+                      handleSummaryDialogChange(true);
+                    }
+                  }}
+                  data-testid="button-summary"
+                >
+                  <List className="mr-2 h-4 w-4" />
+                  Summary
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Employee Salary Summary</DialogTitle>
+                </DialogHeader>
+                <ScrollArea className="flex-1 pr-4">
+                  <div className="overflow-x-auto">
+                    <Table className="border-collapse">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[150px] text-center font-bold border-r-2 border-gray-300">Name</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Salary</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Actual Salary</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Allowance</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Total Salary</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Personal relief</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Dependent relief</TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold border-r-2 border-gray-300">Personal Income tax</TableHead>
+                          <TableHead className="min-w-[77px] text-center font-bold border-r-2 border-gray-300">Total OT hours</TableHead>
+                          <TableHead className="min-w-[180px] text-center font-bold border-r-2 border-gray-300">Insurance - Company's pay (21.5%)</TableHead>
+                          <TableHead className="min-w-[180px] text-center font-bold border-r-2 border-gray-300">Insurance - Employee's pay (10.5%)</TableHead>
+                          <TableHead className="min-w-[77px] text-center font-bold border-r-2 border-gray-300">Đoàn phí</TableHead>
+                          <TableHead className="min-w-[150px] text-center font-bold">Total Net Income</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {employees.map((employee) => {
+                          // Use values from currentCalculation (employee section) when available, otherwise use stored employee data
+                          // This ensures the summary shows exactly what the employee section calculated
+                          const isCurrentEmployee = currentCalculation && employee.employeeNo === currentCalculation.employeeNo;
+                          
+                          return (
+                            <TableRow key={employee.id}>
+                              <TableCell className="text-center font-medium border-r-2 border-gray-300">{employee.name}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.salary)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.augSalary : employee.augSalary)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.allowanceTax)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.totalSalary : employee.totalSalary)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.personalRelief)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.dependentRelief)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.personalIncomeTax : employee.personalIncomeTax)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatNumber(employee.totalOTHours)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.companyInsurance)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.employeeInsurance : employee.employeeInsurance)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.unionFee : employee.unionFee)}
+                              </TableCell>
+                              <TableCell className="text-center font-semibold">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.totalNetIncome : employee.totalNetIncome)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </ScrollArea>
+              </DialogContent>
+            </Dialog>
             <Button
               size="sm"
               variant="outline"
@@ -545,16 +684,16 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        {/* 85%-15% Split Layout */}
-        <div className="flex h-[calc(100vh-16rem)]">
-          {/* 85% PaySlip Display */}
-          <div className="w-[85%] bg-white relative">
+      <CardContent className="flex-1 overflow-hidden pt-0">
+        {/* 81%-19% Split Layout */}
+        <div className="flex h-[calc(100vh-12.3rem)]">
+          {/* 81% PaySlip Display */}
+          <div className="w-[81%] bg-white relative overflow-y-auto overflow-x-hidden">
             <PaySlip currentCalculation={currentCalculation} />
           </div>
           
-          {/* 15% Employee List */}
-          <div className="w-[15%] border-l">
+          {/* 19% Employee List */}
+          <div className="w-[19%] border-l">
             <ScrollArea className="h-full">
               {isLoading ? (
                 <div className="text-center text-muted-foreground py-8">
@@ -580,7 +719,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                       <div
                         key={employee.id}
                         data-testid={`row-employee-${employee.id}`}
-                        className={`cursor-pointer transition-all duration-200 px-1.5 py-1.5 ml-4 rounded-lg border-2 shadow-sm hover:shadow-md transform hover:scale-[1.01] mr-0 ${
+                        className={`cursor-pointer transition-all duration-200 px-1.5 py-1.5 ml-2 rounded-lg border-2 shadow-sm hover:shadow-md transform hover:scale-[1.01] mr-0 ${
                           isBeingEdited 
                             ? 'border-primary bg-blue-50 shadow-md ring-2 ring-primary/20' 
                             : 'border-slate-200 bg-slate-50 hover:border-primary/40 hover:bg-blue-50/50'
@@ -588,10 +727,10 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                         onClick={() => handleEmployeeClick(employee)}
                       >
                         <div className="text-center">
-                          <div className="text-[15px] font-semibold text-slate-700 truncate mb-0.5" title={employee.employeeNo}>
+                          <div className="text-[13px] font-semibold text-slate-700 truncate mb-0.5" title={employee.employeeNo}>
                             {employee.employeeNo}
                           </div>
-                          <div className="text-[13px] font-bold text-slate-500 truncate leading-relaxed" title={displayData.name}>
+                          <div className="text-[11px] font-bold text-slate-500 truncate leading-relaxed" title={displayData.name}>
                             {displayData.name}
                           </div>
                         </div>
