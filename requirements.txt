@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pydantic
+email-validator
+pandas
+openpyxl
+cryptography
+httpx
+python-multipart
+requests
+
+# Optional: Development Dependencies (uncomment if needed)
+# pytest>=8.0.0
+# black>=24.0.0
+# flake8>=7.0.0
+# mypy>=1.8.0
+

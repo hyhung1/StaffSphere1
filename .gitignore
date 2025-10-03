@@ -133,3 +133,8 @@ attached_assets/
 *.db
 *.sqlite
 *.sqlite3
+
+# Security: Encryption keys and sensitive data
+.system_key
+*.encrypted
+backend/app/storage/.system_key

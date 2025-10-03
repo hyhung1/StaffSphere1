@@ -20,15 +20,16 @@ import {
   AccountBalance,
 } from '@mui/icons-material';
 
-const drawerWidth = 202;
+const drawerWidth = 139;
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
+  currentUser: any;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -86,17 +87,18 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
             src="/female-avatar.png" 
             alt="Mrs Nhung" 
             style={{ 
-              width: '60px', 
-              height: '60px',
+              width: '44px', 
+              height: '44px',
               borderRadius: '50%',
-              marginRight: '12px',
+              marginRight: '8px',
               objectFit: 'cover'
             }} 
           />
           <Typography variant="subtitle1" sx={{
             fontWeight: 700,
-            letterSpacing: '0.5px',
-            color: theme.palette.text.primary
+            letterSpacing: '0.46px',
+            color: theme.palette.text.primary,
+            fontSize: '0.8rem',
           }}>
             Mrs Nhung
           </Typography>
@@ -105,15 +107,15 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
 
       {/* Navigation Items */}
       <Box sx={{ flexGrow: 1, py: 1 }}>
-        <List sx={{ px: 2 }}>
+        <List sx={{ px: 1.3 }}>
           {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.36 }}>
               <ListItemButton
                 onClick={() => handleNavigation(item.path, item.text)}
                 sx={{
-                  borderRadius: 2,
-                  py: 1.5,
-                  px: 2,
+                  borderRadius: 1.3,
+                  py: 1.08,
+                  px: 1.44,
                   backgroundColor: isActive(item.path) 
                     ? alpha(theme.palette.primary.main, 0.1)
                     : 'transparent',
@@ -128,12 +130,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
                 }}
               >
                 <ListItemIcon sx={{ 
-                  minWidth: 50,
+                  minWidth: 36,
                   color: isActive(item.path) 
                     ? theme.palette.primary.main 
                     : theme.palette.text.secondary,
                   '& .MuiSvgIcon-root': {
-                    fontSize: '1.4rem',
+                    fontSize: '1.0rem',
                   },
                 }}>
                   {item.icon}
@@ -142,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
                    <ListItemText 
                      primary={item.text}
                      primaryTypographyProps={{
-                       fontSize: '1.1rem',
+                       fontSize: '0.8rem',
                        fontWeight: isActive(item.path) ? 600 : 500,
                        color: isActive(item.path) 
                          ? theme.palette.primary.main 
@@ -155,18 +157,18 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
           ))}
         </List>
 
-        <Divider sx={{ mx: 2, my: 2 }} />
+        <Divider sx={{ mx: 1.3, my: 1.3 }} />
 
         {/* Bottom Menu Items */}
-        <List sx={{ px: 2 }}>
+        <List sx={{ px: 1.3 }}>
           {bottomMenuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.36 }}>
               <ListItemButton
                 onClick={() => handleNavigation(item.path, item.text)}
                 sx={{
-                  borderRadius: 2,
-                  py: 1.5,
-                  px: 2,
+                  borderRadius: 1.3,
+                  py: 1.08,
+                  px: 1.44,
                   backgroundColor: isActive(item.path) 
                     ? alpha(theme.palette.primary.main, 0.1)
                     : 'transparent',
@@ -181,12 +183,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
                 }}
               >
                 <ListItemIcon sx={{ 
-                  minWidth: 50,
+                  minWidth: 36,
                   color: isActive(item.path) 
                     ? theme.palette.primary.main 
                     : theme.palette.text.secondary,
                   '& .MuiSvgIcon-root': {
-                    fontSize: '1.4rem',
+                    fontSize: '1.0rem',
                   },
                 }}>
                   {item.icon}
@@ -195,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
                    <ListItemText 
                      primary={item.text}
                      primaryTypographyProps={{
-                       fontSize: '1.1rem',
+                       fontSize: '0.8rem',
                        fontWeight: isActive(item.path) ? 600 : 500,
                        color: isActive(item.path) 
                          ? theme.palette.primary.main 

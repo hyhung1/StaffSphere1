@@ -10,6 +10,14 @@ import Statistics from './components/Statistics';
 import Sidebar from './components/Sidebar';
 import PermanentSidebar, { drawerWidth } from './components/PermanentSidebar';
 import Login from './components/Login';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import NotFound from './components/pages/not-found';
+import SalaryCalculator from './components/pages/calculator';
+import { queryClient } from "./components/lib/queryClient";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 // Create a sophisticated professional theme for HR application
 const theme = createTheme({
@@ -224,31 +232,114 @@ const theme = createTheme({
 
 function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Check localStorage for existing authentication
+    const savedAuth = localStorage.getItem('isAuthenticated');
+    return savedAuth === 'true';
+  });
+  const [currentUser, setCurrentUser] = useState(() => {
+    // Load user info from localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'forgot'>('login');
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleLogin = async (username: string, password: string): Promise<boolean> => {
-    // Simple authentication - in a real app, this would be an API call
-    if (username === 'admin' && password === 'password') {
-      setIsAuthenticated(true);
-      return true;
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.user) {
+        const user = {
+          ...data.user,
+          loginTime: new Date().toISOString(),
+          password: password // Store password temporarily for encryption/decryption
+        };
+        
+        setIsAuthenticated(true);
+        setCurrentUser(user);
+        
+        // Persist authentication state in localStorage
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
+    
+    // Clear authentication from localStorage
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    
+    // CRITICAL: Clear all React Query cache to prevent data leakage between users
+    // This ensures that when a new user logs in, they don't see the previous user's cached data
+    queryClient.clear();
+    
+    console.log('🔒 User logged out - all cached data cleared');
   };
 
-  // Show login page if not authenticated
+  const handleRegister = () => {
+    setAuthScreen('register');
+  };
+
+  const handleForgotPassword = () => {
+    setAuthScreen('forgot');
+  };
+
+  const handleBackToLogin = () => {
+    setAuthScreen('login');
+  };
+
+  const handleRegisterSuccess = () => {
+    setAuthScreen('login');
+  };
+
+  // Show authentication screens if not authenticated
   if (!isAuthenticated) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Login onLogin={handleLogin} />
+        {authScreen === 'login' && (
+          <Login 
+            onLogin={handleLogin} 
+            onRegister={handleRegister}
+            onForgotPassword={handleForgotPassword}
+          />
+        )}
+        {authScreen === 'register' && (
+          <Register 
+            onRegisterSuccess={handleRegisterSuccess}
+            onBackToLogin={handleBackToLogin}
+          />
+        )}
+        {authScreen === 'forgot' && (
+          <ForgotPassword onBackToLogin={handleBackToLogin} />
+        )}
       </ThemeProvider>
     );
   }
@@ -257,62 +348,69 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Box sx={{ display: 'flex' }}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+         <Toaster />
+          <Router>
+            <Box sx={{ display: 'flex' }}>
 
-          {/* Navigation Drawer */}
-          <Box
-            component="nav"
-            sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-            aria-label="mailbox folders"
-          >
-            {/* Mobile drawer */}
-            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} />
-            
-            {/* Desktop permanent drawer */}
-            <PermanentSidebar onLogout={handleLogout} />
-          </Box>
+              {/* Navigation Drawer */}
+              <Box
+                component="nav"
+                sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+                aria-label="mailbox folders"
+              >
+                {/* Mobile drawer */}
+                <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} currentUser={currentUser} />
+                
+                {/* Desktop permanent drawer */}
+                <PermanentSidebar onLogout={handleLogout} currentUser={currentUser} />
+              </Box>
 
-          {/* Main content */}
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              pt: 3,
-              pr: 3,
-              pb: 3,
-              pl: 1, // Small left padding for comfortable spacing from sidebar
-              width: { md: `calc(100% - ${drawerWidth}px)` },
-              background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
-              minHeight: '100vh',
-            }}
-          >
-            {/* Mobile Menu Button */}
-            <Fab
-              color="primary"
-              aria-label="menu"
-              onClick={handleDrawerToggle}
-              sx={{
-                position: 'fixed',
-                top: 16,
-                left: 16,
-                display: { xs: 'flex', md: 'none' },
-                zIndex: (theme) => theme.zIndex.drawer + 1,
-              }}
-            >
-              <Menu />
-            </Fab>
+              {/* Main content */}
+              <Box
+                component="main"
+                sx={{
+                  flexGrow: 1,
+                  pt: 'calc(0.75rem - 2px)',
+                  pr: -0.5,
+                  pb: 3,
+                  pl: -6, // Reduced left padding to move content closer to sidebar
+                  width: { md: `calc(100% - ${drawerWidth}px)` },
+                  background: 'linear-gradient(135deg, #F7FAFC 0%, #EDF2F7 30%, #E2E8F0 60%, #CBD5E0 100%)',
+                  minHeight: '100vh',
+                }}
+              >
+                {/* Mobile Menu Button */}
+                <Fab
+                  color="primary"
+                  aria-label="menu"
+                  onClick={handleDrawerToggle}
+                  sx={{
+                    position: 'fixed',
+                    top: 16,
+                    left: 16,
+                    display: { xs: 'flex', md: 'none' },
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                  }}
+                >
+                  <Menu />
+                </Fab>
 
-            <Container maxWidth="xl" sx={{ pl: 0, ml: 0 }}>
-              <Routes>
-                <Route path="/" element={<EmployeeDashboard />} />
-                <Route path="/employee/:id" element={<EmployeeDetail />} />
-                <Route path="/statistics" element={<Statistics />} />
-              </Routes>
-            </Container>
-          </Box>
-        </Box>
-      </Router>
+                <Container maxWidth="xl" sx={{ pl: 0, ml: -1.5 }}>
+                  <Routes>
+                    <Route path="/" element={<EmployeeDashboard />} />
+                    <Route path="/employee/:id" element={<EmployeeDetail />} />
+                    <Route path="/statistics" element={<Statistics />} />
+                    <Route path="/payroll" element={<SalaryCalculator />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Container>
+              </Box>
+            </Box>
+          </Router>
+        </TooltipProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

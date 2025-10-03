@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "fullName": "Mrs. Nhung",
+    "role": "Administrator",
+    "createdAt": "2025-01-15T10:00:00Z",
+    "password_hash": "LZF/vQ2TWobZqiP/GTDP7LmlyX/aoEesHEGeIgjN320=",
+    "password_salt": "FEB5IXyrk/JkOtDGQp10gtM54pkLnJS1Yj7NGDYSxIc=",
+    "username_encrypted": "Z0FBQUFBQm8zMDR2RV9sRkVpcjlFa2w4bVFPTU1fanNkT1hmVEY3NmhpdTdnTXJ0LVN0dW5pNFpzVjR3S0ZCTmZlR2poWHVXcDhxTFhZYXJMVHdyMndTOW5QNjJvS0h5aGc9PQ==",
+    "email_encrypted": "Z0FBQUFBQm8zMDR2dkxjTlUtQjZzd3IxV2JhcTZRY2R4MGJLUFQ4enh1QmhhWWdmMU4xOVZkRWV5NnNOLXJzTVYwd2hra205b05oYldXcXV6NF94THQxcFRpenVaemNBbS0yMFo5SW1XZ0xxSXVjal9VOTFsc0U9"
+  },
+  {
+    "id": "2",
+    "fullName": "Hung Nguyen",
+    "role": "User",
+    "createdAt": "2025-10-03T09:35:26.767081",
+    "password_hash": "ys3olmz+ISvke16uHQLnfAIaAp/1k1XR6y3IBGPQGFA=",
+    "password_salt": "ehPjsyDUfYykk4BczAEYDs4TVif4rosmhDdkz2wEReI=",
+    "username_encrypted": "Z0FBQUFBQm8zMDR2STktbjhrNk1NQjVTUElWaEpjc0QtNXh0aW1rNDdvOGZBVXItV01aOXl2LXpmdi1CNFozR004NWVkT2IzSlFpa29jY1g4emQ5ZDVsT292eDQ1V0tUYmc9PQ==",
+    "email_encrypted": "Z0FBQUFBQm8zMDR2VFZ6aE1xVTIwWUJaV29XclV3bElkWURveEFiNE5pY1p4Ml9aQzJXdTcwbFpqVy1iMi1GNHRDR1E1RDhKVEFNYjB0Ti1XcGNmV0J3Ynhwc3RKd0RWQTh1UXlqMHk0bS1McThjQl8xVHZiaWc9"
+  }
+]
