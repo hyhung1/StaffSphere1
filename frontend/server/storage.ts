@@ -83,7 +83,7 @@ export class MemStorage implements IStorage {
     const sampleEmployee: SelectEmployee = {
       id: "sample-001",
       employeeNo: "VIVN-0001",
-      name: "Huỳnh Nguyễn Gia Hoàng",
+      name: "Huỳnh Nguyễn Minh Hoàng",
       augSalary,
       totalOTHours,
       totalNetIncome,

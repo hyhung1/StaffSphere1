@@ -1,66 +1,68 @@
 import os
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
+from .encryption_service import encryption_service
 
 class EmployeeService:
-    """Service class for employee data management."""
+    """Service class for employee data management with per-user encryption."""
     
     def __init__(self):
         self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.json_path = os.path.join(self.base_dir, "storage", "nhan_vien.json")
+        self.storage_dir = os.path.join(self.base_dir, "storage")
     
-    def load_employees(self) -> List[Dict[str, Any]]:
-        """Load employee data from JSON file."""
+    def load_employees(self, username: str, password: str) -> List[Dict[str, Any]]:
+        """Load employee data for a specific user (decrypted)."""
         try:
-            print(f"Loading employees from: {self.json_path}")
-            with open(self.json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return data
-        except FileNotFoundError:
-            print(f"Employee data file not found at: {self.json_path}")
-            return []
-        except json.JSONDecodeError as e:
-            print(f"Error parsing JSON file: {e}")
-            return []
-    
-    def save_employees(self, employees: List[Dict[str, Any]]) -> bool:
-        """Save employee data to JSON file."""
-        try:
-            with open(self.json_path, "w", encoding="utf-8") as f:
-                json.dump(employees, f, ensure_ascii=False, indent=2)
-            return True
+            print(f"Loading employees for user: {username}")
+            employees = encryption_service.decrypt_data(username, password)
+            if employees is None:
+                print(f"No encrypted data found for user: {username}")
+                return []
+            return employees
         except Exception as e:
-            print(f"Error saving employees: {e}")
+            print(f"Error loading employees for {username}: {e}")
+            return []
+    
+    def save_employees(self, username: str, password: str, employees: List[Dict[str, Any]]) -> bool:
+        """Save employee data for a specific user (encrypted)."""
+        try:
+            print(f"Saving {len(employees)} employees for user: {username}")
+            success = encryption_service.save_encrypted_data(username, employees, password)
+            if success:
+                print(f"Successfully saved employees for {username}")
+            return success
+        except Exception as e:
+            print(f"Error saving employees for {username}: {e}")
             return False
     
-    def get_employee_by_id(self, employee_id: str) -> Dict[str, Any] | None:
-        """Get a specific employee by ID."""
-        employees = self.load_employees()
+    def get_employee_by_id(self, username: str, password: str, employee_id: str) -> Optional[Dict[str, Any]]:
+        """Get a specific employee by ID for a user."""
+        employees = self.load_employees(username, password)
         for employee in employees:
             if employee.get("employeeNo") == employee_id:
                 return employee
         return None
     
-    def add_employee(self, employee_data: Dict[str, Any]) -> bool:
-        """Add a new employee."""
-        employees = self.load_employees()
+    def add_employee(self, username: str, password: str, employee_data: Dict[str, Any]) -> bool:
+        """Add a new employee for a user."""
+        employees = self.load_employees(username, password)
         employees.append(employee_data)
-        return self.save_employees(employees)
+        return self.save_employees(username, password, employees)
     
-    def update_employee(self, employee_id: str, updated_data: Dict[str, Any]) -> bool:
-        """Update an existing employee."""
-        employees = self.load_employees()
+    def update_employee(self, username: str, password: str, employee_id: str, updated_data: Dict[str, Any]) -> bool:
+        """Update an existing employee for a user."""
+        employees = self.load_employees(username, password)
         for i, employee in enumerate(employees):
             if employee.get("employeeNo") == employee_id:
                 employees[i] = {**employee, **updated_data}
-                return self.save_employees(employees)
+                return self.save_employees(username, password, employees)
         return False
     
-    def delete_employee(self, employee_id: str) -> bool:
-        """Delete an employee by ID."""
-        employees = self.load_employees()
+    def delete_employee(self, username: str, password: str, employee_id: str) -> bool:
+        """Delete an employee by ID for a user."""
+        employees = self.load_employees(username, password)
         employees = [emp for emp in employees if emp.get("employeeNo") != employee_id]
-        return self.save_employees(employees)
+        return self.save_employees(username, password, employees)
 
 # Create a singleton instance
 employee_service = EmployeeService()

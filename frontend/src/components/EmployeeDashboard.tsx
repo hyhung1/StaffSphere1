@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { ExpandMore, ExpandLess, DeleteOutline, Edit } from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -25,9 +25,13 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import axios from 'axios';
+import { getAuthHeaders } from '../lib/auth-headers';
 
 interface Employee {
   full_name: string;
@@ -165,7 +169,9 @@ const EmployeeDashboard: React.FC = () => {
   const fetchAllEmployees = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/employees`);
+      const response = await axios.get(`/api/employees`, {
+        headers: getAuthHeaders()
+      });
       setAllEmployees(response.data);
     } catch (error) {
       console.error('Error fetching all employees:', error);
@@ -185,7 +191,9 @@ const EmployeeDashboard: React.FC = () => {
       if (filters.min_age) params.append('min_age', filters.min_age);
       if (filters.max_age) params.append('max_age', filters.max_age);
 
-      const response = await axios.get(`/api/employees?${params.toString()}`);
+      const response = await axios.get(`/api/employees?${params.toString()}`, {
+        headers: getAuthHeaders()
+      });
       setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching filtered employees:', error);
@@ -194,7 +202,9 @@ const EmployeeDashboard: React.FC = () => {
 
   const fetchFilterOptions = async () => {
     try {
-      const response = await axios.get(`/api/filter-options`);
+      const response = await axios.get(`/api/filter-options`, {
+        headers: getAuthHeaders()
+      });
       setFilterOptions(response.data);
     } catch (error) {
       console.error('Error fetching filter options:', error);
@@ -216,25 +226,34 @@ const EmployeeDashboard: React.FC = () => {
 
   const exportData = async () => {
     try {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
-      });
-
-      const response = await axios.get(`/api/export/excel?${params.toString()}`, {
+      // Export ALL employees without any filters
+      // This ensures the full employee list is downloaded regardless of active filters
+      const response = await axios.get(`/api/export/excel`, {
         responseType: 'blob',
+        headers: getAuthHeaders()
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'employees.xlsx');
+      link.setAttribute('download', 'vivn_employees.xlsx');
       document.body.appendChild(link);
       link.click();
       link.remove();
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `✅ Successfully exported ${allEmployees.length} employees to Excel!`,
+        severity: 'success'
+      });
     } catch (error) {
       console.error('Error exporting data:', error);
+      setSnackbar({
+        open: true,
+        message: '❌ Failed to export data. Please try again.',
+        severity: 'error'
+      });
     }
   };
 
@@ -246,15 +265,38 @@ const EmployeeDashboard: React.FC = () => {
     formData.append('file', file);
 
     try {
-      await axios.post(`/api/import/excel`, formData, {
+      const authHeaders = getAuthHeaders();
+      const response = await axios.post(`/api/import/excel`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...authHeaders
         },
       });
+      
       fetchAllEmployees();
       fetchFilteredEmployees();
-    } catch (error) {
+      
+      // Show success notification
+      const count = response.data?.count || 'all';
+      setSnackbar({
+        open: true,
+        message: `✅ Successfully imported ${count} employees from Excel file!`,
+        severity: 'success'
+      });
+      
+      // Reset the file input
+      event.target.value = '';
+    } catch (error: any) {
       console.error('Error importing data:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to import Excel file. Please check the file format and try again.';
+      setSnackbar({
+        open: true,
+        message: `❌ ${errorMessage}`,
+        severity: 'error'
+      });
+      
+      // Reset the file input
+      event.target.value = '';
     }
   };
 
@@ -903,7 +945,7 @@ const EmployeeDashboard: React.FC = () => {
             sx: { 
               maxHeight: '85vh',
               width: 'auto',
-              maxWidth: '88vw'
+              maxWidth: selectedDepartment === 'Contract' ? '95vw' : (selectedDepartment === 'Back office' || selectedDepartment === 'Commissioning') ? '92vw' : '88vw'
             }
           }}
         >
@@ -911,49 +953,51 @@ const EmployeeDashboard: React.FC = () => {
             <Typography variant="h6">{selectedDepartment} Department Employees</Typography>
           </DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={1}>
+            <Grid container spacing={selectedDepartment === 'Contract' ? 4 : (selectedDepartment === 'Back office' || selectedDepartment === 'Commissioning') ? 3 : 2}>
               {selectedEmployees.map((employee: Employee) => (
-                <Grid item xs={12} sm={6} md={3} lg={3} key={employee.Id_number}>
+                <Grid item xs={12} sm={6} md={selectedDepartment === 'Contract' ? 6 : 4} lg={selectedDepartment === 'Contract' ? 6 : (selectedDepartment === 'Back office' || selectedDepartment === 'Commissioning') ? 4 : 3} key={employee.Id_number}>
                   <Card sx={{ height: 'auto', minHeight: '200px' }}>
-                    <CardContent sx={{ p: 2 }}>
+                    <CardContent sx={{ p: selectedDepartment === 'Contract' ? 4 : (selectedDepartment === 'Back office' || selectedDepartment === 'Commissioning') ? 2.5 : 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '16px', fontWeight: 600, flex: 1, mr: 1 }}>
+                        <Typography variant="h6" sx={{ fontSize: '17px', fontWeight: 600, flex: 1, mr: 1 }}>
                           {employee.full_name}
                         </Typography>
                         <Typography variant="body2" sx={{ fontSize: '14px', color: 'primary.main', fontWeight: 500 }}>
                           {employee.department}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          ID: {employee.Id_number}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, gap: 3 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          <strong>ID:</strong> {employee.Id_number}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          {employee.position}
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary', textAlign: 'right' }}>
+                          <strong>Position:</strong> {employee.position}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, gap: 3 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary', whiteSpace: 'nowrap' }}>
+                          <strong>DOB:</strong> {formatDate(employee.dob, true)?.replace(/\//g, '-')}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary', textAlign: 'right' }}>
+                          <strong>Gender:</strong> {employee.gender}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, gap: 3 }}>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          <strong>Tax Code:</strong> {employee.tax_code}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <strong>Phone:</strong> {employee.phone}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          DOB: {formatDate(employee.dob, true)?.replace(/\//g, '-')}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.primary' }}>
-                          {employee.gender}
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
+                          <strong>Joined:</strong> {employee.join_date || 'N/A'}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          Tax Code: {employee.tax_code}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          {employee.phone}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary' }}>
-                          Joined: {employee.join_date || 'N/A'}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', maxWidth: '60%', textAlign: 'right' }}>
-                          {employee.current_address || employee.address || 'No address'}
+                      <Box>
+                        <Typography variant="body2" sx={{ fontSize: '14px', color: 'text.secondary', lineHeight: 1.4 }}>
+                          <strong>Address:</strong> <span style={{ fontStyle: 'italic' }}>{employee.current_address || employee.address || 'No address'}</span>
                         </Typography>
                       </Box>
                     </CardContent>
@@ -990,6 +1034,7 @@ const EmployeeDashboard: React.FC = () => {
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell sx={{ width: 50 }}></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Employee</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Age</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Gender</Typography></TableCell>
@@ -1001,13 +1046,34 @@ const EmployeeDashboard: React.FC = () => {
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Current Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Permanent Address</Typography></TableCell>
             <TableCell><Typography variant="subtitle2" fontWeight="bold">Tax Code</Typography></TableCell>
-            <TableCell sx={{ width: 50 }}></TableCell>
+            <TableCell sx={{ width: 50 }}><Typography variant="subtitle2" fontWeight="bold">Actions</Typography></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {paginatedEmployees.map((employee: Employee) => (
             <React.Fragment key={employee.Id_number}>
               <TableRow>
+                <TableCell sx={{ width: 50, textAlign: 'center' }}>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleExpandEmployee(employee.Id_number)}
+                    sx={{ 
+                      width: 32,
+                      height: 32,
+                      backgroundColor: expandedEmployees.has(employee.Id_number) ? 'primary.main' : 'rgba(0, 0, 0, 0.04)',
+                      color: expandedEmployees.has(employee.Id_number) ? 'white' : 'rgba(0, 0, 0, 0.54)',
+                      '&:hover': {
+                        backgroundColor: expandedEmployees.has(employee.Id_number) ? 'primary.dark' : 'rgba(0, 0, 0, 0.08)',
+                        transform: 'scale(1.05)',
+                      },
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.12)',
+                    }}
+                    title={expandedEmployees.has(employee.Id_number) ? "Collapse details" : "Expand details"}
+                  >
+                    {expandedEmployees.has(employee.Id_number) ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+                  </IconButton>
+                </TableCell>
                 <TableCell>
                   <Box>
                     <Typography variant="body2" fontWeight="bold">
@@ -1061,23 +1127,42 @@ const EmployeeDashboard: React.FC = () => {
                     {employee.tax_code}
                   </Typography>
                 </TableCell>
-                <TableCell sx={{ width: 50, textAlign: 'center' }}>
-                  <Button 
+                <TableCell sx={{ width: 80, textAlign: 'center' }}>
+                  <IconButton 
                     size="small" 
-                    onClick={() => handleExpandEmployee(employee.Id_number)}
+                    color="primary"
+                    onClick={() => handleEditEmployee(employee)}
                     sx={{ 
-                      minWidth: 'auto', 
-                      p: 0.25,
-                      width: 30,
-                      height: 30
+                      p: 0.5,
+                      mr: 0.5,
+                      '&:hover': {
+                        backgroundColor: 'primary.light',
+                        color: 'white'
+                      }
                     }}
+                    title="Edit Employee"
                   >
-                    {expandedEmployees.has(employee.Id_number) ? <ExpandLess /> : <ExpandMore />}
-                  </Button>
+                    <Edit fontSize="small" />
+                  </IconButton>
+                  <IconButton 
+                    size="small" 
+                    color="error"
+                    onClick={() => handleDeleteEmployee(employee.Id_number, employee.full_name)}
+                    sx={{ 
+                      p: 0.5,
+                      '&:hover': {
+                        backgroundColor: 'error.light',
+                        color: 'white'
+                      }
+                    }}
+                    title="Delete Employee"
+                  >
+                    <DeleteOutline fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={13}>
                   <Collapse in={expandedEmployees.has(employee.Id_number)} timeout="auto" unmountOnExit>
                     <Box sx={{ margin: 1 }}>
                       <Typography variant="h6" gutterBottom component="div">
@@ -1211,36 +1296,252 @@ const EmployeeDashboard: React.FC = () => {
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState<Partial<Employee>>({});
-  const [bonus, setBonus] = useState(0);
-  const [allowanceTax, setAllowanceTax] = useState(0);
-  const [ot15, setOt15] = useState(0);
-  const [ot20, setOt20] = useState(0);
-  const [ot30, setOt30] = useState(0);
-  const [advance, setAdvance] = useState(0);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Partial<Employee>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<{id: string; name: string} | null>(null);
+  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error' | 'info'}>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const handleUseSample = () => {
+    // Get a random employee from the current list
+    if (allEmployees.length === 0) {
+      setSnackbar({
+        open: true,
+        message: '⚠️ No sample data available',
+        severity: 'info'
+      });
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * allEmployees.length);
+    const sampleEmployee = allEmployees[randomIndex];
+    
+    // Fill the form with sample data (including original ID - user must change it to save)
+    setNewEmployee({
+      full_name: sampleEmployee.full_name,
+      dob: sampleEmployee.dob,
+      age: sampleEmployee.age,
+      gender: sampleEmployee.gender,
+      Id_number: sampleEmployee.Id_number, // Use original ID - will trigger duplicate check
+      Issue_date: sampleEmployee.Issue_date,
+      address: sampleEmployee.address,
+      current_address: sampleEmployee.current_address,
+      phone: sampleEmployee.phone,
+      emergency_contact: sampleEmployee.emergency_contact,
+      education_level: sampleEmployee.education_level,
+      department: sampleEmployee.department,
+      join_date: sampleEmployee.join_date,
+      position: sampleEmployee.position,
+      contract_type: sampleEmployee.contract_type,
+      contract_sign_date: sampleEmployee.contract_sign_date,
+      contract_end_date: sampleEmployee.contract_end_date,
+      salary: sampleEmployee.salary,
+      allowance: sampleEmployee.allowance,
+      last_salary_adjustment: sampleEmployee.last_salary_adjustment,
+      tax_code: sampleEmployee.tax_code,
+      dependent_count: sampleEmployee.dependent_count,
+      social_insurance_number: sampleEmployee.social_insurance_number,
+      medical_insurance_hospital: sampleEmployee.medical_insurance_hospital,
+      bank_account: sampleEmployee.bank_account,
+      bank_name: sampleEmployee.bank_name,
+      pvi_care: sampleEmployee.pvi_care,
+      training_courses: sampleEmployee.training_courses,
+      training_skills: sampleEmployee.training_skills
+    });
+    
+    // Show a helpful message
+    setSnackbar({
+      open: true,
+      message: 'ℹ️ Sample data loaded! Remember to change the ID Number before saving to avoid duplicates.',
+      severity: 'info'
+    });
+  };
+
+  const handleDeleteEmployee = (employeeId: string, employeeName: string) => {
+    setEmployeeToDelete({ id: employeeId, name: employeeName });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
+    try {
+      await axios.delete(`/api/employees/${employeeToDelete.id}`, {
+        headers: getAuthHeaders()
+      });
+      
+      // Close dialog and reset state
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+      
+      // Refresh the employee list
+      fetchAllEmployees();
+      fetchFilteredEmployees();
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `✅ Employee "${employeeToDelete.name}" deleted successfully!`,
+        severity: 'success'
+      });
+    } catch (error: any) {
+      console.error('Error deleting employee:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to delete employee.';
+      setSnackbar({
+        open: true,
+        message: `❌ ${errorMessage}`,
+        severity: 'error'
+      });
+      setDeleteDialogOpen(false);
+      setEmployeeToDelete(null);
+    }
+  };
+
+  const handleEditEmployee = (employee: Employee) => {
+    setEditingEmployee(employee);
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateEmployee = async () => {
+    try {
+      // Validate required fields
+      if (!editingEmployee.full_name || !editingEmployee.Id_number || !editingEmployee.dob) {
+        setSnackbar({
+          open: true,
+          message: '⚠️ Please fill in all required fields: Full Name, ID Number, and Date of Birth',
+          severity: 'error'
+        });
+        return;
+      }
+
+      // Create employee data matching EmployeeCreate schema
+      const employeeData = {
+        full_name: editingEmployee.full_name,
+        dob: editingEmployee.dob,
+        gender: editingEmployee.gender || 'Nam',
+        Id_number: editingEmployee.Id_number,
+        address: editingEmployee.address || '',
+        current_address: editingEmployee.current_address || editingEmployee.address || '',
+        phone: editingEmployee.phone || '',
+        education_level: editingEmployee.education_level || '',
+        department: editingEmployee.department || '',
+        position: editingEmployee.position || '',
+        contract_type: editingEmployee.contract_type || 'Có thời hạn 1 năm',
+        contract_sign_date: editingEmployee.contract_sign_date || new Date().toISOString().split('T')[0],
+        salary: editingEmployee.salary || 0,
+        tax_code: parseInt(editingEmployee.tax_code?.toString() || '0'),
+        social_insurance_number: parseInt(editingEmployee.social_insurance_number?.toString() || '0'),
+        medical_insurance_hospital: editingEmployee.medical_insurance_hospital || '',
+        bank_account: parseInt(editingEmployee.bank_account?.toString() || '0'),
+        pvi_care: editingEmployee.pvi_care || 'Không',
+        training_skills: editingEmployee.training_skills || ''
+      };
+
+      await axios.put(`/api/employees/${editingEmployee.Id_number}`, employeeData, {
+        headers: getAuthHeaders()
+      });
+      
+      // Refresh the employee list
+      fetchAllEmployees();
+      fetchFilteredEmployees();
+      
+      // Reset form and close dialog
+      setEditingEmployee({});
+      setEditDialogOpen(false);
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `✅ Employee "${editingEmployee.full_name}" updated successfully!`,
+        severity: 'success'
+      });
+    } catch (error: any) {
+      console.error('Error updating employee:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to update employee. Please check all fields and try again.';
+      setSnackbar({
+        open: true,
+        message: `❌ ${errorMessage}`,
+        severity: 'error'
+      });
+    }
+  };
 
   const handleAddEmployee = async () => {
     try {
-      const salaryInput: SalaryInput = {
-        employeeNo: newEmployee.Id_number || '',
-        name: newEmployee.full_name || '',
-        salary: newEmployee.salary || 0,
-        bonus,
-        allowanceTax,
-        ot15,
-        ot20,
-        ot30,
-        dependants: parseInt(newEmployee.dependent_count || '0'),
-        advance,
-      };
-      const salaryResult = await axios.post(`/api/salary/calculate`, salaryInput);
-      const updatedEmployee = { ...newEmployee, salary: salaryResult.data.totalNetIncome };
+      // Validate required fields
+      if (!newEmployee.full_name || !newEmployee.Id_number || !newEmployee.dob) {
+        setSnackbar({
+          open: true,
+          message: '⚠️ Please fill in all required fields: Full Name, ID Number, and Date of Birth',
+          severity: 'error'
+        });
+        return;
+      }
 
-      await axios.post(`/api/employees`, updatedEmployee);
+      // Check if employee with same ID already exists
+      const isDuplicate = allEmployees.some(emp => emp.Id_number === newEmployee.Id_number);
+      if (isDuplicate) {
+        setSnackbar({
+          open: true,
+          message: `⚠️ Employee with ID Number "${newEmployee.Id_number}" already exists! Please use a different ID number.`,
+          severity: 'error'
+        });
+        return;
+      }
+
+      // Create employee data matching EmployeeCreate schema
+      const employeeData = {
+        full_name: newEmployee.full_name,
+        dob: newEmployee.dob,
+        gender: newEmployee.gender || 'Nam',
+        Id_number: newEmployee.Id_number,
+        address: newEmployee.address || '',
+        current_address: newEmployee.current_address || newEmployee.address || '',
+        phone: newEmployee.phone || '',
+        education_level: newEmployee.education_level || '',
+        department: newEmployee.department || '',
+        position: newEmployee.position || '',
+        contract_type: newEmployee.contract_type || 'Có thời hạn 1 năm',
+        contract_sign_date: newEmployee.contract_sign_date || new Date().toISOString().split('T')[0],
+        salary: newEmployee.salary || 0,
+        tax_code: parseInt(newEmployee.tax_code?.toString() || '0'),
+        social_insurance_number: parseInt(newEmployee.social_insurance_number?.toString() || '0'),
+        medical_insurance_hospital: newEmployee.medical_insurance_hospital || '',
+        bank_account: parseInt(newEmployee.bank_account?.toString() || '0'),
+        pvi_care: newEmployee.pvi_care || 'Không',
+        training_skills: newEmployee.training_skills || ''
+      };
+
+      await axios.post(`/api/employees`, employeeData, {
+        headers: getAuthHeaders()
+      });
+      
+      // Refresh the employee list
       fetchAllEmployees();
       fetchFilteredEmployees();
+      
+      // Reset form and close dialog
+      setNewEmployee({});
       setAddDialogOpen(false);
-    } catch (error) {
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `✅ Employee "${newEmployee.full_name}" added successfully!`,
+        severity: 'success'
+      });
+    } catch (error: any) {
       console.error('Error adding employee:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to add employee. Please check all fields and try again.';
+      setSnackbar({
+        open: true,
+        message: `❌ ${errorMessage}`,
+        severity: 'error'
+      });
     }
   };
 
@@ -1254,14 +1555,21 @@ const EmployeeDashboard: React.FC = () => {
             </Typography>
           </Box>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={1.8}>
+            <Grid item xs={12} md={2.2}>
               <TextField
                 fullWidth
-                label="Search employee name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Employee name..."
+                placeholder="Search employee name"
                 size="small"
+                InputProps={{
+                  sx: {
+                    '& input::placeholder': {
+                      color: '#999',
+                      opacity: 1,
+                    }
+                  }
+                }}
               />
             </Grid>
             <Grid item xs={3} md={1.3}>
@@ -1499,52 +1807,72 @@ const EmployeeDashboard: React.FC = () => {
           />
         </Paper>
       )}
-      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)}>
-        <DialogTitle>Add New Employee</DialogTitle>
+      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="xl" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Add New Employee</Typography>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              onClick={handleUseSample}
+              size="small"
+            >
+              Use Sample
+            </Button>
+          </Box>
+        </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={4}>
               <TextField
                 fullWidth
                 label="Full Name"
                 value={newEmployee.full_name || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, full_name: e.target.value })}
+                required
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="DOB"
-                value={newEmployee.dob || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, dob: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Age"
-                type="number"
-                value={newEmployee.age || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, age: parseInt(e.target.value) })}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Gender"
-                value={newEmployee.gender || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, gender: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <TextField
                 fullWidth
                 label="ID Number"
                 value={newEmployee.Id_number || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, Id_number: e.target.value })}
+                required
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Phone"
+                value={newEmployee.phone || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="DOB"
+                type="date"
+                value={newEmployee.dob || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, dob: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
+                required
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Gender"
+                value={newEmployee.gender || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, gender: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Issue Date"
@@ -1552,71 +1880,71 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, Issue_date: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
-                label="Address"
-                value={newEmployee.address || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, address: e.target.value })}
+                label="Join Date"
+                type="date"
+                value={newEmployee.join_date || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, join_date: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Current Address"
-                value={newEmployee.current_address || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, current_address: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Phone"
-                value={newEmployee.phone || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Emergency Contact"
                 value={newEmployee.emergency_contact || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, emergency_contact: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Address"
+                value={newEmployee.address || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, address: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Current Address"
+                value={newEmployee.current_address || ''}
+                onChange={(e) => setNewEmployee({ ...newEmployee, current_address: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Education Level"
                 value={newEmployee.education_level || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, education_level: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Department"
                 value={newEmployee.department || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, department: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Join Date"
-                value={newEmployee.join_date || ''}
-                onChange={(e) => setNewEmployee({ ...newEmployee, join_date: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Position"
                 value={newEmployee.position || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, position: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Contract ID"
@@ -1624,23 +1952,26 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, contract_id: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Contract Type"
                 value={newEmployee.contract_type || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, contract_type: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Contract Sign Date"
+                type="date"
                 value={newEmployee.contract_sign_date || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, contract_sign_date: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Contract End Date"
@@ -1648,16 +1979,17 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, contract_end_date: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Salary"
                 type="number"
                 value={newEmployee.salary || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, salary: parseFloat(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Allowance"
@@ -1665,7 +1997,7 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, allowance: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Last Salary Adjustment"
@@ -1673,33 +2005,36 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, last_salary_adjustment: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Tax Code"
                 type="number"
                 value={newEmployee.tax_code || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, tax_code: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Dependent Count"
                 value={newEmployee.dependent_count || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, dependent_count: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Social Insurance Number"
                 type="number"
                 value={newEmployee.social_insurance_number || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, social_insurance_number: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Medical Insurance Hospital"
@@ -1707,24 +2042,26 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, medical_insurance_hospital: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
-        <TextField
+            <Grid item xs={2.4}>
+              <TextField
                 fullWidth
                 label="Bank Account"
                 type="number"
                 value={newEmployee.bank_account || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, bank_account: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Bank Name"
                 value={newEmployee.bank_name || ''}
                 onChange={(e) => setNewEmployee({ ...newEmployee, bank_name: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="PVI Care"
@@ -1732,7 +2069,7 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, pvi_care: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Training Courses"
@@ -1740,7 +2077,7 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, training_courses: e.target.value })}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
                 label="Training Skills"
@@ -1748,65 +2085,385 @@ const EmployeeDashboard: React.FC = () => {
                 onChange={(e) => setNewEmployee({ ...newEmployee, training_skills: e.target.value })}
               />
             </Grid>
-            {/* Salary calculation fields */}
-            <Grid item xs={12}>
+          </Grid>
+          <Button 
+            onClick={handleAddEmployee}
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Save Employee
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Employee Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="xl" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6">Edit Employee</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={4}>
               <TextField
                 fullWidth
-                label="Bonus"
-                type="number"
-                value={bonus}
-                onChange={(e) => setBonus(parseFloat(e.target.value))}
+                label="Full Name"
+                value={editingEmployee.full_name || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, full_name: e.target.value })}
+                required
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <TextField
                 fullWidth
-                label="Allowance Tax"
-                type="number"
-                value={allowanceTax}
-                onChange={(e) => setAllowanceTax(parseFloat(e.target.value))}
+                label="ID Number"
+                value={editingEmployee.Id_number || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, Id_number: e.target.value })}
+                required
+                disabled
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+                helperText="ID Number cannot be changed"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={4}>
               <TextField
                 fullWidth
-                label="OT 1.5"
-                type="number"
-                value={ot15}
-                onChange={(e) => setOt15(parseFloat(e.target.value))}
+                label="Phone"
+                value={editingEmployee.phone || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, phone: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
-                label="OT 2.0"
-                type="number"
-                value={ot20}
-                onChange={(e) => setOt20(parseFloat(e.target.value))}
+                label="DOB"
+                type="date"
+                value={editingEmployee.dob || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, dob: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
+                required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
-                label="OT 3.0"
-                type="number"
-                value={ot30}
-                onChange={(e) => setOt30(parseFloat(e.target.value))}
+                label="Gender"
+                value={editingEmployee.gender || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, gender: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={2.4}>
               <TextField
                 fullWidth
-                label="Advance"
+                label="Issue Date"
+                value={editingEmployee.Issue_date || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, Issue_date: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Join Date"
+                type="date"
+                value={editingEmployee.join_date || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, join_date: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Emergency Contact"
+                value={editingEmployee.emergency_contact || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, emergency_contact: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Address"
+                value={editingEmployee.address || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, address: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="Current Address"
+                value={editingEmployee.current_address || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, current_address: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Education Level"
+                value={editingEmployee.education_level || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, education_level: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Department"
+                value={editingEmployee.department || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, department: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Position"
+                value={editingEmployee.position || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, position: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Contract ID"
+                value={editingEmployee.contract_id || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, contract_id: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Contract Type"
+                value={editingEmployee.contract_type || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, contract_type: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Contract Sign Date"
+                type="date"
+                value={editingEmployee.contract_sign_date || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, contract_sign_date: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Contract End Date"
+                value={editingEmployee.contract_end_date || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, contract_end_date: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Salary"
                 type="number"
-                value={advance}
-                onChange={(e) => setAdvance(parseFloat(e.target.value))}
+                value={editingEmployee.salary || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, salary: parseFloat(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Allowance"
+                value={editingEmployee.allowance || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, allowance: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Last Salary Adjustment"
+                type="date"
+                value={editingEmployee.last_salary_adjustment || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, last_salary_adjustment: e.target.value })}
+                InputLabelProps={{ shrink: true, sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Tax Code"
+                type="number"
+                value={editingEmployee.tax_code || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, tax_code: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Dependent Count"
+                value={editingEmployee.dependent_count || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, dependent_count: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Social Insurance Number"
+                type="number"
+                value={editingEmployee.social_insurance_number || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, social_insurance_number: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Medical Insurance Hospital"
+                value={editingEmployee.medical_insurance_hospital || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, medical_insurance_hospital: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Bank Account"
+                type="number"
+                value={editingEmployee.bank_account || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, bank_account: parseInt(e.target.value) })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Bank Name"
+                value={editingEmployee.bank_name || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, bank_name: e.target.value })}
+                InputLabelProps={{ sx: { fontWeight: 'bold' } }}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="PVI Care"
+                value={editingEmployee.pvi_care || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, pvi_care: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Training Courses"
+                value={editingEmployee.training_courses || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, training_courses: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={2.4}>
+              <TextField
+                fullWidth
+                label="Training Skills"
+                value={editingEmployee.training_skills || ''}
+                onChange={(e) => setEditingEmployee({ ...editingEmployee, training_skills: e.target.value })}
               />
             </Grid>
           </Grid>
-          <Button onClick={handleAddEmployee}>Save</Button>
+          <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+            <Button 
+              onClick={handleUpdateEmployee}
+              variant="contained"
+              color="primary"
+              fullWidth
+            >
+              Update Employee
+            </Button>
+            <Button 
+              onClick={() => setEditDialogOpen(false)}
+              variant="outlined"
+              color="secondary"
+              fullWidth
+            >
+              Cancel
+            </Button>
+          </Box>
         </DialogContent>
       </Dialog>
+
+      {/* Professional Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, fontSize: '1.25rem', pb: 1 }}>
+          ⚠️ Confirm Deletion
+        </DialogTitle>
+        <DialogContent>
+          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+            Are you sure you want to delete employee <strong>"{employeeToDelete?.name}"</strong>? This action cannot be undone.
+          </p>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button 
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              setEmployeeToDelete(null);
+            }}
+            variant="outlined"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 500,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDeleteEmployee}
+            variant="contained"
+            color="error"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Professional Snackbar Notification */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={4000} 
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ mt: 1 }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ 
+            width: '100%',
+            fontSize: '0.95rem',
+            fontWeight: 500,
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

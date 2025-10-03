@@ -10,6 +10,8 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  Link as MuiLink,
+  Divider,
 } from '@mui/material';
 import {
   Visibility,
@@ -20,9 +22,11 @@ import {
 
 interface LoginProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
+  onRegister?: () => void;
+  onForgotPassword?: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onForgotPassword }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -249,37 +253,60 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
 
-            {/* Demo Credentials Info */}
-            <Paper
-              sx={{
-                p: 2,
-                backgroundColor: 'rgba(66, 153, 225, 0.1)',
-                border: '1px solid rgba(66, 153, 225, 0.2)',
-                borderRadius: 2,
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#2C5282',
-                  textAlign: 'center',
-                  fontWeight: 500,
-                  mb: 1,
-                }}
-              >
-                Demo Credentials
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#4A5568',
-                  textAlign: 'center',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Username: <strong>admin</strong> | Password: <strong>password</strong>
-              </Typography>
-            </Paper>
+            {/* Forgot Password Link */}
+            {onForgotPassword && (
+              <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <MuiLink
+                  component="button"
+                  type="button"
+                  onClick={onForgotPassword}
+                  sx={{
+                    color: '#2C5282',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Forgot Password?
+                </MuiLink>
+              </Box>
+            )}
+
+            {/* Divider */}
+            {onRegister && (
+              <Divider sx={{ my: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  OR
+                </Typography>
+              </Divider>
+            )}
+
+            {/* Register Link */}
+            {onRegister && (
+              <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <Typography variant="body2">
+                  Don't have an account?{' '}
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    onClick={onRegister}
+                    sx={{
+                      color: '#2C5282',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    Create Account
+                  </MuiLink>
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Paper>
       </Container>

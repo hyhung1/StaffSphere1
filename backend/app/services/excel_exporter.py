@@ -4,6 +4,7 @@ Generates Excel files using a template to preserve formatting.
 """
 import io
 from typing import List
+from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from ..models.schemas import SelectEmployee
@@ -19,8 +20,14 @@ def export_employees_to_excel(employees: List[SelectEmployee]) -> bytes:
     Returns:
         Bytes content of the Excel file
     """
+    # Path to the template file - relative to this file's location
+    # This file is at: backend/app/services/excel_exporter.py
+    # Template is at: backend/templates/salary_template.xlsx
+    current_file_dir = Path(__file__).parent  # app/services/
+    backend_dir = current_file_dir.parent.parent  # backend/
+    template_path = backend_dir / "templates" / "salary_template.xlsx"
+    
     # Load the template Excel file
-    template_path = "templates/salary_template.xlsx"
     workbook = load_workbook(template_path)
     worksheet: Worksheet = workbook.active
     

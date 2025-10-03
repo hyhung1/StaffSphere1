@@ -24,9 +24,10 @@ const drawerWidth = 139;
 
 interface PermanentSidebarProps {
   onLogout: () => void;
+  currentUser: any;
 }
 
-const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout }) => {
+const PermanentSidebar: React.FC<PermanentSidebarProps> = ({ onLogout, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();

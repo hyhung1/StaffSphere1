@@ -68,15 +68,15 @@ class MemStorage:
         sample_data = [
             {
                 "employeeNo": "VIVN-0001",
-                "name": "Huỳnh Nguyễn Gia Hoàng",
-                "salary": sample_info.get("salary", 10000000),
-                "bonus": sample_info.get("bonus", 500000),
-                "allowanceTax": sample_info.get("allowanceTax", 200000),
-                "ot15": sample_info.get("ot15", 10),
-                "ot20": sample_info.get("ot20", 5),
-                "ot30": sample_info.get("ot30", 2),
-                "dependants": sample_info.get("dependants", 1),
-                "advance": sample_info.get("advance", 0),
+                "name": "Huỳnh Nguyễn Minh Hoàng",
+                "salary": 10000000,
+                "bonus": 0,
+                "allowanceTax": 200000,
+                "ot15": 10,
+                "ot20": 5,
+                "ot30": 2,
+                "dependants": 2,
+                "advance": 0,
             }
         ]
         
@@ -137,6 +137,8 @@ class MemStorage:
                 ot30=data["ot30"],
                 dependants=data["dependants"],
                 advance=data["advance"],
+                actualDaysWorked=20,
+                totalWorkdays=20,
                 overtimePayPIT=overtime_pay_pit,
                 totalSalary=total_salary,
                 personalRelief=personal_relief,
@@ -196,10 +198,20 @@ class MemStorage:
             return True
         return False
     
-    def clearAllEmployees(self) -> int:
-        """Clear all employees from storage. Returns count of deleted employees."""
+    def clearAllEmployees(self, reinitialize: bool = True) -> int:
+        """Clear all employees from storage. 
+        
+        Args:
+            reinitialize: If True, re-initialize with default employee. If False, leave empty.
+            
+        Returns:
+            Count of deleted employees.
+        """
         count = len(self.employees)
         self.employees.clear()
+        # Re-initialize with default employee if requested (for Reset functionality)
+        if reinitialize:
+            self._initialize_sample_employees()
         return count
     
     # Calculation management methods

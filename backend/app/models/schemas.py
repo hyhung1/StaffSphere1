@@ -43,6 +43,8 @@ class SalaryInput(BaseModel):
     ot30: float = Field(default=0, ge=0, description="OT 3.0x hours must be positive")
     dependants: float = Field(default=0, ge=0, description="Dependents must be positive")
     advance: float = Field(default=0, ge=0, description="Advance payment must be positive")
+    actualDaysWorked: float = Field(default=20, ge=1, description="Actual days worked must be positive")
+    totalWorkdays: float = Field(default=20, ge=1, description="Total workdays must be positive")
     
     # Additional editable fields (optional) - Frontend may send these from form
     augSalary: Optional[float] = Field(default=None)
@@ -144,6 +146,8 @@ class SalaryResult(BaseModel):
     ot30: float
     dependants: float
     advance: float
+    actualDaysWorked: float
+    totalWorkdays: float
     
     # Calculated fields
     augSalary: float
@@ -180,6 +184,8 @@ class InsertEmployee(BaseModel):
     ot30: float
     dependants: float
     advance: float
+    actualDaysWorked: float
+    totalWorkdays: float
     overtimePayPIT: float
     totalSalary: float
     personalRelief: float
@@ -210,6 +216,8 @@ class SelectEmployee(BaseModel):
     ot30: float
     dependants: float
     advance: float
+    actualDaysWorked: float
+    totalWorkdays: float
     overtimePayPIT: float
     totalSalary: float
     personalRelief: float
@@ -239,6 +247,8 @@ class EmployeeUpdate(BaseModel):
     ot30: Optional[float] = None
     dependants: Optional[float] = None
     advance: Optional[float] = None
+    actualDaysWorked: Optional[float] = None
+    totalWorkdays: Optional[float] = None
     overtimePayPIT: Optional[float] = None
     totalSalary: Optional[float] = None
     personalRelief: Optional[float] = None

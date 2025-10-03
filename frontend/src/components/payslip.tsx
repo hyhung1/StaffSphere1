@@ -79,11 +79,11 @@ export const PaySlip = React.memo(({ currentCalculation }: PaySlipProps) => {
          <tbody>
            <tr>
              <td className="border border-gray-400 px-1 py-0.5 font-medium bg-gray-100">Employee ID</td>
-             <td className="border border-gray-400 px-1 py-0.5 text-center">{employeeNo}</td>
+             <td className="border border-gray-400 px-1 py-0.5 text-center font-bold">{employeeNo}</td>
            </tr>
            <tr>
              <td className="border border-gray-400 px-1 py-0.5 font-medium bg-gray-100">Full name</td>
-             <td className="border border-gray-400 px-1 py-0.5 text-center">{name}</td>
+             <td className="border border-gray-400 px-1 py-0.5 text-center font-bold">{name}</td>
            </tr>
            <tr>
              <td className="border border-gray-400 px-1 py-0.5 font-medium bg-gray-100">Number of dependants</td>
@@ -322,7 +322,7 @@ export const PaySlip = React.memo(({ currentCalculation }: PaySlipProps) => {
               H. Total Net income (Tổng thu nhập sau thuế)
             </td>
             <td className="border border-gray-400 px-1 py-0.5 text-center font-italic text-gray-600 text-[13px]">
-              (Calculated)
+              (G)=(B)-(D)-(F)-(G)
             </td>
             {/* Calculate Total Net Income using employee section logic: B - D - D.6 - F - G (without non-taxable overtime) */}
             <td className="border border-gray-400 px-1 py-0.5 text-right font-bold">

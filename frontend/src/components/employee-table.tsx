@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { Snackbar, Alert, Dialog as MuiDialog, DialogTitle as MuiDialogTitle, DialogContent as MuiDialogContent, DialogActions as MuiDialogActions, Button as MuiButton, Pagination, Box as MuiBox } from "@mui/material";
 
 interface EmployeeTableProps {
   onAddEmployee?: () => void;
@@ -38,13 +39,24 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
   const [uploading, setUploading] = useState(false);
   const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error' | 'info'}>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [confirmResetDialogOpen, setConfirmResetDialogOpen] = useState(false);
+  const [summaryPage, setSummaryPage] = useState(0);
+  const [summaryRowsPerPage, setSummaryRowsPerPage] = useState(12);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState<{id: string; name: string} | null>(null);
 
   // Handle sidebar visibility when summary dialog opens/closes
   const handleSummaryDialogChange = (open: boolean) => {
     setSummaryDialogOpen(open);
     
-    // Hide/show sidebar by adding/removing CSS class to body
+    // Reset pagination when opening the dialog
     if (open) {
+      setSummaryPage(0);
       document.body.classList.add('hide-sidebar');
     } else {
       document.body.classList.remove('hide-sidebar');
@@ -81,10 +93,26 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
     }
   }, [summaryDialogOpen]);
   
+  // Get current username for cache key to prevent data leakage between users
+  const getCurrentUsername = () => {
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (currentUserStr) {
+      try {
+        const currentUser = JSON.parse(currentUserStr);
+        return currentUser.username || 'anonymous';
+      } catch (error) {
+        return 'anonymous';
+      }
+    }
+    return 'anonymous';
+  };
+  
+  const currentUsername = getCurrentUsername();
+  
   const { data: employees = [], isLoading } = useQuery<SelectEmployee[]>({
-    queryKey: ["/api/employees"],
+    queryKey: ["/api/payroll/employees", currentUsername], // Include username in cache key
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/employees");
+      const res = await apiRequest("GET", "/api/payroll/employees");
       if (!res.ok) throw new Error("Failed to fetch employees");
       return res.json();
     },
@@ -92,45 +120,202 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
 
   const deleteEmployee = useMutation({
     mutationFn: async (id: string) => {
-      const res = await apiRequest("DELETE", `/api/employees/${id}`);
+      const res = await apiRequest("DELETE", `/api/payroll/employees/${id}`);
       return res;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
-      toast({
-        title: "Success",
-        description: "Employee deleted successfully",
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
+      setSnackbar({
+        open: true,
+        message: '✅ Employee deleted successfully!',
+        severity: 'success'
       });
     },
     onError: () => {
+      setSnackbar({
+        open: true,
+        message: '❌ Failed to delete employee. Please try again.',
+        severity: 'error'
+      });
+    },
+  });
+
+  // Handle delete employee - show confirmation dialog
+  const handleDeleteEmployee = (employeeId: string, employeeName: string) => {
+    setEmployeeToDelete({ id: employeeId, name: employeeName });
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm and execute delete
+  const confirmDeleteEmployee = () => {
+    if (!employeeToDelete) return;
+    
+    deleteEmployee.mutate(employeeToDelete.id);
+    setDeleteDialogOpen(false);
+    setEmployeeToDelete(null);
+  };
+
+  // Helper function to check if default employee exists and hasn't been modified
+  const checkDefaultEmployeeExists = () => {
+    const DEFAULT_NAME = "Nguyễn Văn A";
+    const DEFAULT_EMPLOYEE_NO = "VIVN-99999";
+    
+    return employees.some(
+      (emp) => emp.name === DEFAULT_NAME && emp.employeeNo === DEFAULT_EMPLOYEE_NO
+    );
+  };
+
+  const addCurrentAsEmployee = useMutation({
+    mutationFn: async () => {
+      const DEFAULT_NAME = "Nguyễn Văn A";
+      const DEFAULT_EMPLOYEE_NO = "VIVN-99999";
+      
+      // Check if default employee already exists
+      if (checkDefaultEmployeeExists()) {
+        throw new Error("Default employee already exists. Please modify it before adding a new one.");
+      }
+      
+      // Create default employee with standard values
+      const defaultEmployee = {
+        employeeNo: DEFAULT_EMPLOYEE_NO,
+        name: DEFAULT_NAME,
+        salary: 10000000,
+        bonus: 0,
+        allowanceTax: 200000,
+        ot15: 10,
+        ot20: 5,
+        ot30: 2,
+        dependants: 2,
+        advance: 0,
+        actualDaysWorked: 20,
+        totalWorkdays: 20,
+        // Calculate derived values
+        augSalary: 10000000,
+        overtimePayPIT: Math.floor((10000000 / 22 / 8) * (10 + 5 + 2)),
+        personalRelief: 11000000,
+        dependentRelief: 4400000 * 2,
+        employeeInsurance: 10000000 * 0.105,
+        unionFee: Math.min(10000000 * 0.005, 234000),
+        companyInsurance: 10000000 * 0.175,
+        overtimePayNonPIT: Math.round((10000000 / 22 / 8) * (10 * 0.5 + 5 + 2 * 2)),
+        heSo: 10 * 0.5 + 5 + 2 * 2,
+        totalOTHours: 10 + 5 + 2,
+        calculatedAt: new Date().toISOString(),
+      };
+      
+      // Calculate totalSalary
+      const totalOverTimePay = defaultEmployee.overtimePayPIT + defaultEmployee.overtimePayNonPIT;
+      defaultEmployee.augSalary = Math.round((defaultEmployee.salary / defaultEmployee.totalWorkdays) * defaultEmployee.actualDaysWorked);
+      const totalSalaryCalc = Math.round(defaultEmployee.augSalary + totalOverTimePay + defaultEmployee.allowanceTax);
+      
+      // Calculate assessableIncome
+      const assessableIncome = Math.max(0, totalSalaryCalc - defaultEmployee.personalRelief - defaultEmployee.dependentRelief - defaultEmployee.employeeInsurance);
+      
+      // Calculate PIT
+      let personalIncomeTax = 0;
+      if (assessableIncome <= 5000000) {
+        personalIncomeTax = assessableIncome * 0.05;
+      } else if (assessableIncome <= 10000000) {
+        personalIncomeTax = assessableIncome * 0.10 - 250000;
+      } else if (assessableIncome <= 18000000) {
+        personalIncomeTax = assessableIncome * 0.15 - 750000;
+      } else if (assessableIncome <= 32000000) {
+        personalIncomeTax = assessableIncome * 0.20 - 1650000;
+      } else if (assessableIncome <= 52000000) {
+        personalIncomeTax = assessableIncome * 0.25 - 3250000;
+      } else if (assessableIncome <= 80000000) {
+        personalIncomeTax = assessableIncome * 0.30 - 5850000;
+      } else {
+        personalIncomeTax = assessableIncome * 0.35 - 9850000;
+      }
+      personalIncomeTax = Math.round(personalIncomeTax);
+      
+      // Calculate totalNetIncome
+      const totalNetIncome = Math.round(totalSalaryCalc - defaultEmployee.employeeInsurance - defaultEmployee.unionFee - personalIncomeTax - defaultEmployee.advance);
+      
+      // Add calculated values to defaultEmployee
+      const finalEmployee = {
+        ...defaultEmployee,
+        totalSalary: totalSalaryCalc,
+        assessableIncome: assessableIncome,
+        personalIncomeTax: personalIncomeTax,
+        totalNetIncome: totalNetIncome,
+      };
+      
+      const res = await apiRequest("POST", "/api/payroll/employees", finalEmployee);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
+      toast({
+        title: "Success",
+        description: "Default employee 'Nguyễn Văn A' added successfully",
+      });
+    },
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to delete employee",
+        description: error.message || "Failed to add employee",
         variant: "destructive",
       });
     },
   });
 
-  const addCurrentAsEmployee = useMutation({
+  const clearAllEmployees = useMutation({
     mutationFn: async () => {
-      if (!currentCalculation) {
-        throw new Error("No calculation available");
+      const res = await apiRequest("DELETE", "/api/payroll/employees");
+      if (!res.ok) {
+        throw new Error('Failed to clear employees');
       }
-      const res = await apiRequest("POST", "/api/employees", currentCalculation);
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
-      toast({
-        title: "Success",
-        description: "Employee added successfully",
+    onSuccess: async (data) => {
+      // STEP 1: Clear the current selection FIRST to reset the form
+      if (onSelectEmployee) {
+        onSelectEmployee(null as any);
+      }
+      
+      // STEP 2: Wait a moment for the form to clear
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      // STEP 3: Remove all queries from cache and refetch
+      queryClient.removeQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
+      await queryClient.refetchQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
+      
+      // STEP 4: Wait for refetch to complete and data to settle
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      // STEP 5: Get the updated employee list and select the default employee
+      const updatedEmployees = queryClient.getQueryData<SelectEmployee[]>(["/api/payroll/employees"]);
+      
+      console.log('Updated employees after reset:', updatedEmployees);
+      
+      if (updatedEmployees && updatedEmployees.length > 0 && onSelectEmployee) {
+        // Create a fresh copy to ensure React detects the change
+        const defaultEmployee = { ...updatedEmployees[0] };
+        console.log('Selecting default employee:', defaultEmployee);
+        
+        // Wait a tiny bit more, then select
+        await new Promise(resolve => setTimeout(resolve, 50));
+        onSelectEmployee(defaultEmployee);
+        
+        // Force another tiny delay and trigger click simulation if needed
+        await new Promise(resolve => setTimeout(resolve, 100));
+        console.log('Selection should be complete now');
+      }
+      
+      setSnackbar({
+        open: true,
+        message: `✅ Reset Successful! Cleared ${data.deleted || 0} employees. Form reset to default.`,
+        severity: 'success'
       });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to add employee",
-        variant: "destructive",
+    onError: (error) => {
+      console.error('Clear employees error:', error);
+      setSnackbar({
+        open: true,
+        message: '❌ Failed to reset employees. Please try again.',
+        severity: 'error'
       });
     },
   });
@@ -140,11 +325,11 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
       if (!currentCalculation) {
         throw new Error("No calculation available");
       }
-      const res = await apiRequest("PATCH", `/api/employees/${employeeId}`, currentCalculation);
+      const res = await apiRequest("PATCH", `/api/payroll/employees/${employeeId}`, currentCalculation);
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
       setAutoUpdateStatus('saved');
       // Reset to idle after 2 seconds
       setTimeout(() => setAutoUpdateStatus('idle'), 2000);
@@ -340,7 +525,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
     formData.append('file', file);
 
     try {
-      const response = await apiRequest('POST', '/api/employees/upload-excel', formData);
+      const response = await apiRequest('POST', '/api/payroll/employees/upload-excel', formData);
       // Note: apiRequest throws for non-ok responses, so if we get here, it succeeded
 
       // Check if response has content before parsing JSON
@@ -362,7 +547,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
       // Upload successful - no popup dialog needed
       
       // Refresh employee list
-      //queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
       
       // Show toast with complete information
       const toastDescription = result.deleted > 0 
@@ -388,16 +573,48 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
     }
   };
 
-  // Excel export function (exports to actual Excel file)
+  // Download complete payroll (payslips + payroll Excel in one ZIP)
   const handleExportExcel = async () => {
+    if (employees.length === 0) {
+      toast({
+        title: "Error", 
+        description: "No employees found to generate payroll",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let currentToast: { dismiss: () => void } | null = null;
+
     try {
-      const response = await apiRequest('GET', '/api/employees/export-excel');
+      // Save any pending changes before downloading
+      currentToast = toast({
+        title: "Preparing Payroll",
+        description: "Saving changes and generating payroll package...",
+      });
+      
+      try {
+        await savePendingChanges();
+        // Wait a bit for the backend to process the update
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Failed to save pending changes before download:', error);
+      }
+
+      // Dismiss previous toast and show generating toast
+      currentToast.dismiss();
+      currentToast = toast({
+        title: "Generating Payroll",
+        description: `Creating complete payroll package for ${employees.length} employee${employees.length > 1 ? 's' : ''}...`,
+      });
+
+      const response = await apiRequest('GET', '/api/payroll/download-complete');
       
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('No employees to export');
         }
-        throw new Error('Failed to export data');
+        throw new Error('Failed to generate payroll');
       }
       
       // Get the blob from the response
@@ -410,7 +627,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
       
       // Extract filename from Content-Disposition header or use default
       const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = 'salary_export.xlsx';
+      let filename = 'Complete_Payroll.zip';
       if (contentDisposition) {
         const match = contentDisposition.match(/filename=(.+)/);
         if (match && match[1]) {
@@ -426,17 +643,23 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      // Get employee count for toast message
-      const employeeCount = employees.length;
-      
+      // Dismiss generating toast and show success
+      if (currentToast) {
+        currentToast.dismiss();
+      }
       toast({
-        title: "Export Successful",
-        description: `Exported ${employeeCount} employees to ${filename}`,
+        title: "Download Successful",
+        description: `Downloaded complete payroll package with ${employees.length} payslip${employees.length > 1 ? 's' : ''} and payroll data`,
       });
     } catch (error) {
+      // Dismiss current toast if it exists and show error
+      if (currentToast) {
+        currentToast.dismiss();
+      }
+      
       toast({
-        title: "Export Failed",
-        description: error instanceof Error ? error.message : "Failed to export data",
+        title: "Download Failed",
+        description: error instanceof Error ? error.message : "Failed to download payroll",
         variant: "destructive",
       });
     }
@@ -444,8 +667,6 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
       maximumFractionDigits: 0,
     }).format(value);
   };
@@ -456,7 +677,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3 pt-4">
+      <CardHeader className="pb-2 pt-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Dialog open={summaryDialogOpen} onOpenChange={handleSummaryDialogChange}>
@@ -464,7 +685,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
                     if (employees.length === 0) {
                       toast({
                         title: "Error", 
@@ -472,6 +693,12 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                         variant: "destructive",
                       });
                     } else {
+                      // Save any pending changes before opening summary
+                      try {
+                        await savePendingChanges();
+                      } catch (error) {
+                        console.error('Failed to save pending changes before opening summary:', error);
+                      }
                       handleSummaryDialogChange(true);
                     }
                   }}
@@ -481,10 +708,7 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                   Summary
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>Employee Salary Summary</DialogTitle>
-                </DialogHeader>
+              <DialogContent className="max-w-[95vw] max-h-[85vh] overflow-hidden flex flex-col [&>button]:hidden p-4 pt-10">
                 <ScrollArea className="flex-1 pr-4">
                   <div className="overflow-x-auto">
                     <Table className="border-collapse">
@@ -506,29 +730,45 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {employees.map((employee) => {
+                        {employees
+                          .slice(summaryPage * summaryRowsPerPage, summaryPage * summaryRowsPerPage + summaryRowsPerPage)
+                          .map((employee) => {
                           // Use values from currentCalculation (employee section) when available, otherwise use stored employee data
                           // This ensures the summary shows exactly what the employee section calculated
                           const isCurrentEmployee = currentCalculation && employee.employeeNo === currentCalculation.employeeNo;
                           
                           return (
                             <TableRow key={employee.id}>
-                              <TableCell className="text-center font-medium border-r-2 border-gray-300">{employee.name}</TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.salary)}</TableCell>
+                              <TableCell className="text-center font-medium border-r-2 border-gray-300">
+                                {isCurrentEmployee ? currentCalculation.name : employee.name}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.salary : employee.salary)}
+                              </TableCell>
                               <TableCell className="text-center border-r-2 border-gray-300">
                                 {formatCurrency(isCurrentEmployee ? currentCalculation.augSalary : employee.augSalary)}
                               </TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.allowanceTax)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.allowanceTax : employee.allowanceTax)}
+                              </TableCell>
                               <TableCell className="text-center border-r-2 border-gray-300">
                                 {formatCurrency(isCurrentEmployee ? currentCalculation.totalSalary : employee.totalSalary)}
                               </TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.personalRelief)}</TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.dependentRelief)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.personalRelief : employee.personalRelief)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.dependentRelief : employee.dependentRelief)}
+                              </TableCell>
                               <TableCell className="text-center border-r-2 border-gray-300">
                                 {formatCurrency(isCurrentEmployee ? currentCalculation.personalIncomeTax : employee.personalIncomeTax)}
                               </TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatNumber(employee.totalOTHours)}</TableCell>
-                              <TableCell className="text-center border-r-2 border-gray-300">{formatCurrency(employee.companyInsurance)}</TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatNumber(isCurrentEmployee ? currentCalculation.totalOTHours : employee.totalOTHours)}
+                              </TableCell>
+                              <TableCell className="text-center border-r-2 border-gray-300">
+                                {formatCurrency(isCurrentEmployee ? currentCalculation.companyInsurance : employee.companyInsurance)}
+                              </TableCell>
                               <TableCell className="text-center border-r-2 border-gray-300">
                                 {formatCurrency(isCurrentEmployee ? currentCalculation.employeeInsurance : employee.employeeInsurance)}
                               </TableCell>
@@ -545,142 +785,94 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                     </Table>
                   </div>
                 </ScrollArea>
+                {/* Pagination Controls */}
+                <MuiBox sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
+                  <Pagination 
+                    count={Math.ceil(employees.length / summaryRowsPerPage)} 
+                    page={summaryPage + 1}
+                    onChange={(event, value) => setSummaryPage(value - 1)}
+                    color="primary"
+                    size="large"
+                    showFirstButton
+                    showLastButton
+                  />
+                  <span className="text-sm text-gray-600">
+                    Showing {summaryPage * summaryRowsPerPage + 1}-{Math.min((summaryPage + 1) * summaryRowsPerPage, employees.length)} of {employees.length}
+                  </span>
+                </MuiBox>
               </DialogContent>
             </Dialog>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                if (employees.length === 0) {
-                  toast({
-                    title: "Error", 
-                    description: "No employees found to generate pay slips",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                
-                try {
-                  toast({
-                    title: "Generating Pay Slips",
-                    description: `Creating ${employees.length} pay slip${employees.length > 1 ? 's' : ''}...`,
-                  });
-                  
-                  const response = await fetch("/api/payslips/download-all-excel", {
-                    method: "GET",
-                  });
-                  
-                  if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                  }
-                  
-                  // Get the blob and create download
-                  const blob = await response.blob();
-                  const url = window.URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  
-                  // Get filename from Content-Disposition header or use default
-                  const contentDisposition = response.headers.get('content-disposition');
-                  let filename = 'All_Payslips.zip';
-                  if (contentDisposition) {
-                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                    if (filenameMatch) {
-                      filename = filenameMatch[1].replace(/['"]/g, '');
-                    }
-                  }
-                  
-                  link.download = filename;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  window.URL.revokeObjectURL(url);
-                  
-                  toast({
-                    title: "Success",
-                    description: `Downloaded ${employees.length} pay slip${employees.length > 1 ? 's' : ''} as ZIP file`,
-                  });
-                } catch (error) {
-                  console.error('Batch download failed:', error);
-                  
-                  // Get more specific error information
-                  let errorMessage = "Failed to download pay slips";
-                  if (error instanceof Error) {
-                    errorMessage = error.message;
-                  }
-                  
-                  toast({
-                    title: "Error",
-                    description: errorMessage,
-                    variant: "destructive",
-                  });
-                }
-              }}
-              data-testid="button-download-payslip"
-            >
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Pay Slip
-            </Button>
-          </div>
-          <div className="flex items-center space-x-2">
             <Button
               size="sm"
               variant="outline"
               onClick={handleUploadExcel}
               disabled={uploading}
               data-testid="button-upload-excel"
+              title={uploading ? 'Uploading...' : 'Upload Excel'}
             >
               <Upload className="mr-2 h-4 w-4" />
-              {uploading ? 'Uploading...' : 'Upload Payroll'}
+              Upload Excel
             </Button>
             <Button
               size="sm"
               variant="outline"
               onClick={handleExportExcel}
               data-testid="button-export-excel"
+              title="Download Payroll & Payslip"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download Payroll
+              Download Payroll & Payslip
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setConfirmResetDialogOpen(true)}
+              disabled={clearAllEmployees.isPending}
+              data-testid="button-reset"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+            </Button>
+          </div>
+          <div className="flex items-center space-x-2">
             {currentCalculation && (
-              isLoading ? (
-                <Badge variant="secondary" data-testid="status-loading">
-                  <UserPlus className="mr-1 h-3 w-3" />
-                  Loading...
-                </Badge>
-              ) : existingEmployee ? (
-                <div className="flex items-center space-x-2">
-                  {autoUpdateStatus === 'saved' && (
-                    <Badge variant="default" data-testid="status-saved">
-                      <Check className="mr-1 h-3 w-3" />
-                      Auto-saved
-                    </Badge>
-                  )}
-                  {autoUpdateStatus === 'error' && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={retryUpdate}
-                      data-testid="button-retry"
-                    >
-                      <AlertTriangle className="mr-1 h-3 w-3" />
-                      Retry
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() => addCurrentAsEmployee.mutate()}
-                  disabled={addCurrentAsEmployee.isPending}
-                  data-testid="button-add-employee"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Current
-                </Button>
-              )
+              <>
+                {isLoading && (
+                  <Badge variant="secondary" data-testid="status-loading">
+                    <UserPlus className="mr-1 h-3 w-3" />
+                    Loading...
+                  </Badge>
+                )}
+                {!isLoading && existingEmployee && autoUpdateStatus === 'saved' && (
+                  <Badge variant="default" data-testid="status-saved">
+                    <Check className="mr-1 h-3 w-3" />
+                    Auto-saved
+                  </Badge>
+                )}
+                {!isLoading && existingEmployee && autoUpdateStatus === 'error' && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={retryUpdate}
+                    data-testid="button-retry"
+                  >
+                    <AlertTriangle className="mr-1 h-3 w-3" />
+                    Retry
+                  </Button>
+                )}
+              </>
             )}
+            <Button
+              size="icon"
+              onClick={() => {
+                  addCurrentAsEmployee.mutate();
+              }}
+              disabled={checkDefaultEmployeeExists() || addCurrentAsEmployee.isPending}
+              data-testid="button-add-employee"
+              title="Add Default Employee (Nguyễn Văn A)"
+            >
+              <UserPlus className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -719,21 +911,30 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
                       <div
                         key={employee.id}
                         data-testid={`row-employee-${employee.id}`}
-                        className={`cursor-pointer transition-all duration-200 px-1.5 py-1.5 ml-2 rounded-lg border-2 shadow-sm hover:shadow-md transform hover:scale-[1.01] mr-0 ${
+                        className={`group relative cursor-pointer transition-all duration-200 px-1.5 py-2 ml-2 rounded-lg border-2 shadow-sm hover:shadow-md transform hover:scale-[1.01] mr-2 ${
                           isBeingEdited 
                             ? 'border-primary bg-blue-50 shadow-md ring-2 ring-primary/20' 
                             : 'border-slate-200 bg-slate-50 hover:border-primary/40 hover:bg-blue-50/50'
                         }`}
-                        onClick={() => handleEmployeeClick(employee)}
                       >
-                        <div className="text-center">
+                        <div className="text-center" onClick={() => handleEmployeeClick(employee)}>
                           <div className="text-[13px] font-semibold text-slate-700 truncate mb-0.5" title={employee.employeeNo}>
                             {employee.employeeNo}
                           </div>
-                          <div className="text-[11px] font-bold text-slate-500 truncate leading-relaxed" title={displayData.name}>
+                          <div className="text-[11px] font-bold text-slate-500 leading-tight break-words" title={displayData.name}>
                             {displayData.name}
                           </div>
                         </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEmployee(employee.id, employee.name);
+                          }}
+                          className="absolute top-1 right-1 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          title="Delete employee"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
                       </div>
                     );
                   })}
@@ -752,6 +953,127 @@ export function EmployeeTable({ onAddEmployee, currentCalculation, onSelectEmplo
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
+      
+      {/* Professional Snackbar Notification */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={4000} 
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ mt: 1 }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ 
+            width: '100%',
+            fontSize: '0.95rem',
+            fontWeight: 500,
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      
+      {/* Professional Reset Confirmation Dialog */}
+      <MuiDialog
+        open={confirmResetDialogOpen}
+        onClose={() => setConfirmResetDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+          }
+        }}
+      >
+        <MuiDialogTitle sx={{ fontWeight: 600, fontSize: '1.25rem', pb: 1 }}>
+          ⚠️ Confirm Reset
+        </MuiDialogTitle>
+        <MuiDialogContent>
+          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+            Are you sure you want to reset? This will clear all uploaded employees and reset to default values.
+          </p>
+        </MuiDialogContent>
+        <MuiDialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <MuiButton 
+            onClick={() => setConfirmResetDialogOpen(false)}
+            variant="outlined"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 500,
+            }}
+          >
+            Cancel
+          </MuiButton>
+          <MuiButton 
+            onClick={() => {
+              setConfirmResetDialogOpen(false);
+              clearAllEmployees.mutate();
+            }}
+            variant="contained"
+            color="error"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Reset
+          </MuiButton>
+        </MuiDialogActions>
+      </MuiDialog>
+
+      {/* Professional Delete Confirmation Dialog */}
+      <MuiDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.15)',
+          }
+        }}
+      >
+        <MuiDialogTitle sx={{ fontWeight: 600, fontSize: '1.25rem', pb: 1 }}>
+          ⚠️ Confirm Deletion
+        </MuiDialogTitle>
+        <MuiDialogContent>
+          <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6 }}>
+            Are you sure you want to delete employee <strong>"{employeeToDelete?.name}"</strong>? This action cannot be undone.
+          </p>
+        </MuiDialogContent>
+        <MuiDialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <MuiButton 
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              setEmployeeToDelete(null);
+            }}
+            variant="outlined"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 500,
+            }}
+          >
+            Cancel
+          </MuiButton>
+          <MuiButton 
+            onClick={confirmDeleteEmployee}
+            variant="contained"
+            color="error"
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Delete
+          </MuiButton>
+        </MuiDialogActions>
+      </MuiDialog>
     </Card>
   );
 }

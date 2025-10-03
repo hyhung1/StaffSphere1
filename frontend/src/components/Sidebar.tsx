@@ -26,9 +26,10 @@ interface SidebarProps {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
+  currentUser: any;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose, onLogout, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();

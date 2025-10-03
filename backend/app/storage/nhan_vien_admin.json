@@ -1022,5 +1022,28 @@
     "pvi_care": "Có",
     "training_courses": "",
     "training_skills": ""
+  },
+  {
+    "full_name": "Nguyễn Hoàng Thiên",
+    "dob": "1996-10-06",
+    "gender": "Nam",
+    "Id_number": "0790970122921",
+    "address": "1489 Nguyễn Văn Linh, P.Tân Phong, Quận 7. HCM",
+    "current_address": "1489 Nguyễn Văn Linh, P.Tân Phong, Quận 7. HCM",
+    "phone": "0794461080",
+    "education_level": "Cử nhân",
+    "department": "Sales",
+    "position": "Chuyên viên",
+    "contract_id": "33-102025/HĐLĐ/KXĐ",
+    "contract_type": "Không thời hạn",
+    "contract_sign_date": "2025-02-06",
+    "salary": 18000000,
+    "last_salary_adjustment": "2025-02-06",
+    "tax_code": 8824586161,
+    "social_insurance_number": 7932533865,
+    "medical_insurance_hospital": "79-462 BV Đa Khoa Vạn Hạnh",
+    "bank_account": 55441350601,
+    "pvi_care": "Có",
+    "training_skills": "Tư Duy Tích cực, QL rủi ro"
   }
 ]

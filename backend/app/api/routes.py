@@ -11,8 +11,9 @@ import pandas as pd
 from datetime import datetime
 from openpyxl import Workbook
 
-from fastapi import APIRouter, HTTPException, Response, UploadFile, File
+from fastapi import APIRouter, HTTPException, Response, UploadFile, File, Header
 from fastapi.responses import StreamingResponse
+from typing import Annotated
 
 from ..models.schemas import (
     SalaryInput,
@@ -31,7 +32,11 @@ from ..services.payslip_excel_generator import generate_payslip_excel
 from ..services.batch_payslip_generator import generate_batch_payslip_zip
 from ..services.excel_exporter import export_employees_to_excel
 from ..services.employee_service import employee_service
+from ..services.user_service import user_service
+from ..services.encryption_service import encryption_service
+from ..services.payroll_service import payroll_service
 from ..storage.mem import storage
+from pydantic import BaseModel, EmailStr
 
 # Create router with /api prefix
 router = APIRouter(prefix="/api")
@@ -175,30 +180,41 @@ async def get_tax_brackets():
     return TAX_BRACKETS
 
 
-# ============ Employee Management Endpoints ============
+# ============ Payroll Employee Management Endpoints (User-Specific Encrypted Storage) ============
 
-@router.get("/employees", response_model=List[SelectEmployee])
-async def get_all_employees():
+@router.get("/payroll/employees", response_model=List[SelectEmployee])
+async def get_payroll_employees(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Get all employees from storage.
+    Get all employees from payroll storage for authenticated user.
     
     Returns:
-        List of all employees
+        List of all payroll employees for the authenticated user
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        employees = storage.getEmployees()
-        return employees
+        employees = payroll_service.load_payroll_employees(x_username, x_password)
+        # Convert dict to SelectEmployee models
+        return [SelectEmployee(**emp) for emp in employees]
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail={"message": "Failed to retrieve employees", "errors": [str(e)]}
+            detail={"message": "Failed to retrieve payroll employees", "errors": [str(e)]}
         )
 
 
-@router.post("/employees", response_model=SelectEmployee, status_code=201)
-async def create_employee(employee_data: InsertEmployee):
+@router.post("/payroll/employees", response_model=SelectEmployee, status_code=201)
+async def create_payroll_employee(
+    employee_data: InsertEmployee,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Create a new employee from calculation result.
+    Create a new employee in payroll storage for authenticated user.
     
     Args:
         employee_data: Employee data to save
@@ -209,15 +225,31 @@ async def create_employee(employee_data: InsertEmployee):
     Raises:
         HTTPException: If validation fails
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        # Save employee to storage
-        saved_employee = storage.addEmployee(employee_data)
-        return saved_employee
+        import uuid
+        # Generate unique ID
+        employee_id = uuid.uuid4().hex
+        new_employee_dict = {
+            "id": employee_id,
+            **employee_data.model_dump()
+        }
+        
+        # Save to user-specific encrypted storage
+        success = payroll_service.add_payroll_employee(x_username, x_password, new_employee_dict)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save employee")
+        
+        return SelectEmployee(**new_employee_dict)
     except ValueError as e:
         raise HTTPException(
             status_code=400,
             detail={"message": "Invalid employee data", "errors": [str(e)]}
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -225,32 +257,41 @@ async def create_employee(employee_data: InsertEmployee):
         )
 
 
-@router.get("/employees/export-excel")
-async def export_employees_excel():
+@router.get("/payroll/employees/export-excel")
+async def export_payroll_employees_excel(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Export all employees as Excel file in the Vietnamese salary format.
+    Export all payroll employees as Excel file for authenticated user.
     
     Returns:
         Excel file with all employee data formatted for Vietnamese salary calculations
     """
     from datetime import datetime
     
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        # Get all employees from storage
-        employees = storage.getEmployees()
+        # Get all employees from user-specific payroll storage
+        employees_dict = payroll_service.load_payroll_employees(x_username, x_password)
         
-        if not employees:
+        if not employees_dict:
             raise HTTPException(
                 status_code=404,
                 detail={"message": "No employees to export"}
             )
         
+        # Convert to SelectEmployee models
+        employees = [SelectEmployee(**emp) for emp in employees_dict]
+        
         # Generate Excel file
         excel_content = export_employees_to_excel(employees)
         
-        # Create filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"payroll_{timestamp}.xlsx"
+        # Create filename with date only
+        date_str = datetime.now().strftime("%Y%m%d")
+        filename = f"Payroll_{date_str}.xlsx"
         
         # Return Excel file as streaming response (no local saving)
         return StreamingResponse(
@@ -270,10 +311,13 @@ async def export_employees_excel():
         )
 
 
-@router.get("/employees/export-json")
-async def export_employees_json():
+@router.get("/payroll/employees/export-json")
+async def export_payroll_employees_json(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Export all employees as JSON in the specific Vietnamese salary format.
+    Export all payroll employees as JSON for authenticated user.
     
     Returns:
         JSON file with all employee data formatted for Vietnamese salary calculations
@@ -281,16 +325,22 @@ async def export_employees_json():
     import json
     from datetime import datetime
     
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        # Get all employees from storage
-        employees = storage.getEmployees()
+        # Get all employees from user-specific payroll storage
+        employees_dict = payroll_service.load_payroll_employees(x_username, x_password)
         
-        if not employees:
+        if not employees_dict:
             return {
                 "success": False,
                 "message": "No employees to export",
                 "data": []
             }
+        
+        # Convert to SelectEmployee models
+        employees = [SelectEmployee(**emp) for emp in employees_dict]
         
         # Format each employee in the Vietnamese salary format
         formatted_employees = []
@@ -325,8 +375,8 @@ async def export_employees_json():
             formatted_employees.append(formatted_emp)
         
         # Return the JSON data for download (no local saving)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"payroll_{timestamp}.json"
+        date_str = datetime.now().strftime("%Y%m%d")
+        filename = f"Payroll_{date_str}.json"
         return {
             "success": True,
             "message": f"Exported {len(employees)} employees",
@@ -341,10 +391,14 @@ async def export_employees_json():
         )
 
 
-@router.get("/employees/{employee_id}", response_model=SelectEmployee)
-async def get_employee(employee_id: str):
+@router.get("/payroll/employees/{employee_id}", response_model=SelectEmployee)
+async def get_payroll_employee(
+    employee_id: str,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Get a single employee by ID.
+    Get a single payroll employee by ID for authenticated user.
     
     Args:
         employee_id: The employee ID to lookup
@@ -355,19 +409,26 @@ async def get_employee(employee_id: str):
     Raises:
         HTTPException: If employee not found
     """
-    employee = storage.getEmployee(employee_id)
-    if not employee:
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employee_dict = payroll_service.get_payroll_employee_by_id(x_username, x_password, employee_id)
+    if not employee_dict:
         raise HTTPException(
             status_code=404,
             detail={"message": "Employee not found"}
         )
-    return employee
+    return SelectEmployee(**employee_dict)
 
 
-@router.patch("/employees/bulk-update")
-async def bulk_update_employees(bulk_data: dict):
+@router.patch("/payroll/employees/bulk-update")
+async def bulk_update_payroll_employees(
+    bulk_data: dict,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Update a specific field for all employees.
+    Update a specific field for all payroll employees of authenticated user.
     
     Args:
         bulk_data: Dictionary containing 'field' and 'value' to update
@@ -378,6 +439,9 @@ async def bulk_update_employees(bulk_data: dict):
     Raises:
         HTTPException: If invalid field or update fails
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
         field = bulk_data.get('field')
         value = bulk_data.get('value')
@@ -396,18 +460,17 @@ async def bulk_update_employees(bulk_data: dict):
                 detail={"message": f"Field '{field}' is not allowed for bulk update"}
             )
         
-        # Get all employees
-        employees = storage.getEmployees()
+        # Get all employees for this user
+        employees_dict = payroll_service.load_payroll_employees(x_username, x_password)
+        updated_employees = []
         updated_count = 0
         
         # Update each employee with the new field value
-        for employee in employees:
-            # Create update data with just the field to update
-            update_data = EmployeeUpdate(**{field: value})
+        for employee_dict in employees_dict:
+            # Convert to SelectEmployee model
+            employee = SelectEmployee(**employee_dict)
             
-            # Recalculate the employee's salary with the new value
-            # Get existing employee data and update the field
-            employee_dict = employee.model_dump()
+            # Update the field
             employee_dict[field] = value
             
             # Create calculation input from updated data
@@ -429,9 +492,14 @@ async def bulk_update_employees(bulk_data: dict):
             # Calculate the new result
             result = calculate_salary(calc_input)
             
-            # Update employee with full recalculated data
-            storage.updateEmployee(employee.id, result)
+            # Convert result to dict and keep the ID
+            updated_emp_dict = result.model_dump()
+            updated_emp_dict['id'] = employee_dict['id']
+            updated_employees.append(updated_emp_dict)
             updated_count += 1
+        
+        # Save all updated employees
+        payroll_service.save_payroll_employees(x_username, x_password, updated_employees)
         
         return {
             "success": True,
@@ -448,10 +516,15 @@ async def bulk_update_employees(bulk_data: dict):
         )
 
 
-@router.patch("/employees/{employee_id}", response_model=SelectEmployee)
-async def update_employee(employee_id: str, update_data: EmployeeUpdate):
+@router.patch("/payroll/employees/{employee_id}", response_model=SelectEmployee)
+async def update_payroll_employee(
+    employee_id: str,
+    update_data: EmployeeUpdate,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Update employee with partial data (PATCH operation).
+    Update payroll employee with partial data for authenticated user.
     
     Args:
         employee_id: The employee ID to update
@@ -463,35 +536,53 @@ async def update_employee(employee_id: str, update_data: EmployeeUpdate):
     Raises:
         HTTPException: If employee not found or validation fails
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        updated_employee = storage.updateEmployee(employee_id, update_data)
-        if not updated_employee:
+        # Get existing employee
+        employee_dict = payroll_service.get_payroll_employee_by_id(x_username, x_password, employee_id)
+        if not employee_dict:
             raise HTTPException(
                 status_code=404,
                 detail={"message": "Employee not found"}
             )
-        return updated_employee
+        
+        # Update with partial data
+        update_dict = update_data.model_dump(exclude_none=True)
+        employee_dict.update(update_dict)
+        
+        # Update in storage
+        success = payroll_service.update_payroll_employee(x_username, x_password, employee_id, employee_dict)
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail={"message": "Employee not found"}
+            )
+        
+        return SelectEmployee(**employee_dict)
     except ValueError as e:
         raise HTTPException(
             status_code=400,
             detail={"message": "Invalid employee data", "errors": [str(e)]}
         )
+    except HTTPException:
+        raise
     except Exception as e:
-        if "not found" in str(e).lower():
-            raise HTTPException(
-                status_code=404,
-                detail={"message": "Employee not found"}
-            )
         raise HTTPException(
             status_code=500,
             detail={"message": "Failed to update employee", "errors": [str(e)]}
         )
 
 
-@router.delete("/employees/{employee_id}", status_code=204)
-async def delete_employee(employee_id: str):
+@router.delete("/payroll/employees/{employee_id}", status_code=204)
+async def delete_payroll_employee(
+    employee_id: str,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Delete an employee by ID.
+    Delete a payroll employee by ID for authenticated user.
     
     Args:
         employee_id: The employee ID to delete
@@ -502,8 +593,11 @@ async def delete_employee(employee_id: str):
     Raises:
         HTTPException: If employee not found
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        success = storage.deleteEmployee(employee_id)
+        success = payroll_service.delete_payroll_employee(x_username, x_password, employee_id)
         if not success:
             raise HTTPException(
                 status_code=404,
@@ -511,6 +605,8 @@ async def delete_employee(employee_id: str):
             )
         # Return 204 No Content on successful deletion
         return Response(status_code=204)
+    except HTTPException:
+        raise
     except Exception as e:
         if "not found" in str(e).lower():
             raise HTTPException(
@@ -523,10 +619,45 @@ async def delete_employee(employee_id: str):
         )
 
 
-@router.post("/employees/upload-excel")
-async def upload_excel_file(file: UploadFile = File(...)):
+@router.delete("/payroll/employees", status_code=200)
+async def clear_all_payroll_employees(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Upload an Excel file to import multiple employees.
+    Clear all payroll employees for authenticated user.
+    
+    Returns:
+        Number of employees deleted
+        
+    Raises:
+        HTTPException: If deletion fails
+    """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    try:
+        deleted_count = payroll_service.clear_all_payroll_employees(x_username, x_password)
+        return {
+            "success": True,
+            "message": f"Successfully cleared {deleted_count} payroll employees",
+            "deleted": deleted_count
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"message": "Failed to clear employees", "errors": [str(e)]}
+        )
+
+
+@router.post("/payroll/employees/upload-excel")
+async def upload_payroll_excel_file(
+    file: UploadFile = File(...),
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """
+    Upload an Excel file to import multiple employees for authenticated user.
     
     Args:
         file: Excel file containing employee data
@@ -537,6 +668,10 @@ async def upload_excel_file(file: UploadFile = File(...)):
     Raises:
         HTTPException: If file is invalid or processing fails
     """
+    # Check authentication
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     # Validate file extension
     if not file.filename or not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(
@@ -557,27 +692,30 @@ async def upload_excel_file(file: UploadFile = File(...)):
                 detail={"message": "No valid employee data found in the Excel file"}
             )
         
-        # Clear all existing employees before importing new ones
-        deleted_count = storage.clearAllEmployees()
+        # Load existing payroll employees for this user
+        existing_employees = payroll_service.load_payroll_employees(x_username, x_password)
+        deleted_count = len(existing_employees)
         
-        # Process each employee
+        # Process each employee from Excel
         created_employees = []
         errors = []
         
         for idx, employee_data in enumerate(employee_data_list):
             try:
+                import uuid
                 # First, create SalaryInput from the employee data to calculate results
                 salary_input = SalaryInput(**employee_data)
                 
                 # Calculate salary to get all the computed fields
                 calculated_result = calculate_salary(salary_input)
                 
-                # Convert SalaryResult to InsertEmployee (they have the same fields)
-                insert_data = InsertEmployee(**calculated_result.model_dump())
+                # Convert to employee dict format with ID
+                employee_dict = {
+                    "id": uuid.uuid4().hex,
+                    **calculated_result.model_dump()
+                }
                 
-                # Add employee to storage
-                created_employee = storage.addEmployee(insert_data)
-                created_employees.append(created_employee)
+                created_employees.append(employee_dict)
                 
             except Exception as e:
                 errors.append({
@@ -586,6 +724,9 @@ async def upload_excel_file(file: UploadFile = File(...)):
                     "name": employee_data.get("name", "Unknown"),
                     "error": str(e)
                 })
+        
+        # Replace all payroll employees with the new import (clear and add new)
+        payroll_service.save_payroll_employees(x_username, x_password, created_employees)
         
         # Return result summary
         return {
@@ -678,9 +819,12 @@ async def download_payslip_excel(calculation_data: dict):
 
 
 @router.get("/payslips/download-all-excel")
-async def download_all_payslips_excel():
+async def download_all_payslips_excel(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
     """
-    Generate and download a ZIP file containing Excel pay slips for all employees.
+    Generate and download a ZIP file containing Excel pay slips for all employees of authenticated user.
     
     Returns:
         ZIP file containing individual Excel pay slips for each employee
@@ -688,15 +832,21 @@ async def download_all_payslips_excel():
     Raises:
         HTTPException: If generation fails or no employees found
     """
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
-        # Get all employees
-        employees = storage.getEmployees()
+        # Get all employees for this user
+        employees_dict = payroll_service.load_payroll_employees(x_username, x_password)
         
-        if not employees:
+        if not employees_dict:
             raise HTTPException(
                 status_code=404,
                 detail={"message": "No employees found to generate pay slips"}
             )
+        
+        # Convert to SelectEmployee models
+        employees = [SelectEmployee(**emp) for emp in employees_dict]
         
         # Generate ZIP file with all pay slips
         zip_bytes = generate_batch_payslip_zip(employees)
@@ -730,6 +880,118 @@ async def download_all_payslips_excel():
             detail={"message": f"Failed to generate pay slips: {str(e)}"}
         )
 
+@router.get("/payroll/download-complete")
+async def download_complete_payroll(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """
+    Generate and download a ZIP file containing both:
+    - All payslips as Excel files
+    - Payroll data as Excel file
+    
+    For authenticated user only.
+    
+    Returns:
+        ZIP file containing payslips folder and payroll Excel file
+        
+    Raises:
+        HTTPException: If generation fails or no employees found
+    """
+    import zipfile
+    from datetime import datetime
+    
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    try:
+        # Get all employees for this user
+        employees_dict = payroll_service.load_payroll_employees(x_username, x_password)
+        
+        if not employees_dict:
+            raise HTTPException(
+                status_code=404,
+                detail={"message": "No employees found"}
+            )
+        
+        # Convert to SelectEmployee models
+        employees = [SelectEmployee(**emp) for emp in employees_dict]
+        
+        if not employees:
+            raise HTTPException(
+                status_code=404,
+                detail={"message": "No employees found"}
+            )
+        
+        # Create a BytesIO object to hold the ZIP file
+        zip_buffer = io.BytesIO()
+        
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # 1. Add all payslips to the ZIP
+            for employee in employees:
+                try:
+                    # Convert employee to dict for payslip generation
+                    employee_dict = employee.model_dump()
+                    
+                    # Generate payslip Excel for this employee
+                    payslip_bytes = generate_payslip_excel(employee_dict)
+                    
+                    # Create safe filename
+                    import unicodedata
+                    import re
+                    employee_name = employee.name
+                    ascii_name = unicodedata.normalize('NFKD', employee_name)
+                    ascii_name = ''.join(c for c in ascii_name if not unicodedata.combining(c))
+                    safe_name = re.sub(r'[^\w\s-]', '', ascii_name).strip()
+                    safe_name = re.sub(r'[-\s]+', '_', safe_name)
+                    
+                    # Add to ZIP in payslips folder
+                    zip_file.writestr(
+                        f"Payslips/Payslip_{safe_name}.xlsx",
+                        payslip_bytes
+                    )
+                except Exception as e:
+                    # Log error but continue with other payslips
+                    print(f"Error generating payslip for {employee.name}: {str(e)}")
+                    continue
+            
+            # 2. Add payroll Excel to the ZIP
+            payroll_bytes = export_employees_to_excel(employees)
+            date_str = datetime.now().strftime("%Y%m%d")
+            zip_file.writestr(
+                f"Payroll_{date_str}.xlsx",
+                payroll_bytes
+            )
+        
+        # Get the ZIP file bytes
+        zip_buffer.seek(0)
+        zip_bytes = zip_buffer.read()
+        
+        # Create filename with current date
+        current_date = datetime.now().strftime("%Y%m%d")
+        filename = f"Complete_Payroll_{current_date}.zip"
+        
+        # Return ZIP file as download
+        def generate():
+            yield zip_bytes
+            
+        return StreamingResponse(
+            generate(),
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"message": f"Failed to generate complete payroll: {str(e)}"}
+        )
+
+
+# ============ Dashboard Employee Management Endpoints (nhan_vien.json) ============
+
 @router.get("/employees", response_model=List[EmployeeSphere])
 def get_employees(
     department: Optional[str] = None,
@@ -738,9 +1000,16 @@ def get_employees(
     gender: Optional[str] = None,
     search: Optional[str] = None,
     min_age: Optional[int] = None,
-    max_age: Optional[int] = None
+    max_age: Optional[int] = None,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
 ):
-    employees = employee_service.load_employees()
+    """Get employees for the authenticated user."""
+    # Get auth from headers
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     
     # Helper function to calculate age from DOB
     def calculate_age(dob_str):
@@ -802,16 +1071,32 @@ def get_employees(
     return filtered_employees
 
 @router.get("/employees/{employee_id}")
-def get_employee(employee_id: str):
-    employees = employee_service.load_employees()
+def get_employee(
+    employee_id: str,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Get specific employee for authenticated user."""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     for emp in employees:
         if emp.get("Id_number") == employee_id:
             return emp
     raise HTTPException(status_code=404, detail="Employee not found")
 
 @router.post("/employees", response_model=EmployeeSphere)
-def create_employee(employee: EmployeeCreate):
-    employees = employee_service.load_employees()
+def create_employee(
+    employee: EmployeeCreate,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Create employee for authenticated user."""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     
     # Check if employee with same ID already exists
     for emp in employees:
@@ -847,13 +1132,22 @@ def create_employee(employee: EmployeeCreate):
     }
     
     employees.append(new_employee)
-    employee_service.save_employees(employees)
+    employee_service.save_employees(x_username, x_password, employees)
     
     return new_employee
 
 @router.put("/employees/{employee_id}")
-def update_employee(employee_id: str, employee: EmployeeCreate):
-    employees = employee_service.load_employees()
+def update_employee(
+    employee_id: str,
+    employee: EmployeeCreate,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Update employee for authenticated user."""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     
     for i, emp in enumerate(employees):
         if emp.get("Id_number") == employee_id:
@@ -879,27 +1173,53 @@ def update_employee(employee_id: str, employee: EmployeeCreate):
                 "training_skills": employee.training_skills
             })
             
-            employee_service.save_employees(employees)
+            employee_service.save_employees(x_username, x_password, employees)
             return employees[i]
     
     raise HTTPException(status_code=404, detail="Employee not found")
 
 @router.delete("/employees/{employee_id}")
-def delete_employee(employee_id: str):
-    employees = employee_service.load_employees()
+def delete_employee(
+    employee_id: str,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Delete an employee for authenticated user."""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
     
-    for i, emp in enumerate(employees):
-        if emp.get("Id_number") == employee_id:
-            deleted_employee = employees.pop(i)
-            save_employees(employees)
-            return {"message": "Employee deleted successfully", "employee": deleted_employee}
-    
-    raise HTTPException(status_code=404, detail="Employee not found")
+    try:
+        employees = employee_service.load_employees(x_username, x_password)
+        
+        # Find and remove the employee
+        initial_count = len(employees)
+        employees = [emp for emp in employees if emp.get("Id_number") != employee_id]
+        
+        if len(employees) == initial_count:
+            # No employee was removed
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Save the updated list
+        success = employee_service.save_employees(x_username, x_password, employees)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save changes")
+        
+        return {"message": "Employee deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting employee: {str(e)}")
 
 @router.get("/filter-options")
-def get_filter_options():
-    """Get unique values for dropdown filter options"""
-    employees = employee_service.load_employees()
+def get_filter_options(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Get unique values for dropdown filter options for authenticated user"""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     
     if not employees:
         return {
@@ -938,8 +1258,15 @@ def get_filter_options():
     }
 
 @router.get("/statistics")
-def get_statistics():
-    employees = employee_service.load_employees()
+def get_statistics(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Get statistics for authenticated user's employees."""
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    employees = employee_service.load_employees(x_username, x_password)
     
     if not employees:
         return {
@@ -990,11 +1317,14 @@ def export_csv(
     gender: Optional[str] = None,
     search: Optional[str] = None,
     min_age: Optional[int] = None,
-    max_age: Optional[int] = None
+    max_age: Optional[int] = None,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
 ):
-    # Get filtered employees
+    """Export employees to CSV for authenticated user."""
+    # Get filtered employees with authentication
     employees = get_employees(department, position, contract_type, gender, 
-                             search, min_age, max_age)
+                             search, min_age, max_age, x_username, x_password)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
@@ -1020,11 +1350,14 @@ def export_excel(
     gender: Optional[str] = None,
     search: Optional[str] = None,
     min_age: Optional[int] = None,
-    max_age: Optional[int] = None
+    max_age: Optional[int] = None,
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
 ):
-    # Get filtered employees
+    """Export employees to Excel for authenticated user."""
+    # Get filtered employees with authentication
     employees = get_employees(department, position, contract_type, gender, 
-                             search, min_age, max_age)
+                             search, min_age, max_age, x_username, x_password)
     
     if not employees:
         raise HTTPException(status_code=404, detail="No employees found with the given filters")
@@ -1046,7 +1379,16 @@ def export_excel(
     )
 
 @router.post("/import/excel")
-async def import_excel(file: UploadFile = File(...)):
+async def import_excel(
+    file: UploadFile = File(...),
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+):
+    """Import employee data from Excel for authenticated user."""
+    # Check authentication
+    if not x_username or not x_password:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     if not file.filename or not file.filename.endswith(('.xlsx', '.xls')):
         raise HTTPException(status_code=400, detail="Only Excel files are allowed")
     
@@ -1173,20 +1515,195 @@ async def import_excel(file: UploadFile = File(...)):
             
             new_employees.append(employee)
 
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        # Path to nhan_vien.json
-        json_path = os.path.join(BASE_DIR, "storage", "nhan_vien.json")
+        # Save to user-specific encrypted file
+        success = employee_service.save_employees(x_username, x_password, new_employees)
         
-        # Load existing employees
-        with open(json_path, 'r', encoding='utf-8') as f:
-            existing_employees = json.load(f)
-        
-        # Replace existing data with new import (not append)
-        # This ensures we have a fresh dataset from the Excel
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(new_employees, f, ensure_ascii=False, indent=2)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save imported employees")
         
         return {"message": f"Successfully imported {len(new_employees)} employees", "count": len(new_employees)}
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+
+
+# ============= User Management Routes =============
+
+class UserRegister(BaseModel):
+    username: str
+    password: str
+    email: EmailStr
+    fullName: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class PasswordRecovery(BaseModel):
+    email: EmailStr
+    username: str
+
+class AuthenticatedRequest(BaseModel):
+    username: str
+    password: str
+
+class PasswordReset(BaseModel):
+    username: str
+    new_password: str
+
+class PasswordChange(BaseModel):
+    username: str
+    old_password: str
+    new_password: str
+
+# Helper function to get auth from headers
+def get_auth_from_headers(
+    x_username: Annotated[str | None, Header()] = None,
+    x_password: Annotated[str | None, Header()] = None
+) -> tuple:
+    """Extract username and password from request headers"""
+    if not x_username or not x_password:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required. Please provide X-Username and X-Password headers."
+        )
+    return x_username, x_password
+
+
+@router.post("/auth/register")
+def register_user(user_data: UserRegister):
+    """Register a new user account"""
+    result = user_service.register_user(
+        username=user_data.username,
+        password=user_data.password,
+        email=user_data.email,
+        full_name=user_data.fullName
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["message"])
+    
+    return result
+
+
+@router.post("/auth/login")
+def login_user(credentials: UserLogin):
+    """Authenticate user and return user info"""
+    user = user_service.authenticate_user(
+        username=credentials.username,
+        password=credentials.password
+    )
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    # Try to decrypt employee data with user's password
+    employee_data = encryption_service.decrypt_data(credentials.username, credentials.password)
+    
+    return {
+        "success": True,
+        "user": user,
+        "hasEncryptedData": employee_data is not None,
+        "employeeCount": len(employee_data) if employee_data else 0
+    }
+
+
+@router.post("/auth/recover-password")
+def recover_password(recovery_data: PasswordRecovery):
+    """Recover password using email and username"""
+    result = user_service.recover_password(
+        email=recovery_data.email,
+        username=recovery_data.username
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail=result["message"])
+    
+    return result
+
+
+@router.post("/auth/encrypt-data")
+def encrypt_employee_data(credentials: UserLogin):
+    """Encrypt employee data with user's password"""
+    # First verify user credentials
+    user = user_service.authenticate_user(
+        username=credentials.username,
+        password=credentials.password
+    )
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Encrypt the data for this specific user
+    success = encryption_service.encrypt_data(credentials.username, credentials.password)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to encrypt data")
+    
+    return {
+        "success": True,
+        "message": "Employee data encrypted successfully"
+    }
+
+
+@router.post("/auth/decrypt-data")
+def decrypt_employee_data(credentials: UserLogin):
+    """Decrypt employee data with user's password"""
+    # Try to decrypt data for this specific user
+    employee_data = encryption_service.decrypt_data(credentials.username, credentials.password)
+    
+    if employee_data is None:
+        raise HTTPException(status_code=401, detail="Failed to decrypt data. Wrong password or no encrypted data found.")
+    
+    return {
+        "success": True,
+        "data": employee_data
+    }
+
+
+@router.post("/auth/migrate-passwords")
+def migrate_passwords_to_hashed():
+    """
+    Migrate all plain text passwords to hashed passwords
+    This is a one-time migration endpoint for security upgrade
+    """
+    result = user_service.migrate_passwords_to_hashed()
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+    
+    return result
+
+
+@router.post("/auth/reset-password")
+def reset_password(reset_data: PasswordReset):
+    """
+    Reset a user's password (admin function)
+    No authentication required - use carefully or add admin auth
+    """
+    result = user_service.reset_user_password(
+        username=reset_data.username,
+        new_password=reset_data.new_password
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=404, detail=result["message"])
+    
+    return result
+
+
+@router.post("/auth/change-password")
+def change_password(change_data: PasswordChange):
+    """
+    Change user's own password (requires current password)
+    """
+    result = user_service.change_password(
+        username=change_data.username,
+        old_password=change_data.old_password,
+        new_password=change_data.new_password
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=401, detail=result["message"])
+    
+    return result

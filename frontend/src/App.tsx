@@ -10,6 +10,8 @@ import Statistics from './components/Statistics';
 import Sidebar from './components/Sidebar';
 import PermanentSidebar, { drawerWidth } from './components/PermanentSidebar';
 import Login from './components/Login';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
 import NotFound from './components/pages/not-found';
 import SalaryCalculator from './components/pages/calculator';
 import { queryClient } from "./components/lib/queryClient";
@@ -230,31 +232,114 @@ const theme = createTheme({
 
 function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Check localStorage for existing authentication
+    const savedAuth = localStorage.getItem('isAuthenticated');
+    return savedAuth === 'true';
+  });
+  const [currentUser, setCurrentUser] = useState(() => {
+    // Load user info from localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'forgot'>('login');
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleLogin = async (username: string, password: string): Promise<boolean> => {
-    // Simple authentication - in a real app, this would be an API call
-    if (username === 'admin' && password === 'password') {
-      setIsAuthenticated(true);
-      return true;
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.user) {
+        const user = {
+          ...data.user,
+          loginTime: new Date().toISOString(),
+          password: password // Store password temporarily for encryption/decryption
+        };
+        
+        setIsAuthenticated(true);
+        setCurrentUser(user);
+        
+        // Persist authentication state in localStorage
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
+    
+    // Clear authentication from localStorage
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+    
+    // CRITICAL: Clear all React Query cache to prevent data leakage between users
+    // This ensures that when a new user logs in, they don't see the previous user's cached data
+    queryClient.clear();
+    
+    console.log('🔒 User logged out - all cached data cleared');
   };
 
-  // Show login page if not authenticated
+  const handleRegister = () => {
+    setAuthScreen('register');
+  };
+
+  const handleForgotPassword = () => {
+    setAuthScreen('forgot');
+  };
+
+  const handleBackToLogin = () => {
+    setAuthScreen('login');
+  };
+
+  const handleRegisterSuccess = () => {
+    setAuthScreen('login');
+  };
+
+  // Show authentication screens if not authenticated
   if (!isAuthenticated) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Login onLogin={handleLogin} />
+        {authScreen === 'login' && (
+          <Login 
+            onLogin={handleLogin} 
+            onRegister={handleRegister}
+            onForgotPassword={handleForgotPassword}
+          />
+        )}
+        {authScreen === 'register' && (
+          <Register 
+            onRegisterSuccess={handleRegisterSuccess}
+            onBackToLogin={handleBackToLogin}
+          />
+        )}
+        {authScreen === 'forgot' && (
+          <ForgotPassword onBackToLogin={handleBackToLogin} />
+        )}
       </ThemeProvider>
     );
   }
@@ -276,10 +361,10 @@ function App() {
                 aria-label="mailbox folders"
               >
                 {/* Mobile drawer */}
-                <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} />
+                <Sidebar open={mobileOpen} onClose={handleDrawerToggle} onLogout={handleLogout} currentUser={currentUser} />
                 
                 {/* Desktop permanent drawer */}
-                <PermanentSidebar onLogout={handleLogout} />
+                <PermanentSidebar onLogout={handleLogout} currentUser={currentUser} />
               </Box>
 
               {/* Main content */}

@@ -29,14 +29,30 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
   const [totalWorkdays, setTotalWorkdays] = useState<number>(20);
   const { toast } = useToast();
   
+  // Get current username for cache key to prevent data leakage between users
+  const getCurrentUsername = () => {
+    const currentUserStr = localStorage.getItem('currentUser');
+    if (currentUserStr) {
+      try {
+        const currentUser = JSON.parse(currentUserStr);
+        return currentUser.username || 'anonymous';
+      } catch (error) {
+        return 'anonymous';
+      }
+    }
+    return 'anonymous';
+  };
+  
+  const currentUsername = getCurrentUsername();
+  
   // Mutation to bulk update a field for all employees
   const bulkUpdateField = useMutation({
     mutationFn: async ({ field, value }: { field: string; value: number }) => {
-      const res = await apiRequest("PATCH", "/api/employees/bulk-update", { field, value });
+      const res = await apiRequest("PATCH", "/api/payroll/employees/bulk-update", { field, value });
       return res.json();
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/employees/buld-update"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll/employees", currentUsername] });
       toast({
         title: "Success",
         description: `Updated ${variables.field} for all employees`,
@@ -68,7 +84,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
     resolver: zodResolver(salaryInputSchema),
     defaultValues: {
       employeeNo: "VIVN-0001",
-      name: "Huỳnh Nguyễn Gia Hoàng",
+      name: "Huỳnh Nguyễn Minh Hoàng",
       salary: 10000000,
       bonus: 0,
       allowanceTax: 200000,
@@ -90,6 +106,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
   
   // Populate form when an employee is selected
   useEffect(() => {
+    console.log('selectedEmployee changed:', selectedEmployee);
     if (selectedEmployee) {
       form.setValue("employeeNo", selectedEmployee.employeeNo || "");
       form.setValue("name", selectedEmployee.name || "");
@@ -101,8 +118,43 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
       form.setValue("ot30", selectedEmployee.ot30 || 0);
       form.setValue("dependants", selectedEmployee.dependants || 0);
       form.setValue("advance", selectedEmployee.advance || 0);
+      form.setValue("personalRelief", selectedEmployee.personalRelief || 11000000);
+      form.setValue("dependentRelief", selectedEmployee.dependentRelief !== undefined ? selectedEmployee.dependentRelief : 4400000 * (selectedEmployee.dependants || 0));
+      
+      // Set actualDaysWorked and totalWorkdays if available
+      if (selectedEmployee.actualDaysWorked !== undefined) {
+        setActualDaysWorked(selectedEmployee.actualDaysWorked);
+      } else {
+        setActualDaysWorked(20);
+      }
+      if (selectedEmployee.totalWorkdays !== undefined) {
+        setTotalWorkdays(selectedEmployee.totalWorkdays);
+      } else {
+        setTotalWorkdays(20);
+      }
       
       // Clear focused fields and raw inputs to ensure proper display
+      setFocusedField(null);
+      setRawInputValues({});
+      
+      console.log('Form updated with employee:', selectedEmployee.employeeNo, selectedEmployee.name);
+    } else {
+      // When no employee is selected, reset to default values
+      console.log('No employee selected, resetting to defaults');
+      form.reset({
+        employeeNo: "VIVN-0001",
+        name: "Huỳnh Nguyễn Minh Hoàng",
+        salary: 10000000,
+        bonus: 0,
+        allowanceTax: 200000,
+        ot15: 10,
+        ot20: 5,
+        ot30: 2,
+        dependants: 2,
+        advance: 0,
+      });
+      setActualDaysWorked(20);
+      setTotalWorkdays(20);
       setFocusedField(null);
       setRawInputValues({});
     }
@@ -255,37 +307,37 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
 
 
   return (
-    <Card className="w-full max-w-[48rem] h-full flex flex-col">
+    <Card className="w-full max-w-[44rem] h-full flex flex-col">
       <CardContent className="p-6 pt-2 flex-1 overflow-auto">
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4 pb-3 border-b">
+          <div className="grid grid-cols-3 gap-14 pb-3 border-b-2">
             <div className="space-y-1.5">
               <Label htmlFor="employeeNo" className="text-xs font-medium text-muted-foreground">Employee No</Label>
               <Input
                 id="employeeNo"
                 data-testid="input-employee-no"
                 {...form.register("employeeNo")}
-                className="w-[90%] h-9 text-[16rem] font-semibold"
+                className="w-[68%] h-9 text-[16rem] font-semibold"
               />
               {form.formState.errors.employeeNo && (
                 <p className="text-sm text-red-500">{form.formState.errors.employeeNo.message}</p>
               )}
             </div>
             
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 -ml-12">
               <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">Full Name</Label>
               <Input
                 id="name"
                 data-testid="input-employee-name"
                 {...form.register("name")}
-                className="w-[90%] h-9 text-[16rem] font-semibold"
+                className="w-[100%] h-9 text-[16rem] font-semibold"
               />
               {form.formState.errors.name && (
                 <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
               )}
             </div>
             
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 ml-6">
               <Label htmlFor="advance" className="text-xs font-medium text-muted-foreground">Adv</Label>
               <Input
                 id="advance"
@@ -313,14 +365,14 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                 }}
                 onKeyDown={(e) => handleKeyDown(e, "advance")}
                 data-testid="input-advance"
-                className="w-[90%] h-9 text-[16rem] font-semibold"
+                className="w-[72%] h-9 text-[16rem] font-semibold"
               />
             </div>
           </div>
 
           {/* Salary Components */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+          <div className="space-y-4 ml-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end -ml-6">
               <div className="flex items-center">
                 <h3 className="font-medium text-card-foreground border-l-4 border-primary pl-3">
                   Basic Information:
@@ -349,9 +401,9 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
             </div>
             
             {/* First row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -ml-6">
               <div className="space-y-1">
-                <Label htmlFor="salary" className=" h-[40px] flex items-end pb-1">Salary</Label>
+                <Label htmlFor="salary" className=" h-[40px] flex items-center">Salary (VND)</Label>
                 <Input
                   id="salary"
                   type="text"
@@ -382,7 +434,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, salary: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "salary")}
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
                 {form.formState.errors.salary && (
                   <p className="text-sm text-red-500">{form.formState.errors.salary.message}</p>
@@ -390,19 +442,19 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="augSalary" className=" h-[40px] flex items-end pb-1">Actual Salary</Label>
+                <Label htmlFor="augSalary" className=" h-[40px] flex items-center">Actual Salary</Label>
                 <Input
                   id="augSalary"
                   type="text"
                   data-testid="input-aug-salary"
                   value={formatNumberWithVND(Math.round((form.watch("salary") || 0) / totalWorkdays * actualDaysWorked))}
                   readOnly
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <div className="flex items-center justify-between h-[40px]">
+                <div className="flex items-center gap-2 h-[40px]">
                   <Label htmlFor="bonus" className="block">Bonus</Label>
                   <Button
                     type="button"
@@ -450,7 +502,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, bonus: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "bonus")}
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
                 {form.formState.errors.bonus && (
                   <p className="text-sm text-red-500">{form.formState.errors.bonus.message}</p>
@@ -459,9 +511,9 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
             </div>
             
             {/* Second row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -ml-6">
               <div className="space-y-1">
-                <Label htmlFor="dependants" className=" h-[40px] flex items-end pb-1">Dependants</Label>
+                <Label htmlFor="dependants" className=" h-[40px] flex items-center">Dependants</Label>
                 <Input
                   id="dependants"
                   type="number"
@@ -469,7 +521,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-dependents"
                   {...form.register("dependants", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "dependants")}
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
                 {form.formState.errors.dependants && (
                   <p className="text-sm text-red-500">{form.formState.errors.dependants.message}</p>
@@ -477,7 +529,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
               </div>
               
               <div className="space-y-1">
-                <div className="flex items-center justify-between h-[40px]">
+                <div className="flex items-center gap-2 h-[40px]">
                   <Label htmlFor="dependentRelief" className="block">Dependent relief</Label>
                   <Button
                     type="button"
@@ -525,12 +577,12 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, dependentRelief: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "dependentRelief")}
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <div className="flex items-center justify-between h-[40px]">
+                <div className="flex items-center gap-2 h-[40px]">
                   <Label htmlFor="personalRelief" className="block">Personal relief</Label>
                   <Button
                     type="button"
@@ -572,13 +624,13 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, personalRelief: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "personalRelief")}
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
             </div>
             
             {/* Third row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 -ml-6">
               <div className="space-y-1">
                 <Label htmlFor="insuranceCompany" className=" h-[40px] leading-tight flex items-end pb-1">Insurance - Company's pay (21.5%)</Label>
                 <Input
@@ -590,7 +642,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(augSalary * 0.215);
                   })()}
                   readOnly
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
               
@@ -602,12 +654,12 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-insurance-employee"
                   value={formatNumberWithVND((form.watch("salary") || 0) * 0.105)}
                   readOnly
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="pitNonTaxableIncome" className=" h-[40px] leading-tight flex items-end pb-1">thu nhập ko tính thuế (PIT)</Label>
+                <Label htmlFor="pitNonTaxableIncome" className="block leading-tight text-sm">thu nhập ko tính thuế<br />(PIT)</Label>
                 <Input
                   id="pitNonTaxableIncome"
                   type="text"
@@ -619,7 +671,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(personalRelief + dependentRelief + insuranceEmployee);
                   })()}
                   readOnly
-                  className="w-[81%]"
+                  className="w-[62%]"
                 />
               </div>
             </div>
@@ -643,7 +695,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-15"
                   {...form.register("ot15", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot15")}
-                  className="w-[64%]"
+                  className="w-[52%]"
                 />
                 {form.formState.errors.ot15 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot15.message}</p>
@@ -660,7 +712,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-20"
                   {...form.register("ot20", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot20")}
-                  className="w-[64%]"
+                  className="w-[52%]"
                 />
                 {form.formState.errors.ot20 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot20.message}</p>
@@ -677,7 +729,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-ot-30"
                   {...form.register("ot30", { valueAsNumber: true })}
                   onKeyDown={(e) => handleKeyDown(e, "ot30")}
-                  className="w-[64%]"
+                  className="w-[52%]"
                 />
                 {form.formState.errors.ot30 && (
                   <p className="text-sm text-red-500">{form.formState.errors.ot30.message}</p>
@@ -692,7 +744,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   data-testid="input-total-ot-hours"
                   value={formatNumber(Math.round((form.watch("ot15") || 0) + (form.watch("ot20") || 0) + (form.watch("ot30") || 0) + (form.watch("ot15") || 0) * 0.5 + (form.watch("ot20") || 0) + (form.watch("ot30") || 0) * 2))}
                   readOnly
-                  className="w-[64%]"
+                  className="w-[52%]"
                 />
               </div>
             </div>
@@ -700,7 +752,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
             {/* Second row: Allowance, OT none pay PIT, OT pay PIT, Total Salary */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-1">
-                <div className="flex items-end justify-between h-[40px] pb-1">
+                <div className="flex items-center gap-2 h-[40px]">
                   <Label htmlFor="allowanceTax" className="block">Allowance</Label>
                   <Button
                     type="button"
@@ -742,12 +794,12 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     setRawInputValues(prev => ({ ...prev, allowanceTax: "" }));
                   }}
                   onKeyDown={(e) => handleKeyDown(e, "allowanceTax")}
-                  className="w-full"
+                  className="w-[82%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="overtimeNonePayPIT" className=" h-[40px] flex items-end pb-1">OT none pay PIT</Label>
+                <Label htmlFor="overtimeNonePayPIT" className=" h-[40px] flex items-center">OT none pay PIT</Label>
                 <Input
                   id="overtimeNonePayPIT"
                   type="text"
@@ -760,12 +812,12 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(Math.round((augSalary / 22 / 8) * (ot15 * 0.5 + ot20 + ot30 * 2)));
                   })()}
                   readOnly
-                  className="w-full"
+                  className="w-[82%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="overtimePayPIT" className=" h-[40px] flex items-end pb-1">OT pay PIT</Label>
+                <Label htmlFor="overtimePayPIT" className=" h-[40px] flex items-center">OT pay PIT</Label>
                 <Input
                   id="overtimePayPIT"
                   type="text"
@@ -778,12 +830,12 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(Math.floor((augSalary / 22 / 8) * (ot15 + ot20 + ot30)));
                   })()}
                   readOnly
-                  className="w-full"
+                  className="w-[82%]"
                 />
               </div>
               
               <div className="space-y-1">
-                <Label htmlFor="totalSalary" className=" h-[40px] flex items-end pb-1">Total Salary</Label>
+                <Label htmlFor="totalSalary" className=" h-[40px] flex items-center">Total Salary</Label>
                 <Input
                   id="totalSalary"
                   type="text"
@@ -799,7 +851,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                     return formatNumberWithVND(Math.round(augSalary + bonus + allowanceTax + otPayPit));
                   })()}
                   readOnly
-                  className="w-[105%]"
+                  className="w-[85%]"
                 />
               </div>
             </div>
@@ -826,7 +878,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   })()}
                   readOnly
                   data-testid="input-doan-phi"
-                  className="w-full"
+                  className="w-[77%]"
                 />
               </div>
               
@@ -853,7 +905,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   })()}
                   readOnly
                   data-testid="input-assessable-income"
-                  className="w-full"
+                  className="w-[77%]"
                 />
               </div>
               
@@ -901,7 +953,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   })()}
                   readOnly
                   data-testid="input-personal-income-tax"
-                  className="w-full"
+                  className="w-[77%]"
                 />
               </div>
               
@@ -961,7 +1013,7 @@ export function SalaryForm({ onCalculationChange, selectedEmployee }: SalaryForm
                   })()}
                   readOnly
                   data-testid="input-total-net-income"
-                  className="w-full bg-muted/50"
+                  className="w-[77%] bg-muted/50"
                 />
               </div>
             </div>

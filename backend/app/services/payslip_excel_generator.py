@@ -27,22 +27,24 @@ def generate_payslip_excel(calculation_data: Dict[str, Any]) -> bytes:
     try:
         logger.info(f"Starting payslip generation for employee: {calculation_data.get('name', 'Unknown')}")
         
-        # Path to the template file - use absolute path from known project structure
-        current_working_dir = Path(os.getcwd())
-        logger.info(f"Current working directory: {current_working_dir}")
+        # Path to the template file - relative to this file's location
+        # This file is at: backend/app/services/payslip_excel_generator.py
+        # Template is at: backend/templates/Payslip_sample.xlsx
+        current_file_dir = Path(__file__).parent  # app/services/
+        backend_dir = current_file_dir.parent.parent  # backend/
+        template_path = backend_dir / "templates" / "Payslip_sample.xlsx"
         
-        # If we're in backend directory, go up one level to project root
-        if current_working_dir.name == "backend":
-            project_root = current_working_dir.parent
-        else:
-            project_root = current_working_dir
-            
-        template_path = project_root / "templates" / "Payslip_sample.xlsx"
-        
+        logger.info(f"Current file directory: {current_file_dir}")
+        logger.info(f"Backend directory: {backend_dir}")
         logger.info(f"Looking for template at: {template_path.absolute()}")
         
         if not template_path.exists():
             logger.error(f"Template file not found at: {template_path.absolute()}")
+            # Try alternative paths for debugging
+            alt_path1 = Path(os.getcwd()) / "backend" / "templates" / "Payslip_sample.xlsx"
+            alt_path2 = Path(os.getcwd()) / "templates" / "Payslip_sample.xlsx"
+            logger.error(f"Alternative path 1 exists: {alt_path1.exists()} - {alt_path1.absolute()}")
+            logger.error(f"Alternative path 2 exists: {alt_path2.exists()} - {alt_path2.absolute()}")
             raise FileNotFoundError(f"Template file not found: {template_path}")
             
         logger.info("Template file found, loading workbook...")

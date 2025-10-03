@@ -15,7 +15,7 @@ export function formatNumber(value: number | string): string {
 
 export function formatNumberWithVND(value: number | string): string {
   const num = typeof value === 'string' ? parseFloat(value) || 0 : value;
-  return new Intl.NumberFormat('vi-VN').format(num) + ' (VND)';
+  return new Intl.NumberFormat('vi-VN').format(num);
 }
 
 export function parseFormattedNumber(value: string): number {

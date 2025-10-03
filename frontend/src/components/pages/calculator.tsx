@@ -11,8 +11,9 @@ export default function SalaryCalculator() {
     setCurrentResult(result);
   };
 
-  const handleEmployeeSelect = (employee: SelectEmployee) => {
+  const handleEmployeeSelect = (employee: SelectEmployee | null) => {
     // Set the selected employee data which will be passed to the form
+    console.log('handleEmployeeSelect called with:', employee);
     setSelectedEmployeeData(employee);
   };
 
@@ -22,7 +23,7 @@ export default function SalaryCalculator() {
 
   return (
     <div className="w-full h-[calc(100vh-6rem)]">
-      <div className="grid grid-cols-1 xl:grid-cols-[47%_53%] gap-2 h-full">
+      <div className="grid grid-cols-1 xl:grid-cols-[44%_56%] gap-2 h-full">
           {/* Input Form Section */}
           <SalaryForm 
             onCalculationChange={handleCalculationComplete}

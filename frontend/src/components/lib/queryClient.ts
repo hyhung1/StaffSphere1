@@ -28,13 +28,30 @@ export async function apiRequest(
 ): Promise<Response> {
   const fullUrl = getApiUrl(url);
   
+  // Get authentication headers from localStorage
+  const currentUserStr = localStorage.getItem('currentUser');
+  let authHeaders: Record<string, string> = {};
+  
+  if (currentUserStr) {
+    try {
+      const currentUser = JSON.parse(currentUserStr);
+      authHeaders = {
+        'X-Username': currentUser.username || '',
+        'X-Password': currentUser.password || ''
+      };
+    } catch (error) {
+      console.error('Failed to parse current user:', error);
+    }
+  }
+  
   // Determine headers and body based on data type
-  let headers: Record<string, string> = {};
+  let headers: Record<string, string> = { ...authHeaders };
   let body: string | FormData | undefined;
   
   if (data) {
     if (data instanceof FormData) {
       // For FormData, don't set Content-Type - browser will set it with boundary
+      // But still add auth headers
       body = data;
     } else {
       // For JSON data
@@ -62,8 +79,26 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     const path = queryKey.join("/") as string;
     const fullUrl = getApiUrl(path);
+    
+    // Get authentication headers from localStorage
+    const currentUserStr = localStorage.getItem('currentUser');
+    let authHeaders: Record<string, string> = {};
+    
+    if (currentUserStr) {
+      try {
+        const currentUser = JSON.parse(currentUserStr);
+        authHeaders = {
+          'X-Username': currentUser.username || '',
+          'X-Password': currentUser.password || ''
+        };
+      } catch (error) {
+        console.error('Failed to parse current user:', error);
+      }
+    }
+    
     const res = await fetch(fullUrl, {
       credentials: "include",
+      headers: authHeaders,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
